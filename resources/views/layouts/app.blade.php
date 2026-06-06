@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-slate-50">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@yield('title', 'Dashboard') - E-Kinerja Guru SMK</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="h-full font-sans antialiased text-slate-900">
+    <div class="min-h-full">
+        <!-- Sidebar Navigation -->
+        <nav class="fixed inset-y-0 left-0 w-64 bg-slate-900 text-white z-50 transition-transform duration-300">
+            <div class="flex items-center h-16 px-6 bg-indigo-600">
+                <h1 class="text-xl font-bold tracking-tight">EKG SMK</h1>
+            </div>
+            <div class="px-4 py-6 space-y-1">
+                <!-- Dashboard (All Roles) -->
+                <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }} group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200">
+                    <i data-lucide="layout-dashboard" class="mr-3 h-5 w-5 {{ request()->routeIs('dashboard') ? 'text-indigo-400' : 'text-slate-400 group-hover:text-indigo-400' }}"></i>
+                    Dashboard
+                </a>
+
+                @if(auth()->user()->isAdmin())
+                <!-- Master Data (Admin Only) -->
+                <div class="pt-4 pb-2">
+                    <p class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Master Data</p>
+                </div>
+                
+                <a href="{{ route('schools.index') }}" class="{{ request()->routeIs('schools.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }} group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200">
+                    <i data-lucide="school" class="mr-3 h-5 w-5 {{ request()->routeIs('schools.*') ? 'text-indigo-400' : 'text-slate-400 group-hover:text-indigo-400' }}"></i>
+                    Data Sekolah
+                </a>
+                
+                <a href="{{ route('gurus.index') }}" class="{{ request()->routeIs('gurus.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }} group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200">
+                    <i data-lucide="users" class="mr-3 h-5 w-5 {{ request()->routeIs('gurus.*') ? 'text-indigo-400' : 'text-slate-400 group-hover:text-indigo-400' }}"></i>
+                    Data Guru
+                </a>
+                
+                <a href="{{ route('penilais.index') }}" class="{{ request()->routeIs('penilais.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }} group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200">
+                    <i data-lucide="user-check" class="mr-3 h-5 w-5 {{ request()->routeIs('penilais.*') ? 'text-indigo-400' : 'text-slate-400 group-hover:text-indigo-400' }}"></i>
+                    Data Asesor / Penilai
+                </a>
+                
+                <a href="{{ route('evaluation-periods.index') }}" class="{{ request()->routeIs('evaluation-periods.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }} group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200">
+                    <i data-lucide="calendar-clock" class="mr-3 h-5 w-5 {{ request()->routeIs('evaluation-periods.*') ? 'text-indigo-400' : 'text-slate-400 group-hover:text-indigo-400' }}"></i>
+                    Periode Evaluasi
+                </a>
+                
+                <div class="pt-4 pb-2">
+                    <p class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Instrumen</p>
+                </div>
+                
+                <a href="{{ route('indicators.index') }}" class="{{ request()->routeIs('indicators.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }} group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200">
+                    <i data-lucide="book-open-check" class="mr-3 h-5 w-5 {{ request()->routeIs('indicators.*') ? 'text-indigo-400' : 'text-slate-400 group-hover:text-indigo-400' }}"></i>
+                    Master Instrumen
+                </a>
+                @endif
+
+                @if(auth()->user()->isKepalaSekolah())
+                <div class="pt-4 pb-2">
+                    <p class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Master Data</p>
+                </div>
+                <a href="{{ route('gurus.index') }}" class="{{ request()->routeIs('gurus.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }} group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200">
+                    <i data-lucide="users" class="mr-3 h-5 w-5 {{ request()->routeIs('gurus.*') ? 'text-indigo-400' : 'text-slate-400 group-hover:text-indigo-400' }}"></i>
+                    Data Guru
+                </a>
+                @endif
+
+                <!-- Evaluasi Kinerja (All Roles) -->
+                <div class="pt-4 pb-2">
+                    <p class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Evaluasi</p>
+                </div>
+                <a href="{{ route('evaluations.index') }}" class="{{ request()->routeIs('evaluations.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }} group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200">
+                    <i data-lucide="clipboard-list" class="mr-3 h-5 w-5 {{ request()->routeIs('evaluations.*') ? 'text-indigo-400' : 'text-slate-400 group-hover:text-indigo-400' }}"></i>
+                    Data Evaluasi
+                </a>
+            </div>
+        </nav>
+
+        <!-- Main Content area -->
+        <div class="pl-64 flex flex-col min-h-screen">
+            <!-- Topbar -->
+            <header class="h-16 bg-white/80 backdrop-blur-xl border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-40">
+                <div class="flex items-center">
+                    <h2 class="text-lg font-semibold text-slate-800">@yield('title')</h2>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="h-9 w-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-sm">
+                            {{ auth()->user()->initials }}
+                        </div>
+                        <div class="text-sm">
+                            <p class="font-medium text-slate-700 leading-none">{{ auth()->user()->name }}</p>
+                            <p class="text-slate-500 text-xs mt-1 capitalize">{{ str_replace('_', ' ', auth()->user()->role) }}</p>
+                        </div>
+                    </div>
+                    <div class="h-6 w-px bg-slate-200 mx-2"></div>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="text-sm font-medium text-slate-500 hover:text-red-600 flex items-center transition-colors">
+                            <i data-lucide="log-out" class="mr-2 h-4 w-4"></i>
+                            Logout
+                        </button>
+                    </form>
+                </div>
+            </header>
+
+            <!-- Main Content -->
+            <main class="flex-1 p-8">
+                @if (session('success'))
+                    <div class="mb-6 bg-emerald-50 text-emerald-700 p-4 rounded-xl text-sm border border-emerald-100 flex items-center">
+                        <i data-lucide="check-circle" class="mr-3 h-5 w-5 text-emerald-500"></i>
+                        {{ session('success') }}
+                    </div>
+                @endif
+                @if (session('error'))
+                    <div class="mb-6 bg-red-50 text-red-700 p-4 rounded-xl text-sm border border-red-100 flex items-center">
+                        <i data-lucide="alert-circle" class="mr-3 h-5 w-5 text-red-500"></i>
+                        {{ session('error') }}
+                    </div>
+                @endif
+
+                @yield('content')
+            </main>
+        </div>
+    </div>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

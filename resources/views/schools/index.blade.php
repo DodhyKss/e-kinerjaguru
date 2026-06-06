@@ -1,0 +1,73 @@
+@extends('layouts.app')
+@section('title', 'Data Sekolah')
+
+@section('content')
+<div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+    <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+        <h3 class="text-lg font-medium text-slate-900">Daftar Sekolah</h3>
+        <a href="{{ route('schools.create') }}" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors inline-flex items-center">
+            <i data-lucide="plus" class="w-4 h-4 mr-1"></i> Tambah Sekolah
+        </a>
+    </div>
+    
+    <div class="p-6">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+                <thead class="text-xs text-slate-500 uppercase bg-slate-100/50 border-b border-slate-200">
+                    <tr>
+                        <th class="px-6 py-3">NPSN</th>
+                        <th class="px-6 py-3">Nama Sekolah</th>
+                        <th class="px-6 py-3">Kepala Sekolah</th>
+                        <th class="px-6 py-3">Kab/Kota</th>
+                        <th class="px-6 py-3 text-center">Status</th>
+                        <th class="px-6 py-3 text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($schools as $school)
+                    <tr class="border-b border-slate-100 hover:bg-slate-50">
+                        <td class="px-6 py-4 font-medium text-slate-900">{{ $school->npsn }}</td>
+                        <td class="px-6 py-4 text-slate-700">{{ $school->nama }}</td>
+                        <td class="px-6 py-4 text-slate-600">{{ $school->kepala_sekolah }}</td>
+                        <td class="px-6 py-4 text-slate-600">{{ $school->kabupaten }}</td>
+                        <td class="px-6 py-4 text-center">
+                            @if($school->status == 'aktif')
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-200">Aktif</span>
+                            @else
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800 border border-rose-200">Nonaktif</span>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                <a href="{{ route('schools.edit', $school) }}" class="text-indigo-600 hover:bg-indigo-50 p-1.5 rounded-lg transition-colors" title="Edit">
+                                    <i data-lucide="edit" class="w-4 h-4"></i>
+                                </a>
+                                <form action="{{ route('schools.destroy', $school) }}" method="POST" class="inline-block" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data sekolah ini?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-rose-600 hover:bg-rose-50 p-1.5 rounded-lg transition-colors" title="Hapus">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="6" class="px-6 py-8 text-center text-slate-500">
+                            Belum ada data sekolah.
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        
+        @if($schools->hasPages())
+        <div class="mt-6">
+            {{ $schools->links() }}
+        </div>
+        @endif
+    </div>
+</div>
+@endsection
