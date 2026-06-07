@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\School;
+use App\Models\Provinsi;
+use App\Models\Kabupaten;
 use Illuminate\Http\Request;
 
 class SchoolController extends Controller
@@ -15,7 +17,8 @@ class SchoolController extends Controller
 
     public function create()
     {
-        return view('schools.create');
+        $provinsis = Provinsi::all();
+        return view('schools.create', compact('provinsis'));
     }
 
     public function store(Request $request)
@@ -24,8 +27,8 @@ class SchoolController extends Controller
             'nama' => 'required|string|max:255',
             'npsn' => 'required|string|unique:schools,npsn|max:20',
             'alamat' => 'required|string',
-            'kabupaten' => 'required|string|max:100',
-            'provinsi' => 'required|string|max:100',
+            'kabupaten_id' => 'required|exists:kabupatens,id',
+            'provinsi_id' => 'required|exists:provinsis,id',
             'telepon' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:100',
             'kepala_sekolah' => 'required|string|max:100',
@@ -39,7 +42,11 @@ class SchoolController extends Controller
 
     public function edit(School $school)
     {
-        return view('schools.edit', compact('school'));
+        $provinsis = Provinsi::all();
+        // Get kabupatens for selected provinsi
+        $kabupatens = $school->provinsi_id ? Kabupaten::where('provinsi_id', $school->provinsi_id)->get() : [];
+        
+        return view('schools.edit', compact('school', 'provinsis', 'kabupatens'));
     }
 
     public function update(Request $request, School $school)
@@ -48,8 +55,8 @@ class SchoolController extends Controller
             'nama' => 'required|string|max:255',
             'npsn' => 'required|string|max:20|unique:schools,npsn,' . $school->id,
             'alamat' => 'required|string',
-            'kabupaten' => 'required|string|max:100',
-            'provinsi' => 'required|string|max:100',
+            'kabupaten_id' => 'required|exists:kabupatens,id',
+            'provinsi_id' => 'required|exists:provinsis,id',
             'telepon' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:100',
             'kepala_sekolah' => 'required|string|max:100',

@@ -32,7 +32,20 @@ Route::middleware('auth')->group(function () {
         Route::resource('indicators', IndicatorController::class);
         Route::resource('indicators.levels', AchievementLevelController::class)->only(['update']);
         Route::resource('indicators.aspects', AssessmentAspectController::class)->only(['store', 'update', 'destroy']);
+        
+        // Master Wilayah
+        Route::resource('provinsis', \App\Http\Controllers\ProvinsiController::class)->except(['show']);
+        Route::resource('kabupatens', \App\Http\Controllers\KabupatenController::class)->except(['show']);
+
+        // Master Atribut Guru
+        Route::resource('mata-pelajarans', \App\Http\Controllers\MataPelajaranController::class)->except(['show']);
+        Route::resource('kompetensi-keahlians', \App\Http\Controllers\KompetensiKeahlianController::class)->except(['show']);
+        Route::resource('pangkat-golongans', \App\Http\Controllers\PangkatGolonganController::class)->except(['show']);
+        Route::resource('jabatan-fungsionals', \App\Http\Controllers\JabatanFungsionalController::class)->except(['show']);
     });
+
+    // API Routes for Dropdown
+    Route::get('/api/kabupatens/{provinsi_id}', [\App\Http\Controllers\KabupatenController::class, 'getByProvinsi'])->name('api.kabupatens.by-provinsi');
 
     // Master Data Guru & Penilai (Admin & Kepsek)
     Route::middleware('role:admin,kepala_sekolah')->group(function () {
@@ -52,9 +65,10 @@ Route::middleware('auth')->group(function () {
         });
 
         Route::get('/{evaluation}', [EvaluationController::class, 'show'])->name('show');
+        Route::get('/{evaluation}/report', [EvaluationController::class, 'report'])->name('report');
         
-        // Penilai routes
-        Route::middleware('role:penilai')->group(function () {
+        // Penilai & Kepala Sekolah routes
+        Route::middleware('role:penilai,kepala_sekolah')->group(function () {
             Route::get('/{evaluation}/indicator/{indicator}', [EvaluationController::class, 'indicatorForm'])->name('indicator');
             Route::post('/{evaluation}/indicator/{indicator}', [EvaluationController::class, 'saveIndicatorForm'])->name('indicator.save');
             Route::post('/{evaluation}/submit', [EvaluationController::class, 'submit'])->name('submit');
@@ -65,5 +79,14 @@ Route::middleware('auth')->group(function () {
             Route::get('/{evaluation}/upload/{indicator}', [EvaluationController::class, 'uploadDokumenForm'])->name('upload');
             Route::post('/{evaluation}/upload/{indicator}', [EvaluationController::class, 'storeDokumen'])->name('upload.store');
         });
+        
+        // Show indicator details
+        Route::get('/{evaluation}/indicator/{indicator}/show', [EvaluationController::class, 'showIndicator'])->name('indicator.show');
     });
+
+    // Reports Menu
+    Route::get('/reports', [\App\Http\Controllers\ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/grafik', [\App\Http\Controllers\GraphicalReportController::class, 'index'])->name('reports.grafik');
+    Route::get('/reports/ranking', [\App\Http\Controllers\RankingController::class, 'index'])->name('reports.ranking');
+    Route::get('/reports/rekapitulasi', [\App\Http\Controllers\RecapController::class, 'index'])->name('reports.recap');
 });

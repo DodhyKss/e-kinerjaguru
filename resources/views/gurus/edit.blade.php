@@ -76,24 +76,44 @@
         <h4 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 pb-2 border-b border-slate-100">Informasi Tugas & Jabatan</h4>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
-                <label for="mata_pelajaran" class="block text-sm font-bold text-slate-700 mb-1">Mata Pelajaran <span class="text-rose-500">*</span></label>
-                <input type="text" name="mata_pelajaran" id="mata_pelajaran" value="{{ old('mata_pelajaran', $guru->mata_pelajaran) }}" required class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border @error('mata_pelajaran') border-rose-300 ring-rose-500 @enderror">
-                @error('mata_pelajaran') <p class="mt-1 text-sm text-rose-500">{{ $message }}</p> @enderror
+                <label for="mata_pelajaran_id" class="block text-sm font-bold text-slate-700 mb-1">Mata Pelajaran <span class="text-rose-500">*</span></label>
+                <select name="mata_pelajaran_id" id="mata_pelajaran_id" required class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border @error('mata_pelajaran_id') border-rose-300 ring-rose-500 @enderror select2">
+                    <option value="">-- Pilih Mata Pelajaran --</option>
+                    @foreach($mataPelajarans as $item)
+                        <option value="{{ $item->id }}" {{ old('mata_pelajaran_id', $guru->mata_pelajaran_id) == $item->id ? 'selected' : '' }}>{{ $item->nama }}</option>
+                    @endforeach
+                </select>
+                @error('mata_pelajaran_id') <p class="mt-1 text-sm text-rose-500">{{ $message }}</p> @enderror
             </div>
 
             <div>
-                <label for="kompetensi_keahlian" class="block text-sm font-bold text-slate-700 mb-1">Kompetensi Keahlian</label>
-                <input type="text" name="kompetensi_keahlian" id="kompetensi_keahlian" value="{{ old('kompetensi_keahlian', $guru->kompetensi_keahlian) }}" class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border">
+                <label for="kompetensi_keahlian_id" class="block text-sm font-bold text-slate-700 mb-1">Kompetensi Keahlian</label>
+                <select name="kompetensi_keahlian_id" id="kompetensi_keahlian_id" class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border select2">
+                    <option value="">-- Pilih Kompetensi Keahlian --</option>
+                    @foreach($kompetensiKeahlians as $item)
+                        <option value="{{ $item->id }}" {{ old('kompetensi_keahlian_id', $guru->kompetensi_keahlian_id) == $item->id ? 'selected' : '' }}>{{ $item->nama }}</option>
+                    @endforeach
+                </select>
             </div>
 
             <div>
-                <label for="pangkat_golongan" class="block text-sm font-bold text-slate-700 mb-1">Pangkat / Golongan</label>
-                <input type="text" name="pangkat_golongan" id="pangkat_golongan" value="{{ old('pangkat_golongan', $guru->pangkat_golongan) }}" class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border">
+                <label for="pangkat_golongan_id" class="block text-sm font-bold text-slate-700 mb-1">Pangkat / Golongan</label>
+                <select name="pangkat_golongan_id" id="pangkat_golongan_id" class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border select2">
+                    <option value="">-- Pilih Pangkat/Golongan --</option>
+                    @foreach($pangkatGolongans as $item)
+                        <option value="{{ $item->id }}" {{ old('pangkat_golongan_id', $guru->pangkat_golongan_id) == $item->id ? 'selected' : '' }}>{{ $item->nama }}</option>
+                    @endforeach
+                </select>
             </div>
 
             <div>
-                <label for="jabatan" class="block text-sm font-bold text-slate-700 mb-1">Jabatan Fungsional</label>
-                <input type="text" name="jabatan" id="jabatan" value="{{ old('jabatan', $guru->jabatan) }}" class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border">
+                <label for="jabatan_fungsional_id" class="block text-sm font-bold text-slate-700 mb-1">Jabatan Fungsional</label>
+                <select name="jabatan_fungsional_id" id="jabatan_fungsional_id" class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border select2">
+                    <option value="">-- Pilih Jabatan Fungsional --</option>
+                    @foreach($jabatanFungsionals as $item)
+                        <option value="{{ $item->id }}" {{ old('jabatan_fungsional_id', $guru->jabatan_fungsional_id) == $item->id ? 'selected' : '' }}>{{ $item->nama }}</option>
+                    @endforeach
+                </select>
             </div>
         </div>
 
@@ -105,4 +125,12 @@
         </div>
     </form>
 </div>
+
+<script>
+    $(document).ready(function() {
+        $('.select2').select2({
+            width: '100%',
+        });
+    });
+</script>
 @endsection

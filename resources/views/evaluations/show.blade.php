@@ -97,7 +97,12 @@
 </div>
 @endif
 
-@if(auth()->user()->isPenilai() && in_array($evaluation->status, ['in_progress', 'draft']))
+@php
+    $canEvaluate = (auth()->user()->isPenilai() && $evaluation->penilai_id === auth()->user()->penilai->id) || 
+                   (auth()->user()->isKepalaSekolah() && $evaluation->guru->school_id === auth()->user()->school_id);
+@endphp
+
+@if($canEvaluate && in_array($evaluation->status, ['in_progress', 'draft']))
     @if($evaluation->progress == 100)
     <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
         <div>
@@ -158,20 +163,20 @@
                                     Level {{ $result->level_capaian }}
                                 </div>
                             </div>
-                            @if(auth()->user()->isPenilai() && in_array($evaluation->status, ['draft', 'in_progress']))
+                            @if($canEvaluate && in_array($evaluation->status, ['draft', 'in_progress']))
                                 <a href="{{ route('evaluations.indicator', [$evaluation, $ind]) }}" class="inline-flex items-center text-xs font-medium text-indigo-600 hover:text-indigo-800">
                                     <i data-lucide="edit" class="w-3 h-3 mr-1"></i> Edit Penilaian
                                 </a>
                             @else
-                                <button class="inline-flex items-center text-xs font-medium text-slate-500 hover:text-slate-800" onclick="openKesimpulanModal({{ $result->level_capaian }}, '{{ htmlspecialchars($result->kesimpulan ?? '', ENT_QUOTES) }}', '{{ $ind->kode }} - {{ $ind->nama }}')">
+                                <a href="{{ route('evaluations.indicator.show', [$evaluation, $ind]) }}" class="inline-flex items-center text-xs font-medium text-slate-500 hover:text-slate-800">
                                     <i data-lucide="file-search" class="w-3 h-3 mr-1"></i> Lihat Kesimpulan
-                                </button>
+                                </a>
                             @endif
                         @else
                             <div class="mb-3">
                                 <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-500">Belum Dinilai</span>
                             </div>
-                            @if(auth()->user()->isPenilai() && in_array($evaluation->status, ['draft', 'in_progress']))
+                            @if($canEvaluate && in_array($evaluation->status, ['draft', 'in_progress']))
                                 <a href="{{ route('evaluations.indicator', [$evaluation, $ind]) }}" class="inline-flex items-center justify-center w-full px-4 py-2 bg-slate-900 text-white text-sm font-medium rounded-xl hover:bg-slate-800 transition-colors shadow-sm mb-2">
                                     Mulai Penilaian
                                 </a>
@@ -192,49 +197,4 @@
     @endforeach
 </div>
 
-<!-- Modal Kesimpulan -->
-<div id="kesimpulanModal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden transform transition-all">
-        <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-            <h3 class="text-lg font-bold text-slate-900" id="modalIndikatorTitle">Detail Kesimpulan</h3>
-            <button onclick="closeKesimpulanModal()" class="text-slate-400 hover:text-slate-600 transition-colors">
-                <i data-lucide="x" class="w-5 h-5"></i>
-            </button>
-        </div>
-        <div class="p-6">
-            <div class="mb-4">
-                <p class="text-xs text-slate-500 font-medium mb-1 uppercase tracking-wider">Level Capaian Terpilih</p>
-                <div class="inline-flex items-center px-4 py-2 rounded-lg font-bold text-lg bg-indigo-50 text-indigo-700 border border-indigo-100" id="modalLevel">
-                    Level -
-                </div>
-            </div>
-            <div>
-                <p class="text-xs text-slate-500 font-medium mb-2 uppercase tracking-wider">Catatan Kesimpulan Asesor</p>
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-sm text-slate-700 leading-relaxed min-h-[100px] whitespace-pre-wrap" id="modalCatatan">
-                    -
-                </div>
-            </div>
-        </div>
-        <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end">
-            <button onclick="closeKesimpulanModal()" class="px-5 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition-colors">Tutup</button>
-        </div>
-    </div>
-</div>
-
-<script>
-    function openKesimpulanModal(level, catatan, indikator) {
-        document.getElementById('modalIndikatorTitle').innerText = indikator;
-        document.getElementById('modalLevel').innerText = 'Level ' + level;
-        document.getElementById('modalCatatan').innerText = catatan ? catatan : 'Tidak ada catatan kesimpulan.';
-        
-        const modal = document.getElementById('kesimpulanModal');
-        modal.classList.remove('hidden');
-        
-        // Re-initialize Lucide icons if needed inside modal, though we already loaded it
-    }
-
-    function closeKesimpulanModal() {
-        document.getElementById('kesimpulanModal').classList.add('hidden');
-    }
-</script>
 @endsection

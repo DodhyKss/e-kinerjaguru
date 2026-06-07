@@ -48,4 +48,9 @@ class Indicator extends Model
     {
         return $this->hasMany(AssessmentAspect::class)->where('metode', 'wawancara')->orderBy('nomor');
     }
+
+    public function evaluationResults(): HasMany
+    {
+        return $this->hasMany(EvaluationResult::class);
+    }
 }

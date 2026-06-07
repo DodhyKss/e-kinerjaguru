@@ -8,6 +8,10 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Models\MataPelajaran;
+use App\Models\KompetensiKeahlian;
+use App\Models\PangkatGolongan;
+use App\Models\JabatanFungsional;
 use Illuminate\Support\Facades\Hash;
 
 class GuruController extends Controller
@@ -34,7 +38,12 @@ class GuruController extends Controller
         }
         
         $schools = School::where('status', 'aktif')->get();
-        return view('gurus.create', compact('schools'));
+        $mataPelajarans = MataPelajaran::orderBy('nama')->get();
+        $kompetensiKeahlians = KompetensiKeahlian::orderBy('nama')->get();
+        $pangkatGolongans = PangkatGolongan::orderBy('nama')->get();
+        $jabatanFungsionals = JabatanFungsional::orderBy('nama')->get();
+        
+        return view('gurus.create', compact('schools', 'mataPelajarans', 'kompetensiKeahlians', 'pangkatGolongans', 'jabatanFungsionals'));
     }
 
     public function store(Request $request)
@@ -48,10 +57,10 @@ class GuruController extends Controller
             'nama' => 'required|string|max:255',
             'nip' => 'required|string|unique:gurus,nip|max:50',
             'nuptk' => 'nullable|string|max:50',
-            'mata_pelajaran' => 'required|string|max:100',
-            'kompetensi_keahlian' => 'nullable|string|max:100',
-            'pangkat_golongan' => 'nullable|string|max:50',
-            'jabatan' => 'nullable|string|max:100',
+            'mata_pelajaran_id' => 'required|exists:mata_pelajarans,id',
+            'kompetensi_keahlian_id' => 'nullable|exists:kompetensi_keahlians,id',
+            'pangkat_golongan_id' => 'nullable|exists:pangkat_golongans,id',
+            'jabatan_fungsional_id' => 'nullable|exists:jabatan_fungsionals,id',
             'jenis_kelamin' => 'required|in:L,P',
             'no_telepon' => 'nullable|string|max:20',
             'email' => 'required|email|unique:users,email|max:255',
@@ -74,10 +83,10 @@ class GuruController extends Controller
                 'nama' => $validated['nama'],
                 'nip' => $validated['nip'],
                 'nuptk' => $validated['nuptk'],
-                'mata_pelajaran' => $validated['mata_pelajaran'],
-                'kompetensi_keahlian' => $validated['kompetensi_keahlian'],
-                'pangkat_golongan' => $validated['pangkat_golongan'],
-                'jabatan' => $validated['jabatan'],
+                'mata_pelajaran_id' => $validated['mata_pelajaran_id'],
+                'kompetensi_keahlian_id' => $validated['kompetensi_keahlian_id'] ?? null,
+                'pangkat_golongan_id' => $validated['pangkat_golongan_id'] ?? null,
+                'jabatan_fungsional_id' => $validated['jabatan_fungsional_id'] ?? null,
                 'jenis_kelamin' => $validated['jenis_kelamin'],
                 'no_telepon' => $validated['no_telepon'],
             ]);
@@ -93,7 +102,12 @@ class GuruController extends Controller
         }
 
         $schools = School::where('status', 'aktif')->get();
-        return view('gurus.edit', compact('guru', 'schools'));
+        $mataPelajarans = MataPelajaran::orderBy('nama')->get();
+        $kompetensiKeahlians = KompetensiKeahlian::orderBy('nama')->get();
+        $pangkatGolongans = PangkatGolongan::orderBy('nama')->get();
+        $jabatanFungsionals = JabatanFungsional::orderBy('nama')->get();
+
+        return view('gurus.edit', compact('guru', 'schools', 'mataPelajarans', 'kompetensiKeahlians', 'pangkatGolongans', 'jabatanFungsionals'));
     }
 
     public function update(Request $request, Guru $guru)
@@ -107,10 +121,10 @@ class GuruController extends Controller
             'nama' => 'required|string|max:255',
             'nip' => 'required|string|max:50|unique:gurus,nip,' . $guru->id,
             'nuptk' => 'nullable|string|max:50',
-            'mata_pelajaran' => 'required|string|max:100',
-            'kompetensi_keahlian' => 'nullable|string|max:100',
-            'pangkat_golongan' => 'nullable|string|max:50',
-            'jabatan' => 'nullable|string|max:100',
+            'mata_pelajaran_id' => 'required|exists:mata_pelajarans,id',
+            'kompetensi_keahlian_id' => 'nullable|exists:kompetensi_keahlians,id',
+            'pangkat_golongan_id' => 'nullable|exists:pangkat_golongans,id',
+            'jabatan_fungsional_id' => 'nullable|exists:jabatan_fungsionals,id',
             'jenis_kelamin' => 'required|in:L,P',
             'no_telepon' => 'nullable|string|max:20',
             'email' => 'required|email|max:255|unique:users,email,' . $guru->user_id,
@@ -130,10 +144,10 @@ class GuruController extends Controller
                 'nama' => $validated['nama'],
                 'nip' => $validated['nip'],
                 'nuptk' => $validated['nuptk'],
-                'mata_pelajaran' => $validated['mata_pelajaran'],
-                'kompetensi_keahlian' => $validated['kompetensi_keahlian'],
-                'pangkat_golongan' => $validated['pangkat_golongan'],
-                'jabatan' => $validated['jabatan'],
+                'mata_pelajaran_id' => $validated['mata_pelajaran_id'],
+                'kompetensi_keahlian_id' => $validated['kompetensi_keahlian_id'] ?? null,
+                'pangkat_golongan_id' => $validated['pangkat_golongan_id'] ?? null,
+                'jabatan_fungsional_id' => $validated['jabatan_fungsional_id'] ?? null,
                 'jenis_kelamin' => $validated['jenis_kelamin'],
                 'no_telepon' => $validated['no_telepon'],
             ]);

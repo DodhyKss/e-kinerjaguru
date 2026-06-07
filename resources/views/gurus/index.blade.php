@@ -35,11 +35,11 @@
                         </td>
                         <td class="px-6 py-4">
                             <div class="font-bold text-indigo-900">{{ $guru->nama }}</div>
-                            <div class="text-xs text-slate-600">{{ $guru->pangkat_golongan ?? '' }} - {{ $guru->jabatan ?? '' }}</div>
+                            <div class="text-xs text-slate-600">{{ $guru->pangkatGolongan->nama ?? '' }} - {{ $guru->jabatanFungsional->nama ?? '' }}</div>
                         </td>
                         <td class="px-6 py-4">
-                            <div class="text-slate-800">{{ $guru->mata_pelajaran }}</div>
-                            <div class="text-xs text-slate-500">{{ $guru->kompetensi_keahlian ?? '' }}</div>
+                            <div class="text-slate-800">{{ $guru->mataPelajaran->nama ?? '-' }}</div>
+                            <div class="text-xs text-slate-500">{{ $guru->kompetensiKeahlian->nama ?? '' }}</div>
                         </td>
                         <td class="px-6 py-4 text-slate-600">{{ $guru->school->nama }}</td>
                         

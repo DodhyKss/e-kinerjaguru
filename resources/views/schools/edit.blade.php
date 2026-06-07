@@ -44,15 +44,25 @@
             </div>
 
             <div>
-                <label for="kabupaten" class="block text-sm font-bold text-slate-700 mb-1">Kabupaten/Kota <span class="text-rose-500">*</span></label>
-                <input type="text" name="kabupaten" id="kabupaten" value="{{ old('kabupaten', $school->kabupaten) }}" required class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border @error('kabupaten') border-rose-300 ring-rose-500 @enderror">
-                @error('kabupaten') <p class="mt-1 text-sm text-rose-500">{{ $message }}</p> @enderror
+                <label for="provinsi_id" class="block text-sm font-bold text-slate-700 mb-1">Provinsi <span class="text-rose-500">*</span></label>
+                <select name="provinsi_id" id="provinsi_id" required class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border @error('provinsi_id') border-rose-300 ring-rose-500 @enderror select2">
+                    <option value="">-- Pilih Provinsi --</option>
+                    @foreach($provinsis as $provinsi)
+                        <option value="{{ $provinsi->id }}" {{ old('provinsi_id', $school->provinsi_id) == $provinsi->id ? 'selected' : '' }}>{{ $provinsi->nama }}</option>
+                    @endforeach
+                </select>
+                @error('provinsi_id') <p class="mt-1 text-sm text-rose-500">{{ $message }}</p> @enderror
             </div>
 
             <div>
-                <label for="provinsi" class="block text-sm font-bold text-slate-700 mb-1">Provinsi <span class="text-rose-500">*</span></label>
-                <input type="text" name="provinsi" id="provinsi" value="{{ old('provinsi', $school->provinsi) }}" required class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border @error('provinsi') border-rose-300 ring-rose-500 @enderror">
-                @error('provinsi') <p class="mt-1 text-sm text-rose-500">{{ $message }}</p> @enderror
+                <label for="kabupaten_id" class="block text-sm font-bold text-slate-700 mb-1">Kabupaten/Kota <span class="text-rose-500">*</span></label>
+                <select name="kabupaten_id" id="kabupaten_id" required class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border @error('kabupaten_id') border-rose-300 ring-rose-500 @enderror select2">
+                    <option value="">-- Pilih Kabupaten --</option>
+                    @foreach($kabupatens as $kabupaten)
+                        <option value="{{ $kabupaten->id }}" {{ old('kabupaten_id', $school->kabupaten_id) == $kabupaten->id ? 'selected' : '' }}>{{ $kabupaten->nama }}</option>
+                    @endforeach
+                </select>
+                @error('kabupaten_id') <p class="mt-1 text-sm text-rose-500">{{ $message }}</p> @enderror
             </div>
 
             <div>
@@ -82,4 +92,33 @@
         </div>
     </form>
 </div>
+
+<script>
+    $(document).ready(function() {
+        $('.select2').select2({
+            width: '100%',
+        });
+
+        $('#provinsi_id').on('change', function() {
+            var provinsiId = $(this).val();
+            if(provinsiId) {
+                $.ajax({
+                    url: '/api/kabupatens/' + provinsiId,
+                    type: "GET",
+                    dataType: "json",
+                    success:function(data) {
+                        $('#kabupaten_id').empty();
+                        $('#kabupaten_id').append('<option value="">-- Pilih Kabupaten --</option>');
+                        $.each(data, function(key, value) {
+                            $('#kabupaten_id').append('<option value="'+ value.id +'">'+ value.nama +'</option>');
+                        });
+                    }
+                });
+            } else {
+                $('#kabupaten_id').empty();
+                $('#kabupaten_id').append('<option value="">-- Pilih Kabupaten --</option>');
+            }
+        });
+    });
+</script>
 @endsection

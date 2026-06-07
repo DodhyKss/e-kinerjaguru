@@ -78,7 +78,7 @@
                             <td class="px-4 py-3 border-r border-slate-200 text-center text-slate-500">{{ $aspect->nomor }}</td>
                             <td class="px-4 py-3 border-r border-slate-200 text-slate-700">{{ $aspect->aspek }}</td>
                             <td class="px-0 py-0 relative">
-                                <textarea name="observation[{{ $aspect->id }}]" rows="2" class="w-full h-full min-h-[60px] border-0 focus:ring-2 focus:ring-inset focus:ring-indigo-500 resize-y p-3 bg-transparent" placeholder="Catat hasil observasi...">{{ $val }}</textarea>
+                                <textarea name="observation[{{ $aspect->id }}]" rows="2" {{ isset($isReadOnly) && $isReadOnly ? 'readonly disabled' : '' }} class="w-full h-full min-h-[60px] border-0 focus:ring-2 focus:ring-inset focus:ring-indigo-500 resize-y p-3 bg-transparent" placeholder="Catat hasil observasi...">{{ $val }}</textarea>
                             </td>
                         </tr>
                         @endforeach
@@ -88,7 +88,7 @@
             
             <div>
                 <label class="block text-sm font-medium text-slate-700 mb-2">Catatan Tambahan Observasi</label>
-                <textarea name="observation_note" rows="3" class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3 border">{{ $result->observationNote->catatan ?? '' }}</textarea>
+                <textarea name="observation_note" rows="3" {{ isset($isReadOnly) && $isReadOnly ? 'readonly disabled' : '' }} class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3 border">{{ $result->observationNote->catatan ?? '' }}</textarea>
             </div>
         </div>
         @endif
@@ -130,7 +130,7 @@
                                 @endif
                             </td>
                             <td class="px-0 py-0 relative">
-                                <textarea name="document_review[{{ $aspect->id }}]" rows="2" class="w-full h-full min-h-[60px] border-0 focus:ring-2 focus:ring-inset focus:ring-indigo-500 resize-y p-3 bg-transparent" placeholder="Catat hasil telaah...">{{ $val }}</textarea>
+                                <textarea name="document_review[{{ $aspect->id }}]" rows="2" {{ isset($isReadOnly) && $isReadOnly ? 'readonly disabled' : '' }} class="w-full h-full min-h-[60px] border-0 focus:ring-2 focus:ring-inset focus:ring-indigo-500 resize-y p-3 bg-transparent" placeholder="Catat hasil telaah...">{{ $val }}</textarea>
                             </td>
                         </tr>
                         @endforeach
@@ -140,7 +140,7 @@
             
             <div>
                 <label class="block text-sm font-medium text-slate-700 mb-2">Catatan Tambahan Telaah Dokumen</label>
-                <textarea name="document_review_note" rows="3" class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3 border">{{ $result->documentReviewNote->catatan ?? '' }}</textarea>
+                <textarea name="document_review_note" rows="3" {{ isset($isReadOnly) && $isReadOnly ? 'readonly disabled' : '' }} class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3 border">{{ $result->documentReviewNote->catatan ?? '' }}</textarea>
             </div>
         </div>
         @endif
@@ -174,7 +174,7 @@
                             @foreach(['kepala_wakil', 'kepala_kompetensi', 'guru', 'siswa'] as $responden)
                             @php $val = $result->interviewData->where('assessment_aspect_id', $aspect->id)->where('responden', $responden)->first()?->hasil ?? ''; @endphp
                             <td class="px-0 py-0 border-r border-slate-200 relative">
-                                <textarea name="interview[{{ $aspect->id }}][{{ $responden }}]" rows="3" class="w-full h-full border-0 focus:ring-2 focus:ring-inset focus:ring-indigo-500 resize-y p-2 bg-transparent text-xs" placeholder="...">{{ $val }}</textarea>
+                                <textarea name="interview[{{ $aspect->id }}][{{ $responden }}]" rows="3" {{ isset($isReadOnly) && $isReadOnly ? 'readonly disabled' : '' }} class="w-full h-full border-0 focus:ring-2 focus:ring-inset focus:ring-indigo-500 resize-y p-2 bg-transparent text-xs" placeholder="...">{{ $val }}</textarea>
                             </td>
                             @endforeach
                         </tr>
@@ -185,7 +185,7 @@
             
             <div>
                 <label class="block text-sm font-medium text-slate-700 mb-2">Catatan Tambahan Wawancara</label>
-                <textarea name="interview_note" rows="3" class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3 border">{{ $result->interviewNote->catatan ?? '' }}</textarea>
+                <textarea name="interview_note" rows="3" {{ isset($isReadOnly) && $isReadOnly ? 'readonly disabled' : '' }} class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3 border">{{ $result->interviewNote->catatan ?? '' }}</textarea>
             </div>
         </div>
         @endif
@@ -200,7 +200,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     @foreach($indicator->achievementLevels->reverse() as $level)
                     <label class="relative flex cursor-pointer rounded-xl border {{ old('level_capaian', $result->level_capaian) == $level->level ? 'border-indigo-600 bg-indigo-50/50 ring-1 ring-indigo-600' : 'border-slate-200 bg-white hover:bg-slate-50' }} p-4 shadow-sm focus-within:ring-2 focus-within:ring-indigo-600 transition-all">
-                        <input type="radio" name="level_capaian" value="{{ $level->level }}" class="sr-only" {{ old('level_capaian', $result->level_capaian) == $level->level ? 'checked' : '' }} onchange="updateRadioStyling(this)">
+                        <input type="radio" name="level_capaian" value="{{ $level->level }}" class="sr-only" {{ old('level_capaian', $result->level_capaian) == $level->level ? 'checked' : '' }} {{ isset($isReadOnly) && $isReadOnly ? 'disabled' : '' }} onchange="updateRadioStyling(this)">
                         <div class="flex flex-col">
                             <span class="block text-base font-bold text-slate-900 mb-1">Level {{ $level->level }}</span>
                             <span class="block text-sm text-slate-600 leading-relaxed">{{ $level->deskripsi }}</span>
@@ -221,7 +221,7 @@
                     <span id="word-counter" class="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded">0 / 50 Minimal Kata</span>
                 </div>
                 <p class="text-xs text-slate-500 mb-3">Tuliskan kesimpulan menyeluruh berdasarkan bukti faktual dari tabel kerja. Pemilihan level harus sejalan dengan uraian di bawah ini.</p>
-                <textarea id="kesimpulan" name="kesimpulan" rows="6" required
+                <textarea id="kesimpulan" name="kesimpulan" rows="6" {{ isset($isReadOnly) && $isReadOnly ? 'readonly disabled' : 'required' }}
                     class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-4 border @error('kesimpulan') border-red-300 ring-red-500 @enderror" 
                     placeholder="Berdasarkan analisis pada tabel kerja yang dilakukan melalui observasi, telaah dokumen, dan wawancara, dapat disimpulkan bahwa...">{{ old('kesimpulan', $result->kesimpulan) }}</textarea>
                 @error('kesimpulan')
@@ -230,10 +230,12 @@
             </div>
             
             <div class="mt-8 pt-6 border-t border-slate-200 flex items-center justify-between">
-                <a href="{{ route('evaluations.show', $evaluation) }}" class="text-sm font-medium text-slate-600 hover:text-slate-900">Batal</a>
+                <a href="{{ route('evaluations.show', $evaluation) }}" class="text-sm font-medium text-slate-600 hover:text-slate-900">Kembali</a>
+                @if(!isset($isReadOnly) || !$isReadOnly)
                 <button type="submit" class="bg-indigo-600 text-white px-8 py-3 rounded-xl text-sm font-bold shadow-sm hover:bg-indigo-700 hover:-translate-y-0.5 transition-all flex items-center">
                     <i data-lucide="save" class="w-4 h-4 mr-2"></i> Simpan Penilaian Indikator
                 </button>
+                @endif
             </div>
         </div>
 

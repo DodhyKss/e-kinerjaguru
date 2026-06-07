@@ -29,7 +29,7 @@
                         <td class="px-6 py-4 font-medium text-slate-900">{{ $school->npsn }}</td>
                         <td class="px-6 py-4 text-slate-700">{{ $school->nama }}</td>
                         <td class="px-6 py-4 text-slate-600">{{ $school->kepala_sekolah }}</td>
-                        <td class="px-6 py-4 text-slate-600">{{ $school->kabupaten }}</td>
+                        <td class="px-6 py-4 text-slate-600">{{ $school->kabupaten->nama ?? '-' }}</td>
                         <td class="px-6 py-4 text-center">
                             @if($school->status == 'aktif')
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-200">Aktif</span>

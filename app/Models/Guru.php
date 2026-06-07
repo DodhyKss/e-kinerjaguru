@@ -10,8 +10,8 @@ class Guru extends Model
 {
     protected $fillable = [
         'user_id', 'school_id', 'nama', 'nip', 'nuptk',
-        'mata_pelajaran', 'kompetensi_keahlian', 'pangkat_golongan',
-        'jabatan', 'jenis_kelamin', 'no_telepon', 'status',
+        'mata_pelajaran_id', 'kompetensi_keahlian_id', 'pangkat_golongan_id',
+        'jabatan_fungsional_id', 'jenis_kelamin', 'no_telepon', 'status',
     ];
 
     public function user(): BelongsTo
@@ -27,5 +27,25 @@ class Guru extends Model
     public function evaluations(): HasMany
     {
         return $this->hasMany(Evaluation::class);
+    }
+
+    public function mataPelajaran(): BelongsTo
+    {
+        return $this->belongsTo(MataPelajaran::class);
+    }
+
+    public function kompetensiKeahlian(): BelongsTo
+    {
+        return $this->belongsTo(KompetensiKeahlian::class);
+    }
+
+    public function pangkatGolongan(): BelongsTo
+    {
+        return $this->belongsTo(PangkatGolongan::class);
+    }
+
+    public function jabatanFungsional(): BelongsTo
+    {
+        return $this->belongsTo(JabatanFungsional::class);
     }
 }

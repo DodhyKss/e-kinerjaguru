@@ -129,6 +129,33 @@ class EvaluationController extends Controller
         return view('evaluations.show', compact('evaluation', 'dimensions', 'resultsMap'));
     }
 
+    public function report(Evaluation $evaluation)
+    {
+        $user = Auth::user();
+        
+        // Authorization check
+        if ($user->isPenilai() && $evaluation->penilai_id !== $user->penilai->id) {
+            abort(403);
+        }
+        if ($user->isGuru() && $evaluation->guru_id !== $user->guru->id) {
+            abort(403);
+        }
+        if ($user->isKepalaSekolah() && $evaluation->guru->school_id !== $user->school_id) {
+            abort(403);
+        }
+
+        $evaluation->load(['guru', 'penilai', 'evaluationPeriod', 'results.indicator.dimension']);
+        
+        $dimensions = Dimension::with(['indicators' => function($q) use ($evaluation) {
+            $q->with(['achievementLevels', 'assessmentAspects']);
+        }])->orderBy('urutan')->get();
+
+        // Group results by indicator ID for easy access in view
+        $resultsMap = $evaluation->results->keyBy('indicator_id');
+
+        return view('evaluations.report', compact('evaluation', 'dimensions', 'resultsMap'));
+    }
+
     private function initializeResults(Evaluation $evaluation)
     {
         $indicators = Indicator::all();
@@ -151,8 +178,11 @@ class EvaluationController extends Controller
 
     public function indicatorForm(Evaluation $evaluation, Indicator $indicator)
     {
-        // Penilai only
-        if (!Auth::user()->isPenilai() || $evaluation->penilai_id !== Auth::user()->penilai->id) {
+        $user = Auth::user();
+        $isAssignedPenilai = $user->isPenilai() && $evaluation->penilai_id === $user->penilai->id;
+        $isKepsekOfSchool = $user->isKepalaSekolah() && $evaluation->guru->school_id === $user->school_id;
+
+        if (!$isAssignedPenilai && !$isKepsekOfSchool) {
             abort(403);
         }
 
@@ -169,7 +199,11 @@ class EvaluationController extends Controller
 
     public function saveIndicatorForm(Request $request, Evaluation $evaluation, Indicator $indicator)
     {
-        if (!Auth::user()->isPenilai() || $evaluation->penilai_id !== Auth::user()->penilai->id) {
+        $user = Auth::user();
+        $isAssignedPenilai = $user->isPenilai() && $evaluation->penilai_id === $user->penilai->id;
+        $isKepsekOfSchool = $user->isKepalaSekolah() && $evaluation->guru->school_id === $user->school_id;
+
+        if (!$isAssignedPenilai && !$isKepsekOfSchool) {
             abort(403);
         }
 
@@ -326,7 +360,11 @@ class EvaluationController extends Controller
 
     public function submit(Evaluation $evaluation)
     {
-        if (!Auth::user()->isPenilai() || $evaluation->penilai_id !== Auth::user()->penilai->id) {
+        $user = Auth::user();
+        $isAssignedPenilai = $user->isPenilai() && $evaluation->penilai_id === $user->penilai->id;
+        $isKepsekOfSchool = $user->isKepalaSekolah() && $evaluation->guru->school_id === $user->school_id;
+
+        if (!$isAssignedPenilai && !$isKepsekOfSchool) {
             abort(403);
         }
 
@@ -362,5 +400,32 @@ class EvaluationController extends Controller
         ]);
 
         return back()->with('success', 'Hasil evaluasi berhasil disetujui.');
+    }
+
+    public function showIndicator(Evaluation $evaluation, Indicator $indicator)
+    {
+        $user = Auth::user();
+        
+        // Authorization check
+        if ($user->isPenilai() && $evaluation->penilai_id !== $user->penilai->id) {
+            abort(403);
+        }
+        if ($user->isGuru() && $evaluation->guru_id !== $user->guru->id) {
+            abort(403);
+        }
+        if ($user->isKepalaSekolah() && $evaluation->guru->school_id !== $user->school_id) {
+            abort(403);
+        }
+
+        $result = EvaluationResult::firstOrCreate([
+            'evaluation_id' => $evaluation->id,
+            'indicator_id' => $indicator->id,
+        ]);
+
+        $indicator->load(['achievementLevels', 'observationAspects', 'documentReviewAspects', 'interviewAspects']);
+        $result->load(['observationData', 'observationNote', 'documentReviewData', 'documentReviewNote', 'interviewData', 'interviewNote']);
+
+        $isReadOnly = true;
+        return view('evaluations.indicator-form', compact('evaluation', 'indicator', 'result', 'isReadOnly'));
     }
 }
