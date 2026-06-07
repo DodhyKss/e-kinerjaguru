@@ -14,8 +14,11 @@
 
 <body class="h-full font-sans antialiased text-slate-900">
     <div class="min-h-full">
+        <!-- Sidebar Backdrop -->
+        <div id="sidebar-backdrop" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 hidden lg:hidden transition-opacity" onclick="toggleSidebar()"></div>
+
         <!-- Sidebar Navigation -->
-        <nav class="fixed inset-y-0 left-0 w-64 bg-slate-900 text-white z-50 flex flex-col transition-transform duration-300">
+        <nav id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-slate-900 text-white z-50 flex flex-col transition-transform duration-300 transform -translate-x-full lg:translate-x-0">
             <div class="flex items-center gap-3 h-16 px-6 bg-slate-900 border-b border-slate-800 shrink-0">
                 <div class="bg-indigo-500 text-white p-1.5 rounded-lg shadow-sm">
                     <i data-lucide="graduation-cap" class="w-6 h-6"></i>
@@ -193,12 +196,15 @@
         </nav>
 
         <!-- Main Content area -->
-        <div class="pl-64 flex flex-col min-h-screen">
+        <div class="lg:pl-64 flex flex-col min-h-screen transition-all duration-300">
             <!-- Topbar -->
             <header
-                class="h-16 bg-white/80 backdrop-blur-xl border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-40">
-                <div class="flex items-center">
-                    <h2 class="text-lg font-semibold text-slate-800">@yield('title')</h2>
+                class="h-16 bg-white/80 backdrop-blur-xl border-b border-slate-200 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-30">
+                <div class="flex items-center gap-3">
+                    <button type="button" onclick="toggleSidebar()" class="lg:hidden text-slate-500 hover:text-slate-700 focus:outline-none p-2 -ml-2 rounded-lg hover:bg-slate-100">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                    <h2 class="text-lg font-semibold text-slate-800 truncate max-w-[200px] sm:max-w-none">@yield('title')</h2>
                 </div>
                 <div class="flex items-center gap-4">
                     <div class="flex items-center gap-3">
@@ -206,7 +212,7 @@
                             class="h-9 w-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-sm">
                             {{ auth()->user()->initials }}
                         </div>
-                        <div class="text-sm">
+                        <div class="text-sm hidden sm:block">
                             <p class="font-medium text-slate-700 leading-none">{{ auth()->user()->name }}</p>
                             <p class="text-slate-500 text-xs mt-1 capitalize">
                                 {{ str_replace('_', ' ', auth()->user()->role) }}</p>
@@ -217,15 +223,15 @@
                         @csrf
                         <button type="submit"
                             class="text-sm font-medium text-slate-500 hover:text-red-600 flex items-center transition-colors">
-                            <i data-lucide="log-out" class="mr-2 h-4 w-4"></i>
-                            Logout
+                            <i data-lucide="log-out" class="sm:mr-2 h-5 w-5 sm:h-4 sm:w-4"></i>
+                            <span class="hidden sm:inline">Logout</span>
                         </button>
                     </form>
                 </div>
             </header>
 
             <!-- Main Content -->
-            <main class="flex-1 p-8">
+            <main class="flex-1 p-4 sm:p-8 overflow-x-hidden w-full max-w-full">
                 @if (session('success'))
                     <div
                         class="mb-6 bg-emerald-50 text-emerald-700 p-4 rounded-xl text-sm border border-emerald-100 flex items-center">
@@ -243,16 +249,15 @@
                 @yield('content')
             </main>
 
-            <!-- Footer -->
             <footer class="bg-white border-t border-slate-200 mt-auto">
-                <div class="px-8 py-5 flex items-center justify-between text-sm">
+                <div class="px-4 sm:px-8 py-5 flex flex-col sm:flex-row items-center justify-between text-sm gap-2 text-center sm:text-left">
                     <div class="text-slate-500 font-medium">
                         &copy; {{ date('Y') }} <span class="text-indigo-600 font-semibold">E-Kinerja Guru SMK</span>.
-                        Hak Cipta Dilindungi.
+                        <span class="hidden sm:inline">Hak Cipta Dilindungi.</span>
                     </div>
-                    <div class="text-slate-400 flex items-center gap-4">
-                        <span>Dikelola oleh Admin Pusat</span>
-                        <span class="w-1 h-1 bg-slate-300 rounded-full"></span>
+                    <div class="text-slate-400 flex items-center justify-center gap-2 sm:gap-4">
+                        <span class="hidden sm:inline">Dikelola oleh Admin Pusat</span>
+                        <span class="hidden sm:inline w-1 h-1 bg-slate-300 rounded-full"></span>
                         <span>Versi 1.0.0</span>
                     </div>
                 </div>
@@ -261,6 +266,14 @@
     </div>
     <script>
         lucide.createIcons();
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebar-backdrop');
+            
+            sidebar.classList.toggle('-translate-x-full');
+            backdrop.classList.toggle('hidden');
+        }
     </script>
 </body>
 
