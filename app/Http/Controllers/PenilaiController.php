@@ -14,11 +14,17 @@ class PenilaiController extends Controller
 {
     public function index()
     {
-        if (!Auth::user()->isAdmin()) {
+        if (!Auth::user()->isAdmin() && !Auth::user()->isKepalaSekolah()) {
             abort(403);
         }
         
-        $penilais = Penilai::with('school')->latest()->paginate(10);
+        $query = Penilai::with('school')->latest();
+        
+        if (Auth::user()->isKepalaSekolah()) {
+            $query->where('school_id', Auth::user()->school_id);
+        }
+
+        $penilais = $query->paginate(10);
         return view('penilais.index', compact('penilais'));
     }
 

@@ -21,7 +21,9 @@
                         <th class="px-6 py-3">NIP / ID</th>
                         <th class="px-6 py-3">Jabatan & Instansi</th>
                         <th class="px-6 py-3">Penugasan Sekolah</th>
+                        @if(auth()->user()->isAdmin())
                         <th class="px-6 py-3 text-right">Aksi</th>
+                        @endif
                     </tr>
                 </thead>
                 <tbody>
@@ -38,6 +40,7 @@
                         </td>
                         <td class="px-6 py-4 text-slate-600">{{ $penilai->school->nama }}</td>
                         
+                        @if(auth()->user()->isAdmin())
                         <td class="px-6 py-4 text-right">
                             <div class="flex items-center justify-end gap-2">
                                 <a href="{{ route('penilais.edit', $penilai) }}" class="text-indigo-600 hover:bg-indigo-50 p-1.5 rounded-lg transition-colors" title="Edit">
@@ -52,6 +55,7 @@
                                 </form>
                             </div>
                         </td>
+                        @endif
                     </tr>
                     @empty
                     <tr>
