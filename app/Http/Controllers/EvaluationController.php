@@ -338,13 +338,18 @@ class EvaluationController extends Controller
                         ->where('assessment_aspect_id', $aspectId)
                         ->first();
 
-                    // Hapus file lama jika ada
-                    if ($existingData && $existingData->file_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($existingData->file_path)) {
-                        \Illuminate\Support\Facades\Storage::disk('public')->delete($existingData->file_path);
+                    // Hapus file lama jika ada di folder public/
+                    if ($existingData && $existingData->file_path) {
+                        $oldFilePath = public_path($existingData->file_path);
+                        if (file_exists($oldFilePath) && is_file($oldFilePath)) {
+                            unlink($oldFilePath);
+                        }
                     }
 
-                    // Simpan file baru
-                    $path = $file->store('dokumen_guru', 'public');
+                    // Simpan file baru langsung ke folder public/dokumen_guru
+                    $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                    $file->move(public_path('dokumen_guru'), $filename);
+                    $path = 'dokumen_guru/' . $filename;
                     $originalName = $file->getClientOriginalName();
 
                     \App\Models\DocumentReviewData::updateOrCreate(

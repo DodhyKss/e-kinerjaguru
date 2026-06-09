@@ -120,7 +120,7 @@
                             <td class="px-4 py-3 border-r border-slate-200 text-slate-600 text-xs font-mono bg-slate-50">
                                 <div class="mb-2">{{ $aspect->nama_dokumen }}</div>
                                 @if($docData && $docData->file_path)
-                                    <a href="{{ Storage::url($docData->file_path) }}" target="_blank" class="inline-flex items-center text-indigo-600 hover:text-indigo-800 font-sans font-medium bg-indigo-50 px-2 py-1 rounded border border-indigo-100">
+                                    <a href="{{ asset($docData->file_path) }}" target="_blank" class="inline-flex items-center text-indigo-600 hover:text-indigo-800 font-sans font-medium bg-indigo-50 px-2 py-1 rounded border border-indigo-100">
                                         <i data-lucide="download" class="w-3 h-3 mr-1"></i> Buka File
                                     </a>
                                 @else
