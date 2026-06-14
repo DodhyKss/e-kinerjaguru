@@ -42,6 +42,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('kabupatens', \App\Http\Controllers\KabupatenController::class)->except(['show']);
 
         // Master Atribut Guru
+        Route::resource('kelompok-mapels', \App\Http\Controllers\KelompokMapelController::class)->except(['show']);
         Route::resource('mata-pelajarans', \App\Http\Controllers\MataPelajaranController::class)->except(['show']);
         Route::resource('kompetensi-keahlians', \App\Http\Controllers\KompetensiKeahlianController::class)->except(['show']);
         Route::resource('pangkat-golongans', \App\Http\Controllers\PangkatGolonganController::class)->except(['show']);
@@ -61,6 +62,13 @@ Route::middleware('auth')->group(function () {
     Route::prefix('evaluations')->name('evaluations.')->group(function () {
         Route::get('/', [EvaluationController::class, 'index'])->name('index');
         
+        // Rekomendasi (Admin & Penilai & Kepsek) - Harus diletakkan sebelum /{evaluation} agar tidak terbaca sebagai parameter dinamis
+        Route::middleware('role:admin,penilai,kepala_sekolah')->group(function () {
+            Route::get('/rekomendasis', [\App\Http\Controllers\RekomendasiController::class, 'index'])->name('rekomendasis.index');
+            Route::get('/{evaluation}/rekomendasi', [\App\Http\Controllers\RekomendasiController::class, 'create'])->name('rekomendasis.create');
+            Route::post('/{evaluation}/rekomendasi', [\App\Http\Controllers\RekomendasiController::class, 'store'])->name('rekomendasis.store');
+        });
+
         // Create Penugasan (Admin & Kepsek)
         Route::middleware('role:admin,kepala_sekolah')->group(function () {
             Route::get('/create', [EvaluationController::class, 'create'])->name('create');
@@ -80,6 +88,9 @@ Route::middleware('auth')->group(function () {
 
         // Guru routes (Upload Dokumen)
         Route::middleware('role:guru')->group(function () {
+            Route::get('/{evaluation}/upload-general', [EvaluationController::class, 'generalUploadForm'])->name('upload-general');
+            Route::post('/{evaluation}/upload-general', [EvaluationController::class, 'storeGeneralUpload'])->name('upload-general.store');
+            
             Route::get('/{evaluation}/upload/{indicator}', [EvaluationController::class, 'uploadDokumenForm'])->name('upload');
             Route::post('/{evaluation}/upload/{indicator}', [EvaluationController::class, 'storeDokumen'])->name('upload.store');
         });

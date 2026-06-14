@@ -363,6 +363,82 @@ class EvaluationController extends Controller
         return redirect()->route('evaluations.show', $evaluation)->with('success', 'Dokumen bukti berhasil diunggah.');
     }
 
+    public function generalUploadForm(Evaluation $evaluation)
+    {
+        if (!Auth::user()->isGuru() || $evaluation->guru_id !== Auth::user()->guru->id) {
+            abort(403);
+        }
+
+        if ($evaluation->status !== 'in_progress' && $evaluation->status !== 'draft') {
+            return back()->with('error', 'Evaluasi sudah tidak bisa diubah.');
+        }
+
+        // Ambil indikator yang memiliki observasi dokumen (has_telaah_dokumen = true)
+        // beserta aspek penilaiannya (metode telaah_dokumen)
+        $indicators = Indicator::where('has_telaah_dokumen', true)
+            ->with(['documentReviewAspects'])
+            ->orderBy('urutan')
+            ->get();
+
+        return view('evaluations.upload-general', compact('evaluation', 'indicators'));
+    }
+
+    public function storeGeneralUpload(Request $request, Evaluation $evaluation)
+    {
+        if (!Auth::user()->isGuru() || $evaluation->guru_id !== Auth::user()->guru->id) {
+            abort(403);
+        }
+
+        if ($evaluation->status !== 'in_progress' && $evaluation->status !== 'draft') {
+            return back()->with('error', 'Evaluasi sudah tidak bisa diubah.');
+        }
+
+        $request->validate([
+            'dokumen' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'aspect_ids' => 'required|array',
+            'aspect_ids.*' => 'exists:assessment_aspects,id',
+        ]);
+
+        if ($request->hasFile('dokumen')) {
+            $file = $request->file('dokumen');
+            if ($file->isValid()) {
+                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('dokumen_guru'), $filename);
+                $path = 'dokumen_guru/' . $filename;
+                $originalName = $file->getClientOriginalName();
+
+                // Dapatkan indicator_id dari masing-masing aspect_id
+                $aspects = \App\Models\AssessmentAspect::whereIn('id', $request->aspect_ids)->get();
+
+                foreach ($aspects as $aspect) {
+                    $result = EvaluationResult::firstOrCreate([
+                        'evaluation_id' => $evaluation->id,
+                        'indicator_id' => $aspect->indicator_id,
+                    ]);
+
+                    // Cek data lama untuk ditimpa file barunya
+                    $existingData = \App\Models\DocumentReviewData::where('evaluation_result_id', $result->id)
+                        ->where('assessment_aspect_id', $aspect->id)
+                        ->first();
+
+                    if ($existingData && $existingData->file_path) {
+                        $oldFilePath = public_path($existingData->file_path);
+                        // Hapus file lama jika ada yang sama (opsional, tapi karena di-upload general, satu file bisa dipakai barengan
+                        // Jadi kita biarkan saja file fisiknya, atau hanya unlink jika ini referensi terakhir.
+                        // Namun lebih amannya, biarkan file lamanya tetap ada di storage, hanya update recordnya saja.
+                    }
+
+                    \App\Models\DocumentReviewData::updateOrCreate(
+                        ['evaluation_result_id' => $result->id, 'assessment_aspect_id' => $aspect->id],
+                        ['file_path' => $path, 'original_filename' => $originalName]
+                    );
+                }
+            }
+        }
+
+        return redirect()->route('evaluations.show', $evaluation)->with('success', 'Dokumen bukti general berhasil diunggah dan ditautkan ke aspek terpilih.');
+    }
+
     public function submit(Evaluation $evaluation)
     {
         $user = Auth::user();

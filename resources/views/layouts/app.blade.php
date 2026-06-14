@@ -92,6 +92,13 @@
                         </p>
                     </div>
 
+                    <a href="{{ route('kelompok-mapels.index') }}"
+                        class="{{ request()->routeIs('kelompok-mapels.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }} group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200">
+                        <i data-lucide="layers"
+                            class="mr-3 h-5 w-5 {{ request()->routeIs('kelompok-mapels.*') ? 'text-indigo-400' : 'text-slate-400 group-hover:text-indigo-400' }}"></i>
+                        Kelompok Mapel
+                    </a>
+
                     <a href="{{ route('mata-pelajarans.index') }}"
                         class="{{ request()->routeIs('mata-pelajarans.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }} group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200">
                         <i data-lucide="book"
@@ -156,11 +163,20 @@
                     <p class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Evaluasi</p>
                 </div>
                 <a href="{{ route('evaluations.index') }}"
-                    class="{{ request()->routeIs('evaluations.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }} group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 mb-1">
+                    class="{{ request()->routeIs('evaluations.index') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }} group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 mb-1">
                     <i data-lucide="clipboard-list"
-                        class="mr-3 h-5 w-5 {{ request()->routeIs('evaluations.*') ? 'text-indigo-400' : 'text-slate-400 group-hover:text-indigo-400' }}"></i>
+                        class="mr-3 h-5 w-5 {{ request()->routeIs('evaluations.index') ? 'text-indigo-400' : 'text-slate-400 group-hover:text-indigo-400' }}"></i>
                     Data Evaluasi
                 </a>
+
+                @if(auth()->user()->isKepalaSekolah() || auth()->user()->isPenilai())
+                <a href="{{ route('evaluations.rekomendasis.index') }}"
+                    class="{{ request()->routeIs('evaluations.rekomendasis.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }} group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 mb-1">
+                    <i data-lucide="message-square-plus"
+                        class="mr-3 h-5 w-5 {{ request()->routeIs('evaluations.rekomendasis.*') ? 'text-indigo-400' : 'text-slate-400 group-hover:text-indigo-400' }}"></i>
+                    Rekomendasi
+                </a>
+                @endif
 
                 <a href="{{ route('reports.index') }}"
                     class="{{ request()->routeIs('reports.index') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }} group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 mb-1">

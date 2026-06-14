@@ -86,6 +86,11 @@
             </div>
 
             <div>
+                <label for="kelompok_mapel" class="block text-sm font-bold text-slate-700 mb-1">Kelompok Mapel</label>
+                <input type="text" id="kelompok_mapel" placeholder="Pilih Mata Pelajaran dahulu" class="block w-full rounded-xl border-slate-300 bg-slate-100 shadow-sm sm:text-sm p-2.5 border text-slate-500" disabled readonly>
+            </div>
+
+            <div>
                 <label for="kompetensi_keahlian_id" class="block text-sm font-bold text-slate-700 mb-1">Kompetensi Keahlian</label>
                 <select name="kompetensi_keahlian_id" id="kompetensi_keahlian_id" class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border select2">
                     <option value="">-- Pilih Kompetensi Keahlian --</option>
@@ -130,6 +135,24 @@
         $('.select2').select2({
             width: '100%',
         });
+
+        const mapelData = {
+            @foreach($mataPelajarans as $item)
+                "{{ $item->id }}": "{{ $item->kelompokMapel ? $item->kelompokMapel->nama_kelompok_mapel : '-' }}",
+            @endforeach
+        };
+
+        $('#mata_pelajaran_id').on('change', function() {
+            const val = $(this).val();
+            if (val && mapelData[val]) {
+                $('#kelompok_mapel').val(mapelData[val]);
+            } else {
+                $('#kelompok_mapel').val('');
+            }
+        });
+
+        // Trigger change on load if selected
+        $('#mata_pelajaran_id').trigger('change');
     });
 </script>
 @endsection

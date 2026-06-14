@@ -38,7 +38,7 @@ class GuruController extends Controller
         }
         
         $schools = School::where('status', 'aktif')->get();
-        $mataPelajarans = MataPelajaran::orderBy('nama')->get();
+        $mataPelajarans = MataPelajaran::with('kelompokMapel')->orderBy('nama')->get();
         $kompetensiKeahlians = KompetensiKeahlian::orderBy('nama')->get();
         $pangkatGolongans = PangkatGolongan::orderBy('nama')->get();
         $jabatanFungsionals = JabatanFungsional::orderBy('nama')->get();
@@ -102,7 +102,7 @@ class GuruController extends Controller
         }
 
         $schools = School::where('status', 'aktif')->get();
-        $mataPelajarans = MataPelajaran::orderBy('nama')->get();
+        $mataPelajarans = MataPelajaran::with('kelompokMapel')->orderBy('nama')->get();
         $kompetensiKeahlians = KompetensiKeahlian::orderBy('nama')->get();
         $pangkatGolongans = PangkatGolongan::orderBy('nama')->get();
         $jabatanFungsionals = JabatanFungsional::orderBy('nama')->get();

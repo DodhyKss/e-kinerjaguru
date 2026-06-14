@@ -25,6 +25,19 @@
                 @error('nama')
                     <p class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</p>
                 @enderror
+            <div class="mb-6">
+                <label for="kelompok_mapel_id" class="block text-sm font-semibold text-slate-700 mb-2">Kelompok Mapel</label>
+                <select name="kelompok_mapel_id" id="kelompok_mapel_id" class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3 border">
+                    <option value="">-- Pilih Kelompok Mapel --</option>
+                    @foreach($kelompokMapels as $km)
+                        <option value="{{ $km->id }}" {{ old('kelompok_mapel_id') == $km->id ? 'selected' : '' }}>
+                            {{ $km->nama_kelompok_mapel }}
+                        </option>
+                    @endforeach
+                </select>
+                @error('kelompok_mapel_id')
+                    <p class="mt-2 text-sm text-red-600 font-medium">{{ $message }}</p>
+                @enderror
             </div>
 
             <div class="pt-4 border-t border-slate-100 flex justify-end">

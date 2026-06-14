@@ -1,13 +1,12 @@
-
 @extends('layouts.app')
-@section('title', 'Master Mata Pelajaran')
+@section('title', 'Master Kelompok Mapel')
 
 @section('content')
 <div class="mb-6 flex justify-between items-center">
     <div>
-        <h2 class="text-2xl font-bold text-slate-800">Master Data Mata Pelajaran</h2>
+        <h2 class="text-2xl font-bold text-slate-800">Master Data Kelompok Mapel</h2>
     </div>
-    <a href="{{ route('mata-pelajarans.create') }}" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center shadow-sm">
+    <a href="{{ route('kelompok-mapels.create') }}" class="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-colors flex items-center shadow-sm">
         <i data-lucide="plus" class="w-4 h-4 mr-2"></i> Tambah Data
     </a>
 </div>
@@ -17,24 +16,22 @@
         <table class="w-full text-sm text-left">
             <thead class="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
                 <tr>
-                    <th class="px-6 py-4">ID</th>
-                    <th class="px-6 py-4">Nama Mata Pelajaran</th>
-                    <th class="px-6 py-4">Kelompok Mapel</th>
-                    <th class="px-6 py-4 text-right">Aksi</th>
+                    <th class="px-6 py-4 w-24">ID</th>
+                    <th class="px-6 py-4">Nama Kelompok Mapel</th>
+                    <th class="px-6 py-4 text-right w-32">Aksi</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-200">
-                @forelse($data as $item)
+                @forelse($kelompokMapels as $item)
                 <tr class="hover:bg-slate-50 transition-colors">
                     <td class="px-6 py-4 font-medium text-slate-900">{{ $item->id }}</td>
-                    <td class="px-6 py-4">{{ $item->nama }}</td>
-                    <td class="px-6 py-4">{{ $item->kelompokMapel->nama_kelompok_mapel ?? '-' }}</td>
+                    <td class="px-6 py-4">{{ $item->nama_kelompok_mapel }}</td>
                     <td class="px-6 py-4 text-right">
                         <div class="flex justify-end gap-2">
-                            <a href="{{ route('mata-pelajarans.edit', $item) }}" class="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Edit">
+                            <a href="{{ route('kelompok-mapels.edit', $item) }}" class="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Edit">
                                 <i data-lucide="edit-2" class="w-4 h-4"></i>
                             </a>
-                            <form action="{{ route('mata-pelajarans.destroy', $item) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
+                            <form action="{{ route('kelompok-mapels.destroy', $item) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Hapus">
@@ -52,10 +49,5 @@
             </tbody>
         </table>
     </div>
-    @if($data->hasPages())
-    <div class="px-6 py-4 border-t border-slate-200">
-        {{ $data->links() }}
-    </div>
-    @endif
 </div>
 @endsection

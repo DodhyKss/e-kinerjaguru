@@ -41,6 +41,11 @@ class Evaluation extends Model
         return $this->hasMany(EvaluationResult::class);
     }
 
+    public function rekomendasi()
+    {
+        return $this->hasOne(Rekomendasi::class);
+    }
+
     public function getProgressAttribute(): int
     {
         $total = $this->results()->count();

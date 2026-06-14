@@ -119,6 +119,18 @@
     @endif
 @endif
 
+@if(auth()->user()->isGuru() && in_array($evaluation->status, ['draft', 'in_progress']))
+    <div class="bg-indigo-50 border border-indigo-200 rounded-2xl p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div>
+            <h4 class="text-base font-bold text-indigo-900">Upload Bukti Dokumen Lintas Indikator</h4>
+            <p class="text-sm text-indigo-700 mt-1">Gunakan fitur ini untuk mengunggah 1 (satu) dokumen dan menautkannya ke berbagai aspek penilaian pada beberapa indikator sekaligus.</p>
+        </div>
+        <a href="{{ route('evaluations.upload-general', $evaluation) }}" class="bg-indigo-600 text-white px-6 py-3 rounded-xl text-sm font-bold hover:bg-indigo-700 transition-colors shadow-sm flex items-center whitespace-nowrap">
+            <i data-lucide="upload-cloud" class="w-4 h-4 mr-2"></i> Upload Bukti General
+        </a>
+    </div>
+@endif
+
 <!-- Rincian Penilaian Per Dimensi -->
 <div class="space-y-8">
     @foreach($dimensions as $dim)

@@ -6,7 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class MataPelajaran extends Model
 {
-    protected $fillable = ['nama'];
+    protected $fillable = ['nama', 'kelompok_mapel_id'];
+
+    public function kelompokMapel()
+    {
+        return $this->belongsTo(KelompokMapel::class);
+    }
 
     public function gurus()
     {

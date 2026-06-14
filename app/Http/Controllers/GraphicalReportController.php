@@ -25,7 +25,15 @@ class GraphicalReportController extends Controller
             $schoolId = $request->school_id;
         }
         
-        $activePeriod = EvaluationPeriod::where('status', 'aktif')->first();
+        $periods = EvaluationPeriod::orderBy('id', 'desc')->get();
+        $selectedPeriodId = $request->filled('evaluation_period_id') ? $request->evaluation_period_id : null;
+        
+        if ($selectedPeriodId) {
+            $activePeriod = EvaluationPeriod::find($selectedPeriodId);
+        } else {
+            $activePeriod = EvaluationPeriod::where('status', 'aktif')->first();
+        }
+        $selectedPeriodId = $activePeriod ? $activePeriod->id : null;
         
         // 1. Status Distribution (Pie Chart)
         $statusQuery = Evaluation::query();
@@ -67,12 +75,15 @@ class GraphicalReportController extends Controller
             'data' => $trends->map(fn($t) => round($t->avg_score, 2))->values()->toArray(),
         ];
 
-        // 3. Average Score per Dimension for Active Period (Bar Chart)
-        $dimensionLabels = [];
-        $dimensionData = [];
+        // 3. Level Distribution per Indicator (Stacked Bar Chart)
+        $indicatorLabels = [];
+        $level1Data = [];
+        $level2Data = [];
+        $level3Data = [];
+        $level4Data = [];
         
         if ($activePeriod) {
-            $dimensions = Dimension::with(['indicators.evaluationResults' => function($q) use ($schoolId, $activePeriod) {
+            $indicators = \App\Models\Indicator::with(['evaluationResults' => function($q) use ($schoolId, $activePeriod) {
                 $q->whereHas('evaluation', function($eq) use ($schoolId, $activePeriod) {
                     $eq->where('evaluation_period_id', $activePeriod->id);
                     if ($schoolId) {
@@ -81,32 +92,34 @@ class GraphicalReportController extends Controller
                 });
             }])->orderBy('urutan')->get();
 
-            foreach ($dimensions as $dim) {
-                // Label bisa disingkat kalau kepanjangan, e.g. ambil kata kunci
-                $dimensionLabels[] = "Dimensi " . $dim->urutan; 
+            foreach ($indicators as $ind) {
+                $indicatorLabels[] = $ind->kode; 
                 
-                $totalScore = 0;
-                $count = 0;
-                foreach ($dim->indicators as $ind) {
-                    foreach ($ind->evaluationResults as $result) {
-                        if ($result->level_capaian) {
-                            $totalScore += $result->level_capaian;
-                            $count++;
-                        }
-                    }
+                $l1 = 0; $l2 = 0; $l3 = 0; $l4 = 0;
+                foreach ($ind->evaluationResults as $result) {
+                    if ($result->level_capaian == 1) $l1++;
+                    elseif ($result->level_capaian == 2) $l2++;
+                    elseif ($result->level_capaian == 3) $l3++;
+                    elseif ($result->level_capaian == 4) $l4++;
                 }
-                $avg = $count > 0 ? round($totalScore / $count, 2) : 0;
-                $dimensionData[] = $avg;
+                
+                $level1Data[] = $l1;
+                $level2Data[] = $l2;
+                $level3Data[] = $l3;
+                $level4Data[] = $l4;
             }
         }
         
-        $chartData['dimensions'] = [
-            'labels' => $dimensionLabels,
-            'data' => $dimensionData,
+        $chartData['indicators'] = [
+            'labels' => $indicatorLabels,
+            'level1' => $level1Data,
+            'level2' => $level2Data,
+            'level3' => $level3Data,
+            'level4' => $level4Data,
         ];
 
         $schools = $user->isAdmin() ? \App\Models\School::orderBy('nama')->get() : collect();
 
-        return view('reports.grafik', compact('chartData', 'activePeriod', 'schools', 'schoolId'));
+        return view('reports.grafik', compact('chartData', 'activePeriod', 'schools', 'schoolId', 'periods', 'selectedPeriodId'));
     }
 }
