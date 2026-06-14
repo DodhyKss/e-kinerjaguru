@@ -140,6 +140,7 @@
                     <th style="width: 20%;">Asesor / Penilai</th>
                     <th style="width: 7%;">Total Skor</th>
                     <th style="width: 8%;">Nilai Akhir</th>
+                    <th style="width: 15%;">Rekomendasi</th>
                 </tr>
             </thead>
             <tbody>
@@ -174,10 +175,17 @@
                                 -
                             @endif
                         </td>
+                        <td>
+                            @if($eval && $eval->rekomendasi)
+                                {{ $eval->rekomendasi->rekomendasi }}
+                            @else
+                                -
+                            @endif
+                        </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="text-center">Tidak ada data guru.</td>
+                        <td colspan="8" class="text-center">Tidak ada data guru.</td>
                     </tr>
                 @endforelse
             </tbody>

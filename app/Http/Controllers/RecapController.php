@@ -45,7 +45,7 @@ class RecapController extends Controller
         // 3. Query Gurus
         $query = Guru::with(['school', 'evaluations' => function($q) use ($periodId) {
             if ($periodId) {
-                $q->where('evaluation_period_id', $periodId)->with('penilai');
+                $q->where('evaluation_period_id', $periodId)->with(['penilai', 'rekomendasi']);
             }
         }]);
 

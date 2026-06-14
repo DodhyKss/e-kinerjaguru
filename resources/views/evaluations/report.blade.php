@@ -223,6 +223,17 @@
                         @endif
                     </td>
                 </tr>
+                <tr>
+                    <td class="label">Rekomendasi Lanjutan</td>
+                    <td class="colon">:</td>
+                    <td class="value">
+                        @if($evaluation->rekomendasi)
+                            {{ $evaluation->rekomendasi->rekomendasi }}
+                        @else
+                            <i>Belum ada rekomendasi</i>
+                        @endif
+                    </td>
+                </tr>
             </table>
         </div>
 

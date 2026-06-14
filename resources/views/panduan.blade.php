@@ -58,7 +58,7 @@
                                 <div class="flex-shrink-0 flex items-center justify-center w-16 h-16 rounded-full bg-blue-500 text-white font-bold text-xl border-4 border-white shadow-md z-10">2</div>
                                 <div class="bg-blue-50 p-6 rounded-2xl border border-blue-100 flex-1">
                                     <h3 class="text-lg font-bold text-slate-900 mb-2">Pelaksanaan Penilaian (Oleh Asesor/Penilai)</h3>
-                                    <p class="text-sm text-slate-600">Asesor login, memilih menu Data Evaluasi, lalu menekan tombol "Mulai Evaluasi" pada guru yang ingin dinilai. Asesor mengisi nilai (skala 1-4) di setiap indikator berdasarkan Observasi dan Dokumen. Setelah rampung, Asesor menyelesaikan status draf menjadi "Completed".</p>
+                                    <p class="text-sm text-slate-600">Asesor login, memilih menu Data Evaluasi, lalu menekan tombol "Mulai Evaluasi" pada guru yang ingin dinilai. Asesor mengisi nilai (skala 1-4) di setiap indikator berdasarkan bukti yang diperoleh dari telaah dokumen, observasi, dan wawancara. Selain itu, Penilai juga menyusun dan menuliskan rekomendasi lanjutan bagi guru bersangkutan. Setelah rampung, Asesor menyelesaikan status draf menjadi "Completed".</p>
                                 </div>
                             </div>
                             <!-- Step 3 -->
@@ -100,28 +100,24 @@
                             </div>
                             <div class="space-y-4">
                                 <div class="pl-4 border-l-2 border-indigo-200">
-                                    <h4 class="font-bold text-slate-800 text-sm">Dashboard</h4>
-                                    <p class="text-xs text-slate-500 mt-1">Halaman muka berisi ringkasan statistik (jumlah guru, sekolah, dan status evaluasi berjalan).</p>
+                                    <h4 class="font-bold text-slate-800 text-sm">Persiapan Sistem & Dashboard</h4>
+                                    <p class="text-xs text-slate-500 mt-1">Admin merupakan pemegang kendali utama aplikasi. Pada Dashboard, Admin memantau rekap data seluruh sistem (jumlah guru, sekolah, dan status evaluasi secara real-time).</p>
                                 </div>
                                 <div class="pl-4 border-l-2 border-indigo-200">
-                                    <h4 class="font-bold text-slate-800 text-sm">Master Wilayah & Atribut Guru</h4>
-                                    <p class="text-xs text-slate-500 mt-1">Menu untuk menambah/mengedit data fundamental seperti: Provinsi, Kabupaten, Mata Pelajaran, Kompetensi Keahlian, Pangkat/Golongan, dan Jabatan Fungsional.</p>
+                                    <h4 class="font-bold text-slate-800 text-sm">Manajemen Master Data Induk</h4>
+                                    <p class="text-xs text-slate-500 mt-1">Langkah pertama yang wajib dilakukan adalah mengisi atribut dasar seperti Provinsi, Kabupaten, Kelompok Mata Pelajaran, Mata Pelajaran, Kompetensi Keahlian, Pangkat/Golongan, hingga Jabatan Fungsional agar identitas pegawai terdata secara rapi.</p>
                                 </div>
                                 <div class="pl-4 border-l-2 border-indigo-200">
-                                    <h4 class="font-bold text-slate-800 text-sm">Data Sekolah</h4>
-                                    <p class="text-xs text-slate-500 mt-1">Manajemen unit kerja/sekolah. Menentukan nama, alamat, serta kabupaten sekolah terkait.</p>
+                                    <h4 class="font-bold text-slate-800 text-sm">Registrasi Sekolah, Guru & Evaluator</h4>
+                                    <p class="text-xs text-slate-500 mt-1">Admin membuatkan akun bagi setiap Sekolah, Guru, Kepala Sekolah, dan Asesor/Evaluator. Saat pembuatan, Admin menentukan hak akses (Role) dan memetakan penempatan unit kerjanya agar akun tersebut tertaut secara struktural.</p>
                                 </div>
                                 <div class="pl-4 border-l-2 border-indigo-200">
-                                    <h4 class="font-bold text-slate-800 text-sm">Data Guru & Penilai</h4>
-                                    <p class="text-xs text-slate-500 mt-1">Mendaftarkan akun Guru dan akun Asesor. Saat menambah, Admin mengatur penempatan unit kerjanya agar akun tersebut tertaut ke sekolah tertentu.</p>
+                                    <h4 class="font-bold text-slate-800 text-sm">Pengaturan Periode & Instrumen Penilaian</h4>
+                                    <p class="text-xs text-slate-500 mt-1">Admin merancang siklus evaluasi melalui menu Periode (misal: "Tahun Ajaran 2024 Genap"). Selain itu, Admin menyusun borang penilaian secara hierarkis (Dimensi > Aspek > Indikator) yang nantinya akan digunakan oleh Evaluator untuk menilai Guru.</p>
                                 </div>
                                 <div class="pl-4 border-l-2 border-indigo-200">
-                                    <h4 class="font-bold text-slate-800 text-sm">Periode Evaluasi & Master Instrumen</h4>
-                                    <p class="text-xs text-slate-500 mt-1">Membuat periode penilaian (contoh: "Tahun Ajaran 2024 Genap"). Serta membuat susunan pertanyaan kuesioner penilaian yang terdiri dari Dimensi -> Aspek -> Indikator.</p>
-                                </div>
-                                <div class="pl-4 border-l-2 border-indigo-200">
-                                    <h4 class="font-bold text-slate-800 text-sm">Laporan, Grafik & Rekapitulasi</h4>
-                                    <p class="text-xs text-slate-500 mt-1">Akses mutlak untuk melihat seluruh data evaluasi se-provinsi. Admin dapat melihat analitik grafik, Ranking Guru berprestasi, dan mencetak Rekapitulasi.</p>
+                                    <h4 class="font-bold text-slate-800 text-sm">Pemantauan & Cetak Rekapitulasi Global</h4>
+                                    <p class="text-xs text-slate-500 mt-1">Admin memiliki otoritas memantau seluruh Laporan Evaluasi, Grafik Kinerja lintas periode, dan Ranking Guru terbaik. Admin juga bertugas mencetak Rekapitulasi Kinerja (Buku Induk) lengkap beserta catatan rekomendasi dari seluruh sekolah.</p>
                                 </div>
                             </div>
                         </div>
@@ -134,54 +130,50 @@
                             </div>
                             <div class="space-y-4">
                                 <div class="pl-4 border-l-2 border-emerald-200">
-                                    <h4 class="font-bold text-slate-800 text-sm">Dashboard</h4>
-                                    <p class="text-xs text-slate-500 mt-1">Ringkasan status kinerja khusus di lingkup sekolah yang dipimpinnya.</p>
+                                    <h4 class="font-bold text-slate-800 text-sm">Pemantauan Kinerja Internal</h4>
+                                    <p class="text-xs text-slate-500 mt-1">Kepala Sekolah bertindak sebagai penanggung jawab mutu di tingkat satuan pendidikan. Melalui Dashboard dan Grafik Kinerja, beliau memantau tren perolehan nilai sekolahnya dari periode ke periode dalam bentuk visual (Pie/Bar/Line Chart).</p>
                                 </div>
                                 <div class="pl-4 border-l-2 border-emerald-200">
-                                    <h4 class="font-bold text-slate-800 text-sm">Data Guru & Asesor (Read-Only)</h4>
-                                    <p class="text-xs text-slate-500 mt-1">Melihat daftar guru dan asesor yang bertugas di sekolahnya untuk tujuan monitoring, tanpa hak untuk mengubah/menghapus data.</p>
+                                    <h4 class="font-bold text-slate-800 text-sm">Supervisi Asesor & Guru</h4>
+                                    <p class="text-xs text-slate-500 mt-1">Beliau dapat melihat seluruh guru dan asesor yang ditugaskan di sekolahnya (mode baca/read-only). Hal ini memudahkan pengawasan agar setiap guru telah memiliki penugasan evaluasi.</p>
                                 </div>
                                 <div class="pl-4 border-l-2 border-emerald-200">
-                                    <h4 class="font-bold text-slate-800 text-sm">Data Evaluasi (Verifikasi & Approval)</h4>
-                                    <p class="text-xs text-slate-500 mt-1">Pintu gerbang terakhir sebelum nilai disahkan. Kepala Sekolah membuka draf yang "Selesai" (Completed) oleh Asesor, mengeceknya, lalu klik "Setujui" agar hasil menjadi sah.</p>
+                                    <h4 class="font-bold text-slate-800 text-sm">Verifikasi & Pengesahan Dokumen</h4>
+                                    <p class="text-xs text-slate-500 mt-1">Menu Data Evaluasi adalah pintu terakhir sebelum nilai disahkan. Kepala Sekolah bertugas membaca detail kuesioner dari Evaluator, memberikan Catatan/Feedback tambahan (opsional), lalu mengklik tombol "Setujui" agar hasil menjadi sah dan final.</p>
                                 </div>
                                 <div class="pl-4 border-l-2 border-emerald-200">
-                                    <h4 class="font-bold text-slate-800 text-sm">Grafik Kinerja</h4>
-                                    <p class="text-xs text-slate-500 mt-1">Melihat tren nilai rata-rata sekolah dari periode ke periode dalam bentuk visual (Pie/Bar/Line Chart).</p>
+                                    <h4 class="font-bold text-slate-800 text-sm">Pemetaan Guru Berprestasi (Ranking)</h4>
+                                    <p class="text-xs text-slate-500 mt-1">Sistem otomatis menyajikan Peringkat (Ranking) performa guru terbaik di sekolahnya berdasarkan Nilai Akhir untuk mempermudah kepala sekolah dalam memberikan referensi penghargaan, promosi, atau tunjangan kinerja.</p>
                                 </div>
                                 <div class="pl-4 border-l-2 border-emerald-200">
-                                    <h4 class="font-bold text-slate-800 text-sm">Ranking Guru</h4>
-                                    <p class="text-xs text-slate-500 mt-1">Sistem otomatis menyortir performa guru terbaik (Top 3) di sekolahnya berdasarkan Nilai Akhir untuk referensi penghargaan atau promosi.</p>
-                                </div>
-                                <div class="pl-4 border-l-2 border-emerald-200">
-                                    <h4 class="font-bold text-slate-800 text-sm">Rekapitulasi (Buku Induk)</h4>
-                                    <p class="text-xs text-slate-500 mt-1">Mencetak satu lembar PDF besar berisi seluruh daftar guru di sekolahnya beserta perolehan nilai, untuk ditandatangani.</p>
+                                    <h4 class="font-bold text-slate-800 text-sm">Otorisasi Laporan (Rekapitulasi)</h4>
+                                    <p class="text-xs text-slate-500 mt-1">Mencetak Rekapitulasi (Buku Induk) satu lembar PDF yang memuat rekap nilai serta rekomendasi seluruh guru. Lembar ini dicetak untuk ditandatangani secara basah sebagai bukti akreditasi dan laporan ke dinas.</p>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- PENILAI -->
+                        <!-- EVALUATOR -->
                         <div class="border border-slate-200 rounded-3xl p-8 bg-white shadow-sm hover:shadow-md transition-shadow">
                             <div class="flex items-center gap-3 mb-6">
                                 <i data-lucide="user-check" class="w-8 h-8 text-blue-600"></i>
-                                <h3 class="text-xl font-bold text-slate-900">3. Asesor / Penilai</h3>
+                                <h3 class="text-xl font-bold text-slate-900">3. Asesor / Evaluator</h3>
                             </div>
                             <div class="space-y-4">
                                 <div class="pl-4 border-l-2 border-blue-200">
-                                    <h4 class="font-bold text-slate-800 text-sm">Dashboard</h4>
-                                    <p class="text-xs text-slate-500 mt-1">Melihat progres tugas penilaian yang sedang ia tangani (Berapa Draft, Berapa yang Selesai).</p>
+                                    <h4 class="font-bold text-slate-800 text-sm">Manajemen Penugasan</h4>
+                                    <p class="text-xs text-slate-500 mt-1">Melalui Dashboard, Evaluator dapat melacak progres tugasnya secara presisi (seperti jumlah guru yang belum dinilai, sedang dalam proses draf, atau sudah dikirim ke Kepala Sekolah).</p>
                                 </div>
                                 <div class="pl-4 border-l-2 border-blue-200">
-                                    <h4 class="font-bold text-slate-800 text-sm">Data Evaluasi</h4>
-                                    <p class="text-xs text-slate-500 mt-1">Menu sentral bagi Penilai. Di sini Penilai memulai kuesioner baru untuk seorang guru. Penilai mengisi borang penilaian (Skala 1-4) beserta catatan setiap indikator.</p>
+                                    <h4 class="font-bold text-slate-800 text-sm">Pelaksanaan Observasi & Telaah Borang</h4>
+                                    <p class="text-xs text-slate-500 mt-1">Di menu Data Evaluasi, Evaluator memberikan bobot nilai (skala 1-4) beserta kesimpulan untuk tiap indikator. Acuan utamanya adalah dari bukti otentik seperti: Observasi Kelas, Telaah Dokumen bukti RPP/Silabus yang diunggah guru, serta sesi Wawancara langsung.</p>
                                 </div>
                                 <div class="pl-4 border-l-2 border-blue-200">
-                                    <h4 class="font-bold text-slate-800 text-sm">Fitur Simpan Draf & Finalisasi</h4>
-                                    <p class="text-xs text-slate-500 mt-1">Penilaian tidak harus selesai 1 hari. Asesor dapat menyimpan sebagai "Draft" atau "In Progress". Jika seluruh observasi telah mantap, barulah ubah ke "Selesai (Completed)".</p>
+                                    <h4 class="font-bold text-slate-800 text-sm">Penyusunan Rekomendasi Khusus</h4>
+                                    <p class="text-xs text-slate-500 mt-1">Setelah menuntaskan seluruh butir penilaian, Evaluator wajib merumuskan catatan "Rekomendasi Lanjutan" (tindak lanjut perbaikan) yang akan menjadi pedoman pembinaan guru bersangkutan di masa depan.</p>
                                 </div>
                                 <div class="pl-4 border-l-2 border-blue-200">
-                                    <h4 class="font-bold text-slate-800 text-sm">Laporan Hasil Observasi</h4>
-                                    <p class="text-xs text-slate-500 mt-1">Asesor dapat melihat daftar detail historis seluruh guru yang pernah ia berikan nilai beserta catatan asesornya.</p>
+                                    <h4 class="font-bold text-slate-800 text-sm">Draf Terpadu & Riwayat Penilaian</h4>
+                                    <p class="text-xs text-slate-500 mt-1">Proses penilaian bisa dilakukan bertahap menggunakan status "Draft". Setelah semua lengkap, klik Submit (Status berubah menjadi Completed). Evaluator juga dapat melihat riwayat lengkap laporannya untuk keperluan rekam jejak.</p>
                                 </div>
                             </div>
                         </div>
@@ -194,16 +186,20 @@
                             </div>
                             <div class="space-y-4">
                                 <div class="pl-4 border-l-2 border-amber-200">
-                                    <h4 class="font-bold text-slate-800 text-sm">Dashboard</h4>
-                                    <p class="text-xs text-slate-500 mt-1">Menyambut guru dengan nilai akhir rata-rata (IPK) kinerjanya pada periode aktif.</p>
+                                    <h4 class="font-bold text-slate-800 text-sm">Refleksi Kinerja (Dashboard)</h4>
+                                    <p class="text-xs text-slate-500 mt-1">Begitu masuk ke aplikasi, guru langsung disuguhkan dengan status penilaian berjalannya dan nilai akhir rata-rata IPK yang telah diverifikasi Kepala Sekolah.</p>
                                 </div>
                                 <div class="pl-4 border-l-2 border-amber-200">
-                                    <h4 class="font-bold text-slate-800 text-sm">Data Evaluasi (Rapor Kinerja)</h4>
-                                    <p class="text-xs text-slate-500 mt-1">Guru hanya dapat melihat riwayat penilaian yang ditujukan untuk dirinya sendiri secara detail, mengawasi progres (apakah sudah disetujui atau masih draft), serta melihat detail komponen mana yang nilainya kurang/lebih.</p>
+                                    <h4 class="font-bold text-slate-800 text-sm">Upload Bukti Kinerja (Lintas Indikator)</h4>
+                                    <p class="text-xs text-slate-500 mt-1">Sebagai pendukung penilaian "Telaah Dokumen", guru dapat mengunggah berbagai berkas (RPP, Sertifikat, Presensi). Melalui fitur <b>Upload General</b>, efisiensi ditingkatkan di mana 1 file bukti saja dapat dipetakan langsung ke beberapa aspek penilaian lintas indikator sekaligus.</p>
                                 </div>
                                 <div class="pl-4 border-l-2 border-amber-200">
-                                    <h4 class="font-bold text-slate-800 text-sm">Menu Laporan Pribadi (Cetak)</h4>
-                                    <p class="text-xs text-slate-500 mt-1">Akses satu klik untuk mencetak dokumen final Rapor Kinerja. Lembar cetak ini dilengkapi kop surat resmi sekolah dan siap ditandatangani untuk keperluan akreditasi/kenaikan pangkat.</p>
+                                    <h4 class="font-bold text-slate-800 text-sm">Monitoring Hasil & Rapor Detail</h4>
+                                    <p class="text-xs text-slate-500 mt-1">Guru memantau rincian poin tiap indikator secara detail dan transparan untuk melihat kekurangan/kelebihan performanya (tersedia begitu draf penilaian selesai).</p>
+                                </div>
+                                <div class="pl-4 border-l-2 border-amber-200">
+                                    <h4 class="font-bold text-slate-800 text-sm">Pencetakan Laporan Resmi</h4>
+                                    <p class="text-xs text-slate-500 mt-1">Satu klik untuk mengunduh Laporan (Rapor) format PDF ber-Kop Surat resmi sekolah. Dokumen fisik ini memuat rincian kompetensi, kesimpulan, hingga tanda tangan pihak berwenang untuk kebutuhan kenaikan jenjang karir.</p>
                                 </div>
                             </div>
                         </div>

@@ -86,6 +86,7 @@
                     <th class="px-6 py-3">Asesor/Penilai</th>
                     <th class="px-6 py-3">Status</th>
                     <th class="px-6 py-3">Skor (Rata-rata)</th>
+                    <th class="px-6 py-3">Rekomendasi</th>
                     <th class="px-6 py-3 text-right">Aksi Laporan</th>
                 </tr>
             </thead>
@@ -130,6 +131,15 @@
                             <span class="text-slate-400">-</span>
                         @endif
                     </td>
+                    <td class="px-6 py-4 text-xs text-slate-600">
+                        @if($eval->rekomendasi)
+                            <span class="line-clamp-2" title="{{ $eval->rekomendasi->rekomendasi }}">
+                                {{ $eval->rekomendasi->rekomendasi }}
+                            </span>
+                        @else
+                            <span class="text-slate-400 italic">Belum ada</span>
+                        @endif
+                    </td>
                     <td class="px-6 py-4 text-right">
                         <div class="flex items-center justify-end gap-2">
                             <a href="{{ route('evaluations.show', $eval) }}" class="inline-flex items-center text-xs font-medium text-slate-600 hover:text-slate-900 bg-white border border-slate-200 hover:bg-slate-50 px-2.5 py-1.5 rounded-lg transition-colors">
@@ -143,7 +153,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" class="px-6 py-12 text-center text-slate-500">
+                    <td colspan="8" class="px-6 py-12 text-center text-slate-500">
                         <div class="flex flex-col items-center justify-center">
                             <i data-lucide="file-search" class="h-10 w-10 text-slate-300 mb-3"></i>
                             <p>Tidak ada laporan yang sesuai dengan filter.</p>

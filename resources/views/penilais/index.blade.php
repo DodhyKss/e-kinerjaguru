@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Data Asesor / Penilai')
+@section('title', 'Data Asesor / Evaluator')
 
 @section('content')
 <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">

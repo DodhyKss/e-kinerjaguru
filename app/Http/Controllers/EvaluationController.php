@@ -144,7 +144,7 @@ class EvaluationController extends Controller
             abort(403);
         }
 
-        $evaluation->load(['guru', 'penilai', 'evaluationPeriod', 'results.indicator.dimension']);
+        $evaluation->load(['guru', 'penilai', 'evaluationPeriod', 'rekomendasi', 'results.indicator.dimension']);
         
         $dimensions = Dimension::with(['indicators' => function($q) use ($evaluation) {
             $q->with(['achievementLevels', 'assessmentAspects']);

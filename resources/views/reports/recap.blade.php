@@ -95,6 +95,7 @@
                     <th class="px-6 py-4">Asesor / Penilai</th>
                     <th class="px-6 py-4 text-center">Total Skor</th>
                     <th class="px-6 py-4 text-center">Nilai Akhir</th>
+                    <th class="px-6 py-4">Rekomendasi</th>
                 </tr>
             </thead>
             <tbody>
@@ -145,10 +146,19 @@
                             <span class="text-slate-400">-</span>
                         @endif
                     </td>
+                    <td class="px-6 py-4 text-xs text-slate-600">
+                        @if($eval && $eval->rekomendasi)
+                            <span class="line-clamp-2" title="{{ $eval->rekomendasi->rekomendasi }}">
+                                {{ $eval->rekomendasi->rekomendasi }}
+                            </span>
+                        @else
+                            <span class="text-slate-400 italic">-</span>
+                        @endif
+                    </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" class="px-6 py-12 text-center text-slate-500">
+                    <td colspan="8" class="px-6 py-12 text-center text-slate-500">
                         <div class="flex flex-col items-center justify-center">
                             <i data-lucide="users" class="h-12 w-12 text-slate-200 mb-3"></i>
                             <p class="text-base font-medium text-slate-600">Tidak ada data guru</p>

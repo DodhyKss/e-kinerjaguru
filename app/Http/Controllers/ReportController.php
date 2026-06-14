@@ -14,7 +14,7 @@ class ReportController extends Controller
     {
         $user = Auth::user();
         
-        $query = Evaluation::with(['guru.school', 'penilai', 'evaluationPeriod']);
+        $query = Evaluation::with(['guru.school', 'penilai', 'evaluationPeriod', 'rekomendasi']);
 
         // Base Scope based on role
         if ($user->isKepalaSekolah()) {
