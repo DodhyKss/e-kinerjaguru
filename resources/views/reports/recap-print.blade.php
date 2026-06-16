@@ -198,8 +198,12 @@
                     {{ $selectedSchool->kabupaten->nama ?? '..........................' }}, {{ date('d F Y') }}<br>
                     Kepala Sekolah<br>
                     <div class="signature-space"></div>
-                    <b><u>.......................................</u></b><br>
-                    NIP. ....................................
+                    @php
+                        $kepsekName = $selectedSchool->kepala_sekolah ?? '';
+                        $kepsek = \App\Models\KepalaSekolah::where('nama', $kepsekName)->first();
+                    @endphp
+                    <b><u>{{ $kepsekName ?: '.......................................' }}</u></b><br>
+                    NIP. {{ $kepsek->nip ?? '....................................' }}
                 </td>
             </tr>
         </table>

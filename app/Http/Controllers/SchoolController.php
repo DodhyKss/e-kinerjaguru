@@ -18,7 +18,8 @@ class SchoolController extends Controller
     public function create()
     {
         $provinsis = Provinsi::all();
-        return view('schools.create', compact('provinsis'));
+        $kepsekUsers = \App\Models\User::where('role', 'kepala_sekolah')->get();
+        return view('schools.create', compact('provinsis', 'kepsekUsers'));
     }
 
     public function store(Request $request)
@@ -31,7 +32,7 @@ class SchoolController extends Controller
             'provinsi_id' => 'required|exists:provinsis,id',
             'telepon' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:100',
-            'kepala_sekolah' => 'required|string|max:100',
+            'kepala_sekolah' => 'nullable|string|max:100',
             'status' => 'required|in:aktif,nonaktif',
         ]);
 
@@ -45,8 +46,9 @@ class SchoolController extends Controller
         $provinsis = Provinsi::all();
         // Get kabupatens for selected provinsi
         $kabupatens = $school->provinsi_id ? Kabupaten::where('provinsi_id', $school->provinsi_id)->get() : [];
+        $kepsekUsers = \App\Models\User::where('role', 'kepala_sekolah')->get();
         
-        return view('schools.edit', compact('school', 'provinsis', 'kabupatens'));
+        return view('schools.edit', compact('school', 'provinsis', 'kabupatens', 'kepsekUsers'));
     }
 
     public function update(Request $request, School $school)
@@ -59,7 +61,7 @@ class SchoolController extends Controller
             'provinsi_id' => 'required|exists:provinsis,id',
             'telepon' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:100',
-            'kepala_sekolah' => 'required|string|max:100',
+            'kepala_sekolah' => 'nullable|string|max:100',
             'status' => 'required|in:aktif,nonaktif',
         ]);
 

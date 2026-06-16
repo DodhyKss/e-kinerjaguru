@@ -45,6 +45,11 @@ class User extends Authenticatable
         return $this->hasOne(Penilai::class);
     }
 
+    public function kepalaSekolah(): HasOne
+    {
+        return $this->hasOne(KepalaSekolah::class);
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === 'admin';

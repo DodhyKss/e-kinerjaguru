@@ -169,7 +169,22 @@
             <tr>
                 <td class="label">Mata Pelajaran</td>
                 <td class="colon">:</td>
-                <td class="value">{{ $evaluation->guru->mata_pelajaran }}</td>
+                <td class="value">{{ $evaluation->guru->mataPelajaran->nama ?? $evaluation->guru->mata_pelajaran ?? '-' }}</td>
+            </tr>
+            <tr>
+                <td class="label">Kelompok Mapel</td>
+                <td class="colon">:</td>
+                <td class="value">{{ $evaluation->guru->mataPelajaran->kelompokMapel->nama ?? '-' }}</td>
+            </tr>
+            <tr>
+                <td class="label">Kompetensi Keahlian</td>
+                <td class="colon">:</td>
+                <td class="value">{{ $evaluation->guru->kompetensiKeahlian->nama ?? '-' }}</td>
+            </tr>
+            <tr>
+                <td class="label">Pangkat/Golongan</td>
+                <td class="colon">:</td>
+                <td class="value">{{ $evaluation->guru->pangkatGolongan->nama ?? '-' }}</td>
             </tr>
             <tr>
                 <td class="label">Unit Kerja (Sekolah)</td>
@@ -307,8 +322,12 @@
                     Mengetahui,<br>
                     Kepala Sekolah<br>
                     <div class="signature-space"></div>
-                    <b><u>.......................................</u></b><br>
-                    NIP. ....................................
+                    @php
+                        $kepsekName = $evaluation->guru->school->kepala_sekolah ?? '';
+                        $kepsek = \App\Models\KepalaSekolah::where('nama', $kepsekName)->first();
+                    @endphp
+                    <b><u>{{ $kepsekName ?: '.......................................' }}</u></b><br>
+                    NIP. {{ $kepsek->nip ?? '....................................' }}
                 </td>
                 <td>
                     Penilai / Asesor,<br>

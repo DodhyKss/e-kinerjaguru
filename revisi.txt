@@ -1,24 +1,9 @@
 Revisi
-# Revisi 1
-1. Tambahkan tabel kelompok_mapel yang berisi kolom : id, nama_kelompok_mapel, created_at, updated_at.
-2. Di tabel mata_pelajarans tambahkan kolom kelompok_mapel_id yang berisi relasi ke tabel kelompok_mapel.
-3. Di tabel guru tambahkan field kelompok mapel yang disabled otomatis terisi ketika memilih mapel pada field mapel
+# Fitur Rekomendasi
+1. Jika Rekomendasi di edit tetap tampilkan rekomendasi sebelumnya di riwayat rekomendasi di tampilan pada saat edit
 
-# Revisi 2
-1. Ubah di menu Grafik Kinerja menjadi gambaran di setiap indikator lihat ada berapa guru di level 1,2,3 dan 4
+# Menu Laporan 
+1. pada saat cetak buat agar informasi data atau identitas guru yang dinilai ditampilkan seperti : Mapel, kelompok mapel, Kompetensi keahlian, Pangkat/golongan.
+2. di bagian ttd kepala sekolah buat otomatis juga terisi berdasarkan sekolah gurunya.'
 
-# Revisi 3
-1. tambahkan tabel rekomendasi yang berisi kolom : id, evaluasi_id, rekomendasi (text), created_at, updated_at. 
-    - diisi setelah guru mengisi semua penilaian
-    - penilai melakukan analisis menyilang antar butir indikator/kinerjanya untuk merumuskan rekomendasi bagi guru
-2. pemberian rekomendasi setelah semua penilaian diisi dan menunya beda sendiri yaitu menu rekomendasi, di menu tersebut penilai/kepala sekolah hanya memilih evaluasi guru yang ingin diberikan rekomendasi dari evaluasi yang sudah selesai
-3. Pemberian rekomendasi adalah analisis menyilang pada setiap indikator WHAT, WHY, HOW
-    - WHAT :Apa yang menjadi kekuatan dan kelemahan guru dalam melaksanakan tugasnya
-    - WHY : Mengapa hal itu bisa terjadi
-    - HOW : Bagaimana cara memperbaikinya
-4. setelah analisis menyilang penialai/kepala sekolah dapat mengisi rekomendasi.
-
-
-
-
-
+# Menu detail evaluasi pada bagian informasi penilaian tampilkan juga secara detail informasi gurunya seperti : Mapel, kelompok mapel, Kompetensi keahlian, Pangkat/golongan.

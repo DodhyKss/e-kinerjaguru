@@ -32,8 +32,15 @@
             </div>
             
             <div>
-                <label for="kepala_sekolah" class="block text-sm font-bold text-slate-700 mb-1">Nama Kepala Sekolah <span class="text-rose-500">*</span></label>
-                <input type="text" name="kepala_sekolah" id="kepala_sekolah" value="{{ old('kepala_sekolah', $school->kepala_sekolah) }}" required class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border @error('kepala_sekolah') border-rose-300 ring-rose-500 @enderror">
+                <label for="kepala_sekolah" class="block text-sm font-bold text-slate-700 mb-2">Kepala Sekolah <span class="text-xs text-slate-400 font-normal ml-1">(Bisa diisi belakangan)</span></label>
+                <select name="kepala_sekolah" id="kepala_sekolah" class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3 border select2 @error('kepala_sekolah') border-rose-300 ring-rose-500 @enderror">
+                    <option value="">Pilih Kepala Sekolah...</option>
+                    @foreach($kepsekUsers as $user)
+                        <option value="{{ $user->name }}" {{ old('kepala_sekolah', $school->kepala_sekolah) == $user->name ? 'selected' : '' }}>
+                            {{ $user->name }}
+                        </option>
+                    @endforeach
+                </select>
                 @error('kepala_sekolah') <p class="mt-1 text-sm text-rose-500">{{ $message }}</p> @enderror
             </div>
 

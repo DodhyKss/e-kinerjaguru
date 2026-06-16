@@ -61,10 +61,7 @@ class RekomendasiController extends Controller
             'rekomendasi' => 'required|string',
         ]);
 
-        $evaluation->rekomendasi()->updateOrCreate(
-            ['evaluation_id' => $evaluation->id],
-            $validated
-        );
+        $evaluation->rekomendasis()->create($validated);
 
         return redirect()->route('evaluations.rekomendasis.index')->with('success', 'Rekomendasi berhasil disimpan.');
     }

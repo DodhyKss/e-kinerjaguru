@@ -43,7 +43,12 @@ class Evaluation extends Model
 
     public function rekomendasi()
     {
-        return $this->hasOne(Rekomendasi::class);
+        return $this->hasOne(Rekomendasi::class)->latest();
+    }
+
+    public function rekomendasis(): HasMany
+    {
+        return $this->hasMany(Rekomendasi::class);
     }
 
     public function getProgressAttribute(): int

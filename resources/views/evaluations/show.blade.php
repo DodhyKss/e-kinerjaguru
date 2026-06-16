@@ -31,7 +31,10 @@
                     <p class="text-xs text-slate-500 mb-1">Guru Yang Dinilai</p>
                     <p class="text-sm font-bold text-slate-900">{{ $evaluation->guru->nama }}</p>
                     <p class="text-xs text-slate-600 mt-0.5">NIP: {{ $evaluation->guru->nip ?? '-' }}</p>
-                    <p class="text-xs text-slate-600">{{ $evaluation->guru->mata_pelajaran }}</p>
+                    <p class="text-xs text-slate-600 mt-1">Mapel: <span class="font-medium text-slate-800">{{ $evaluation->guru->mataPelajaran->nama ?? $evaluation->guru->mata_pelajaran ?? '-' }}</span></p>
+                    <p class="text-xs text-slate-600">Kelompok Mapel: <span class="font-medium text-slate-800">{{ $evaluation->guru->mataPelajaran->kelompokMapel->nama ?? '-' }}</span></p>
+                    <p class="text-xs text-slate-600">Kompetensi Keahlian: <span class="font-medium text-slate-800">{{ $evaluation->guru->kompetensiKeahlian->nama ?? '-' }}</span></p>
+                    <p class="text-xs text-slate-600">Pangkat/Golongan: <span class="font-medium text-slate-800">{{ $evaluation->guru->pangkatGolongan->nama ?? '-' }}</span></p>
                 </div>
                 <div>
                     <p class="text-xs text-slate-500 mb-1">Asesor / Penilai</p>

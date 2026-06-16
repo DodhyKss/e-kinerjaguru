@@ -46,6 +46,53 @@
                         <li><strong>HOW:</strong> Bagaimana cara memperbaikinya.</li>
                     </ul>
                 </div>
+
+                @php
+                    $riwayatRekomendasi = App\Models\Rekomendasi::whereHas('evaluation', function($q) use ($evaluation) {
+                            $q->where('guru_id', $evaluation->guru_id);
+                        })
+                        ->when($rekomendasi, function($query) use ($rekomendasi) {
+                            $query->where('id', '!=', $rekomendasi->id);
+                        })
+                        ->with(['evaluation.evaluationPeriod', 'evaluation.penilai'])
+                        ->latest('id')
+                        ->paginate(2);
+                @endphp
+
+                @if($rekomendasi || $riwayatRekomendasi->isNotEmpty())
+                <hr class="border-slate-100 border-dashed my-4">
+                <div class="space-y-4">
+                    <h4 class="text-sm font-bold text-slate-800 flex items-center">
+                        <i data-lucide="history" class="w-4 h-4 text-slate-500 mr-2"></i> Riwayat Rekomendasi
+                    </h4>
+                    
+                    @if($rekomendasi && $riwayatRekomendasi->currentPage() == 1)
+                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                        <div class="flex justify-between items-start mb-1">
+                            <p class="text-xs font-bold text-slate-500">Rekomendasi Saat Ini (Sebelum Diedit)</p>
+                            <p class="text-xs text-slate-500 font-medium">Oleh: {{ $evaluation->penilai->nama ?? '-' }}</p>
+                        </div>
+                        <p class="text-xs text-slate-700 whitespace-pre-wrap">{{ $rekomendasi->rekomendasi }}</p>
+                    </div>
+                    @endif
+
+                    @foreach($riwayatRekomendasi as $riwayat)
+                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                        <div class="flex justify-between items-start mb-1">
+                            <p class="text-xs font-bold text-indigo-600">{{ $riwayat->evaluation->evaluationPeriod->nama }} <span class="text-slate-400 font-normal ml-1">({{ $riwayat->created_at->format('d M Y H:i') }})</span></p>
+                            <p class="text-xs text-slate-500 font-medium">Oleh: {{ $riwayat->evaluation->penilai->nama ?? '-' }}</p>
+                        </div>
+                        <p class="text-xs text-slate-700 whitespace-pre-wrap">{{ $riwayat->rekomendasi }}</p>
+                    </div>
+                    @endforeach
+
+                    @if($riwayatRekomendasi->hasPages())
+                        <div class="mt-4">
+                            {{ $riwayatRekomendasi->links() }}
+                        </div>
+                    @endif
+                </div>
+                @endif
             </div>
         </div>
     </div>

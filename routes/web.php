@@ -52,10 +52,15 @@ Route::middleware('auth')->group(function () {
     // API Routes for Dropdown
     Route::get('/api/kabupatens/{provinsi_id}', [\App\Http\Controllers\KabupatenController::class, 'getByProvinsi'])->name('api.kabupatens.by-provinsi');
 
-    // Master Data Guru & Penilai (Admin & Kepsek)
+    // Master Data Guru & Penilai & Kepsek (Admin & Kepsek)
     Route::middleware('role:admin,kepala_sekolah')->group(function () {
         Route::resource('gurus', GuruController::class)->except(['show']);
         Route::resource('penilais', PenilaiController::class)->except(['show']);
+    });
+    
+    // Master Kepala Sekolah (Admin only)
+    Route::middleware('role:admin')->group(function () {
+        Route::resource('kepala-sekolahs', \App\Http\Controllers\KepalaSekolahController::class)->except(['show']);
     });
 
     // Evaluations
