@@ -59,6 +59,17 @@
             </div>
 
             <div>
+                <label for="pangkat_golongan_id" class="block text-sm font-bold text-slate-700 mb-1">Pangkat/Golongan (Opsional)</label>
+                <select name="pangkat_golongan_id" id="pangkat_golongan_id" class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border @error('pangkat_golongan_id') border-rose-300 ring-rose-500 @enderror">
+                    <option value="">-- Pilih Pangkat/Golongan --</option>
+                    @foreach($pangkatGolongans as $pg)
+                        <option value="{{ $pg->id }}" {{ old('pangkat_golongan_id', $penilai->pangkat_golongan_id) == $pg->id ? 'selected' : '' }}>{{ $pg->nama }} ({{ $pg->golongan }})</option>
+                    @endforeach
+                </select>
+                @error('pangkat_golongan_id') <p class="mt-1 text-sm text-rose-500">{{ $message }}</p> @enderror
+            </div>
+
+            <div>
                 <label for="instansi" class="block text-sm font-bold text-slate-700 mb-1">Instansi Asal <span class="text-rose-500">*</span></label>
                 <input type="text" name="instansi" id="instansi" value="{{ old('instansi', $penilai->instansi) }}" required class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border @error('instansi') border-rose-300 ring-rose-500 @enderror">
                 @error('instansi') <p class="mt-1 text-sm text-rose-500">{{ $message }}</p> @enderror

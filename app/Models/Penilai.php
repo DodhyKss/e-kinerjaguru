@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Penilai extends Model
 {
     protected $fillable = [
-        'user_id', 'school_id', 'nama', 'nip',
+        'user_id', 'school_id', 'pangkat_golongan_id', 'nama', 'nip',
         'jabatan', 'instansi', 'no_telepon', 'status',
     ];
 
@@ -21,6 +21,11 @@ class Penilai extends Model
     public function school(): BelongsTo
     {
         return $this->belongsTo(School::class);
+    }
+
+    public function pangkatGolongan(): BelongsTo
+    {
+        return $this->belongsTo(PangkatGolongan::class, 'pangkat_golongan_id');
     }
 
     public function evaluations(): HasMany

@@ -35,7 +35,8 @@ class PenilaiController extends Controller
         }
         
         $schools = School::where('status', 'aktif')->get();
-        return view('penilais.create', compact('schools'));
+        $pangkatGolongans = \App\Models\PangkatGolongan::all();
+        return view('penilais.create', compact('schools', 'pangkatGolongans'));
     }
 
     public function store(Request $request)
@@ -46,6 +47,7 @@ class PenilaiController extends Controller
 
         $validated = $request->validate([
             'school_id' => 'required|exists:schools,id',
+            'pangkat_golongan_id' => 'nullable|exists:pangkat_golongans,id',
             'nama' => 'required|string|max:255',
             'nip' => 'nullable|string|max:50',
             'jabatan' => 'required|string|max:100',
@@ -69,6 +71,7 @@ class PenilaiController extends Controller
             Penilai::create([
                 'user_id' => $user->id,
                 'school_id' => $validated['school_id'],
+                'pangkat_golongan_id' => $validated['pangkat_golongan_id'] ?? null,
                 'nama' => $validated['nama'],
                 'nip' => $validated['nip'],
                 'jabatan' => $validated['jabatan'],
@@ -87,7 +90,8 @@ class PenilaiController extends Controller
         }
 
         $schools = School::where('status', 'aktif')->get();
-        return view('penilais.edit', compact('penilai', 'schools'));
+        $pangkatGolongans = \App\Models\PangkatGolongan::all();
+        return view('penilais.edit', compact('penilai', 'schools', 'pangkatGolongans'));
     }
 
     public function update(Request $request, Penilai $penilai)
@@ -98,6 +102,7 @@ class PenilaiController extends Controller
 
         $validated = $request->validate([
             'school_id' => 'required|exists:schools,id',
+            'pangkat_golongan_id' => 'nullable|exists:pangkat_golongans,id',
             'nama' => 'required|string|max:255',
             'nip' => 'nullable|string|max:50',
             'jabatan' => 'required|string|max:100',
@@ -115,6 +120,7 @@ class PenilaiController extends Controller
 
             $penilai->update([
                 'school_id' => $validated['school_id'],
+                'pangkat_golongan_id' => $validated['pangkat_golongan_id'] ?? null,
                 'nama' => $validated['nama'],
                 'nip' => $validated['nip'],
                 'jabatan' => $validated['jabatan'],

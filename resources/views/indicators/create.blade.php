@@ -24,7 +24,7 @@
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div class="md:col-span-2">
-                <label for="dimension_id" class="block text-sm font-bold text-slate-700 mb-1">Dimensi Utama <span class="text-rose-500">*</span></label>
+                <label for="dimension_id" class="block text-sm font-bold text-slate-700 mb-1">Komponen / Dimensi Utama <span class="text-rose-500">*</span></label>
                 <select name="dimension_id" id="dimension_id" required class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3 border @error('dimension_id') border-rose-300 ring-rose-500 @enderror">
                     <option value="">-- Pilih Dimensi --</option>
                     @foreach($dimensions as $dim)
@@ -47,7 +47,7 @@
             </div>
 
             <div class="md:col-span-2">
-                <label for="nama" class="block text-sm font-bold text-slate-700 mb-1">Nama Indikator / Butir Penilaian <span class="text-rose-500">*</span></label>
+                <label for="nama" class="block text-sm font-bold text-slate-700 mb-1">Dimensi Kinerja / Butir Penilaian <span class="text-rose-500">*</span></label>
                 <input type="text" name="nama" id="nama" value="{{ old('nama') }}" required class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3 border @error('nama') border-rose-300 ring-rose-500 @enderror" placeholder="Contoh: Perencanaan Pembelajaran">
                 @error('nama') <p class="mt-1 text-sm text-rose-500">{{ $message }}</p> @enderror
             </div>

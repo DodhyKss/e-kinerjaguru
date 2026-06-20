@@ -167,6 +167,11 @@
                 <td class="value">{{ $evaluation->guru->nip ?? '-' }}</td>
             </tr>
             <tr>
+                <td class="label">Pangkat/Golongan</td>
+                <td class="colon">:</td>
+                <td class="value">{{ $evaluation->guru->pangkatGolongan->nama ?? '-' }} {{ isset($evaluation->guru->pangkatGolongan->golongan) ? '('.$evaluation->guru->pangkatGolongan->golongan.')' : '' }}</td>
+            </tr>
+            <tr>
                 <td class="label">Mata Pelajaran</td>
                 <td class="colon">:</td>
                 <td class="value">{{ $evaluation->guru->mataPelajaran->nama ?? $evaluation->guru->mata_pelajaran ?? '-' }}</td>
@@ -180,11 +185,6 @@
                 <td class="label">Kompetensi Keahlian</td>
                 <td class="colon">:</td>
                 <td class="value">{{ $evaluation->guru->kompetensiKeahlian->nama ?? '-' }}</td>
-            </tr>
-            <tr>
-                <td class="label">Pangkat/Golongan</td>
-                <td class="colon">:</td>
-                <td class="value">{{ $evaluation->guru->pangkatGolongan->nama ?? '-' }}</td>
             </tr>
             <tr>
                 <td class="label">Unit Kerja (Sekolah)</td>
@@ -204,6 +204,11 @@
                 <td class="label">NIP</td>
                 <td class="colon">:</td>
                 <td class="value">{{ $evaluation->penilai->nip ?? '-' }}</td>
+            </tr>
+            <tr>
+                <td class="label">Pangkat/Golongan</td>
+                <td class="colon">:</td>
+                <td class="value">{{ $evaluation->penilai->pangkatGolongan->nama ?? '-' }} {{ isset($evaluation->penilai->pangkatGolongan->golongan) ? '('.$evaluation->penilai->pangkatGolongan->golongan.')' : '' }}</td>
             </tr>
             <tr>
                 <td class="label">Jabatan</td>

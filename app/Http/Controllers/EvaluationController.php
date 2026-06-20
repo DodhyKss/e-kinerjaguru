@@ -375,9 +375,12 @@ class EvaluationController extends Controller
 
         // Ambil indikator yang memiliki observasi dokumen (has_telaah_dokumen = true)
         // beserta aspek penilaiannya (metode telaah_dokumen)
-        $indicators = Indicator::where('has_telaah_dokumen', true)
+        $indicators = Indicator::where('indicators.has_telaah_dokumen', true)
             ->with(['documentReviewAspects'])
-            ->orderBy('urutan')
+            ->join('dimensions', 'indicators.dimension_id', '=', 'dimensions.id')
+            ->orderBy('dimensions.urutan')
+            ->orderBy('indicators.urutan')
+            ->select('indicators.*')
             ->get();
 
         return view('evaluations.upload-general', compact('evaluation', 'indicators'));

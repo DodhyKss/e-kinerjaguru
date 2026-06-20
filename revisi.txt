@@ -1,9 +1,3 @@
-Revisi
-# Fitur Rekomendasi
-1. Jika Rekomendasi di edit tetap tampilkan rekomendasi sebelumnya di riwayat rekomendasi di tampilan pada saat edit
-
-# Menu Laporan 
-1. pada saat cetak buat agar informasi data atau identitas guru yang dinilai ditampilkan seperti : Mapel, kelompok mapel, Kompetensi keahlian, Pangkat/golongan.
-2. di bagian ttd kepala sekolah buat otomatis juga terisi berdasarkan sekolah gurunya.'
-
-# Menu detail evaluasi pada bagian informasi penilaian tampilkan juga secara detail informasi gurunya seperti : Mapel, kelompok mapel, Kompetensi keahlian, Pangkat/golongan.
+1. Revisi E-Kinerja
+- Buat agar di Upload Document General agar urutan Indikator sama dengan di penilaian
+- di Informasi Penilaian Pangkat/Golongan dinaikkan di bawah NIP dan Penilai/Asesor tambahkan Golongan/Pangkat juga
