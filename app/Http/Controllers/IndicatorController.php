@@ -7,6 +7,7 @@ use App\Models\Indicator;
 use App\Models\EvaluationResult;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class IndicatorController extends Controller
 {
@@ -29,7 +30,14 @@ class IndicatorController extends Controller
         }
 
         $dimensions = Dimension::orderBy('urutan')->get();
-        return view('indicators.create', compact('dimensions'));
+        
+        $nextUrutanByDimension = [];
+        foreach ($dimensions as $dim) {
+            $maxUrutan = Indicator::where('dimension_id', $dim->id)->max('urutan');
+            $nextUrutanByDimension[$dim->id] = $maxUrutan ? $maxUrutan + 1 : 1;
+        }
+        
+        return view('indicators.create', compact('dimensions', 'nextUrutanByDimension'));
     }
 
     public function store(Request $request)
@@ -43,7 +51,14 @@ class IndicatorController extends Controller
             'kode' => 'required|string|max:10|unique:indicators,kode',
             'nama' => 'required|string|max:255',
             'deskripsi' => 'required|string',
-            'urutan' => 'required|integer|min:1',
+            'urutan' => [
+                'required',
+                'integer',
+                'min:1',
+                Rule::unique('indicators', 'urutan')->where(function ($query) use ($request) {
+                    return $query->where('dimension_id', $request->dimension_id);
+                })
+            ],
             'has_observasi' => 'boolean',
             'has_telaah_dokumen' => 'boolean',
             'has_wawancara' => 'boolean',
@@ -101,7 +116,14 @@ class IndicatorController extends Controller
             'kode' => 'required|string|max:10|unique:indicators,kode,' . $indicator->id,
             'nama' => 'required|string|max:255',
             'deskripsi' => 'required|string',
-            'urutan' => 'required|integer|min:1',
+            'urutan' => [
+                'required',
+                'integer',
+                'min:1',
+                Rule::unique('indicators', 'urutan')->where(function ($query) use ($request) {
+                    return $query->where('dimension_id', $request->dimension_id);
+                })->ignore($indicator->id)
+            ],
         ]);
 
         $validated['has_observasi'] = $request->has('has_observasi');

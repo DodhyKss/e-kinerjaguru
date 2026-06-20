@@ -42,7 +42,7 @@
             
             <div>
                 <label for="urutan" class="block text-sm font-bold text-slate-700 mb-1">Nomor Urut <span class="text-rose-500">*</span></label>
-                <input type="number" name="urutan" id="urutan" value="{{ old('urutan') }}" required min="1" class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3 border @error('urutan') border-rose-300 ring-rose-500 @enderror">
+                <input type="number" name="urutan" id="urutan" value="{{ old('urutan', $nextUrutan ?? 1) }}" required min="1" class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3 border @error('urutan') border-rose-300 ring-rose-500 @enderror">
                 @error('urutan') <p class="mt-1 text-sm text-rose-500">{{ $message }}</p> @enderror
             </div>
 
@@ -85,4 +85,26 @@
         </div>
     </form>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const urutanData = @json($nextUrutanByDimension);
+        const dimensionSelect = document.getElementById('dimension_id');
+        const urutanInput = document.getElementById('urutan');
+        
+        dimensionSelect.addEventListener('change', function() {
+            const dimId = this.value;
+            if (dimId && urutanData[dimId]) {
+                urutanInput.value = urutanData[dimId];
+            } else {
+                urutanInput.value = '';
+            }
+        });
+        
+        // Trigger initially if there's already a value selected
+        if (dimensionSelect.value && !urutanInput.value) {
+            dimensionSelect.dispatchEvent(new Event('change'));
+        }
+    });
+</script>
 @endsection
