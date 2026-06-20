@@ -126,7 +126,7 @@
         }
         @media print {
             body {
-                font-size: 12pt;
+                font-size: 10.5pt;
                 background-color: white;
             }
             .container {
@@ -141,6 +141,15 @@
             .btn-print {
                 display: none;
             }
+            /* Adjustments to fit everything on one page */
+            .header { margin-bottom: 5px; padding-bottom: 2px; }
+            .header h1 { font-size: 11pt; }
+            .header h2 { font-size: 10pt; margin-top: 1px; }
+            .section-title { margin-top: 3px; margin-bottom: 2px; font-size: 10pt; }
+            .data-table th, .data-table td { padding: 1px; line-height: 1.1; font-size: 9pt; }
+            .info-table td { padding: 0px 2px; line-height: 1.1; font-size: 9.5pt; }
+            table[style*="margin-bottom: 20px"] { margin-bottom: 5px !important; }
+            .signature-space { height: 45px; }
         }
     </style>
 </head>
@@ -149,145 +158,152 @@
     <div class="container">
         <div class="header">
             <h1>LAPORAN HASIL EVALUASI KINERJA GURU</h1>
-            <h2>PERIODE: {{ strtoupper($evaluation->evaluationPeriod->nama) }}</h2>
         </div>
 
-        <table class="info-table">
+        <table style="width: 100%; margin-bottom: 20px; border-collapse: collapse;">
             <tr>
-                <td colspan="3"><div class="section-title">I. IDENTITAS GURU YANG DINILAI</div></td>
-            </tr>
-            <tr>
-                <td class="label">Nama</td>
-                <td class="colon">:</td>
-                <td class="value">{{ $evaluation->guru->nama }}</td>
-            </tr>
-            <tr>
-                <td class="label">NIP</td>
-                <td class="colon">:</td>
-                <td class="value">{{ $evaluation->guru->nip ?? '-' }}</td>
-            </tr>
-            <tr>
-                <td class="label">Pangkat/Golongan</td>
-                <td class="colon">:</td>
-                <td class="value">{{ $evaluation->guru->pangkatGolongan->nama ?? '-' }} {{ isset($evaluation->guru->pangkatGolongan->golongan) ? '('.$evaluation->guru->pangkatGolongan->golongan.')' : '' }}</td>
-            </tr>
-            <tr>
-                <td class="label">Mata Pelajaran</td>
-                <td class="colon">:</td>
-                <td class="value">{{ $evaluation->guru->mataPelajaran->nama ?? $evaluation->guru->mata_pelajaran ?? '-' }}</td>
-            </tr>
-            <tr>
-                <td class="label">Kelompok Mapel</td>
-                <td class="colon">:</td>
-                <td class="value">{{ $evaluation->guru->mataPelajaran->kelompokMapel->nama ?? '-' }}</td>
-            </tr>
-            <tr>
-                <td class="label">Kompetensi Keahlian</td>
-                <td class="colon">:</td>
-                <td class="value">{{ $evaluation->guru->kompetensiKeahlian->nama ?? '-' }}</td>
-            </tr>
-            <tr>
-                <td class="label">Unit Kerja (Sekolah)</td>
-                <td class="colon">:</td>
-                <td class="value">{{ $evaluation->guru->school->nama ?? '-' }}</td>
-            </tr>
-            
-            <tr>
-                <td colspan="3"><div class="section-title" style="margin-top: 15px;">II. IDENTITAS PENILAI</div></td>
-            </tr>
-            <tr>
-                <td class="label">Nama Penilai</td>
-                <td class="colon">:</td>
-                <td class="value">{{ $evaluation->penilai->nama }}</td>
-            </tr>
-            <tr>
-                <td class="label">NIP</td>
-                <td class="colon">:</td>
-                <td class="value">{{ $evaluation->penilai->nip ?? '-' }}</td>
-            </tr>
-            <tr>
-                <td class="label">Pangkat/Golongan</td>
-                <td class="colon">:</td>
-                <td class="value">{{ $evaluation->penilai->pangkatGolongan->nama ?? '-' }} {{ isset($evaluation->penilai->pangkatGolongan->golongan) ? '('.$evaluation->penilai->pangkatGolongan->golongan.')' : '' }}</td>
-            </tr>
-            <tr>
-                <td class="label">Jabatan</td>
-                <td class="colon">:</td>
-                <td class="value">{{ $evaluation->penilai->jabatan }}</td>
+                <td style="width: 49%; vertical-align: top; padding: 0;">
+                    <div class="section-title" style="margin-top: 0; font-size: 11pt;">I. IDENTITAS GURU YANG DINILAI</div>
+                    <table class="data-table" style="margin-bottom: 0; width: 100%;">
+                        <tr><td style="width:40%">Nama</td><td>: {{ $evaluation->guru->nama }}</td></tr>
+                        <tr><td>NIP</td><td>: {{ $evaluation->guru->nip ?? '-' }}</td></tr>
+                        <tr><td>Pangkat/Golongan</td><td>: {{ $evaluation->guru->pangkatGolongan->nama ?? '-' }} {{ isset($evaluation->guru->pangkatGolongan->golongan) ? '('.$evaluation->guru->pangkatGolongan->golongan.')' : '' }}</td></tr>
+                        <tr><td>Mata Pelajaran</td><td>: {{ $evaluation->guru->mataPelajaran->nama ?? $evaluation->guru->mata_pelajaran ?? '-' }}</td></tr>
+                        <tr><td>Kelompok Mapel</td><td>: {{ $evaluation->guru->mataPelajaran->kelompokMapel->nama ?? '-' }}</td></tr>
+                        <tr><td>Kompetensi Keahlian</td><td>: {{ $evaluation->guru->kompetensiKeahlian->nama ?? '-' }}</td></tr>
+                        <tr><td>Unit Kerja (Sekolah)</td><td>: {{ $evaluation->guru->school->nama ?? '-' }}</td></tr>
+                        @php
+                            $periode = $evaluation->evaluationPeriod->nama ?? '';
+                            $tahunAjaran = '-';
+                            $semester = '-';
+                            
+                            if (preg_match('/(\d{4}\/\d{4}|\d{4})/', $periode, $matches)) {
+                                $tahunAjaran = $matches[1];
+                            }
+                            
+                            if (preg_match('/semester\s+(ganjil|genap|1|2)/i', $periode, $matches)) {
+                                $semester = ucwords(strtolower($matches[1]));
+                            }
+                        @endphp
+                        <tr><td>Tahun Ajaran</td><td>: {{ $tahunAjaran }}</td></tr>
+                        <tr><td>Semester</td><td>: {{ $semester }}</td></tr>
+                    </table>
+                </td>
+                <td style="width: 2%; padding: 0;"></td>
+                <td style="width: 49%; vertical-align: top; padding: 0;">
+                    <div class="section-title" style="margin-top: 0; font-size: 11pt;">II. IDENTITAS PENILAI</div>
+                    <table class="data-table" style="margin-bottom: 0; width: 100%;">
+                        <tr><td style="width:40%">Nama</td><td>: {{ $evaluation->penilai->nama }}</td></tr>
+                        <tr><td>NIP</td><td>: {{ $evaluation->penilai->nip ?? '-' }}</td></tr>
+                        <tr><td>Pangkat/Golongan</td><td>: {{ $evaluation->penilai->pangkatGolongan->nama ?? '-' }} {{ isset($evaluation->penilai->pangkatGolongan->golongan) ? '('.$evaluation->penilai->pangkatGolongan->golongan.')' : '' }}</td></tr>
+                        <tr><td>Jabatan</td><td>: {{ $evaluation->penilai->jabatan }}</td></tr>
+                        <tr><td>Unit Kerja (Sekolah)</td><td>: {{ $evaluation->penilai->school->nama ?? '-' }}</td></tr>
+                    </table>
+                </td>
             </tr>
         </table>
 
-        <div class="summary-box">
-            <h3 style="text-align:center;">REKAPITULASI HASIL PENILAIAN</h3>
-            <table class="info-table" style="margin-bottom:0;">
-                <tr>
-                    <td class="label">Total Skor</td>
-                    <td class="colon">:</td>
-                    <td class="value"><b>{{ $evaluation->total_skor ?? '0' }}</b></td>
-                </tr>
-                <tr>
-                    <td class="label">Rata-rata / Nilai Akhir</td>
-                    <td class="colon">:</td>
-                    <td class="value"><b>{{ $evaluation->rata_rata ?? '0' }} / 4.0</b></td>
-                </tr>
-                <tr>
-                    <td class="label">Status Evaluasi</td>
-                    <td class="colon">:</td>
-                    <td class="value">
-                        @if($evaluation->status == 'approved')
-                            Disetujui Kepala Sekolah
-                        @elseif($evaluation->status == 'completed')
-                            Selesai (Menunggu Review Kepsek)
-                        @else
-                            Sedang Diproses
-                        @endif
-                    </td>
-                </tr>
-                <tr>
-                    <td class="label">Rekomendasi Lanjutan</td>
-                    <td class="colon">:</td>
-                    <td class="value">
-                        @if($evaluation->rekomendasi)
-                            {{ $evaluation->rekomendasi->rekomendasi }}
-                        @else
-                            <i>Belum ada rekomendasi</i>
-                        @endif
-                    </td>
-                </tr>
-            </table>
-        </div>
+        @php
+            $allIndicators = collect();
+            foreach($dimensions as $dim) {
+                foreach($dim->indicators as $ind) {
+                    $allIndicators->push($ind);
+                }
+            }
+            $totalIndicators = $allIndicators->count();
+            
+            // Get date for signature
+            $date = \Carbon\Carbon::parse($evaluation->tanggal_selesai ?? now())->translatedFormat('d F Y');
+            $kepsekName = $evaluation->guru->school->kepala_sekolah ?? '';
+            $kepsek = \App\Models\KepalaSekolah::where('nama', $kepsekName)->first();
+        @endphp
 
-        <div class="page-break"></div>
-
-        <div class="section-title">III. RINCIAN HASIL PENILAIAN</div>
-        
+        <div class="section-title">III. REKAP HASIL PENILAIAN</div>
         <table class="data-table">
             <thead>
                 <tr>
-                    <th style="width: 5%;">No</th>
-                    <th style="width: 25%;">Dimensi / Indikator</th>
-                    <th style="width: 55%;">Deskripsi & Kesimpulan</th>
-                    <th style="width: 15%;">Nilai (Level)</th>
+                    <th style="width: 15%; background-color: transparent;">Nomor Butir Kinerja</th>
+                    <th style="width: 15%; background-color: transparent;">Nilai (Level Kinerja)</th>
+                    <th style="width: 70%; background-color: transparent;">Rekomendasi Tindak Lanjut</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($allIndicators as $index => $ind)
+                    @php
+                        $result = $resultsMap->get($ind->id);
+                    @endphp
+                    <tr>
+                        <td style="text-align: center;">{{ $ind->kode ?? ($index + 1) }}</td>
+                        <td style="text-align: center;">{{ $result && $result->status == 'selesai' ? $result->level_capaian : '-' }}</td>
+                        @if($index == 0)
+                        <td rowspan="{{ $totalIndicators }}" style="vertical-align: top;">
+                            @if($evaluation->rekomendasi)
+                                {!! nl2br(e($evaluation->rekomendasi->rekomendasi)) !!}
+                            @else
+                                <i>Belum ada rekomendasi</i>
+                            @endif
+                        </td>
+                        @endif
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+
+        <div style="text-align: right; margin-bottom: 10px; margin-top: 20px;">
+            Makassar, {{ $date }}
+        </div>
+        <table class="signature-table" style="page-break-inside: avoid; margin-top: 0;">
+            <tr>
+                <td>
+                    GURU YANG DINILAI<br>
+                    <div class="signature-space"></div>
+                    <b><u>{{ $evaluation->guru->nama }}</u></b><br>
+                    NIP. {{ $evaluation->guru->nip ?? '-' }}
+                </td>
+                <td>
+                    PENILAI/EVALUATOR<br>
+                    <div class="signature-space"></div>
+                    <b><u>{{ $evaluation->penilai->nama }}</u></b><br>
+                    NIP. {{ $evaluation->penilai->nip ?? '-' }}
+                </td>
+                <td>
+                    KEPALA SEKOLAH<br>
+                    <div class="signature-space"></div>
+                    <b><u>{{ $kepsekName ?: '.......................................' }}</u></b><br>
+                    NIP. {{ $kepsek->nip ?? '....................................' }}
+                </td>
+            </tr>
+        </table>
+
+        <div class="page-break"></div>
+
+        <div class="section-title">IV. RINCIAN HASIL PENILAIAN</div>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th style="width: 10%; background-color: transparent;">Nomor Butir Kinerja</th>
+                    <th style="width: 25%; background-color: transparent;">Dimensi Kinerja</th>
+                    <th style="width: 50%; background-color: transparent;">Deskripsi Kinerja & Kesimpulan Penilai</th>
+                    <th style="width: 15%; background-color: transparent;">Nilai (Level Kinerja)</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($dimensions as $dim)
-                    <tr style="background-color: #e9e9e9; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
-                        <td style="text-align: center;">{{ $dim->urutan }}</td>
-                        <td colspan="3">{{ $dim->nama }}</td>
+                    <tr>
+                        <td colspan="4" style="background-color: #f9f9f9; font-weight: bold;">{{ $dim->nama }}</td>
                     </tr>
                     @foreach($dim->indicators as $ind)
                         @php
                             $result = $resultsMap->get($ind->id);
                         @endphp
                         <tr>
-                            <td style="text-align: center;">{{ $ind->kode }}</td>
+                            <td style="text-align: center;">{{ $ind->kode ?? $loop->iteration }}</td>
                             <td>{{ $ind->nama }}</td>
                             <td>
-                                <i>Deskripsi:</i><br>
+                                <b>Deskripsi:</b><br>
                                 {{ $ind->deskripsi }}
                                 <div style="margin-top: 10px;">
-                                    <i>Kesimpulan Penilai:</i><br>
+                                    <b>Kesimpulan Penilai:</b><br>
                                     @if($result && $result->status == 'selesai')
                                         {{ $result->kesimpulan }}
                                     @else
@@ -295,16 +311,16 @@
                                     @endif
                                 </div>
                             </td>
-                            <td style="text-align: center; vertical-align: middle; font-size: 14pt; font-weight: bold;">
-                                @if($result && $result->status == 'selesai')
-                                    {{ $result->level_capaian }}
-                                @else
-                                    -
-                                @endif
+                            <td style="text-align: center; vertical-align: middle; font-size: 14pt;">
+                                {{ $result && $result->status == 'selesai' ? $result->level_capaian : '-' }}
                             </td>
                         </tr>
                     @endforeach
                 @endforeach
+                <tr>
+                    <td colspan="3" style="text-align: right; font-weight: bold;">Total Skor</td>
+                    <td style="text-align: center; font-weight: bold; font-size: 14pt;">{{ $evaluation->total_skor ?? '0' }}</td>
+                </tr>
             </tbody>
         </table>
 
@@ -315,30 +331,28 @@
         </div>
         @endif
 
-        <table class="signature-table" style="page-break-inside: avoid;">
+        <div style="text-align: right; margin-bottom: 10px; margin-top: 30px;">
+            Makassar, {{ $date }}
+        </div>
+        <table class="signature-table" style="page-break-inside: avoid; margin-top: 0;">
             <tr>
                 <td>
-                    Guru yang Dinilai,<br>
+                    GURU YANG DINILAI<br>
                     <div class="signature-space"></div>
                     <b><u>{{ $evaluation->guru->nama }}</u></b><br>
                     NIP. {{ $evaluation->guru->nip ?? '-' }}
                 </td>
                 <td>
-                    Mengetahui,<br>
-                    Kepala Sekolah<br>
-                    <div class="signature-space"></div>
-                    @php
-                        $kepsekName = $evaluation->guru->school->kepala_sekolah ?? '';
-                        $kepsek = \App\Models\KepalaSekolah::where('nama', $kepsekName)->first();
-                    @endphp
-                    <b><u>{{ $kepsekName ?: '.......................................' }}</u></b><br>
-                    NIP. {{ $kepsek->nip ?? '....................................' }}
-                </td>
-                <td>
-                    Penilai / Asesor,<br>
+                    PENILAI/EVALUATOR<br>
                     <div class="signature-space"></div>
                     <b><u>{{ $evaluation->penilai->nama }}</u></b><br>
                     NIP. {{ $evaluation->penilai->nip ?? '-' }}
+                </td>
+                <td>
+                    KEPALA SEKOLAH<br>
+                    <div class="signature-space"></div>
+                    <b><u>{{ $kepsekName ?: '.......................................' }}</u></b><br>
+                    NIP. {{ $kepsek->nip ?? '....................................' }}
                 </td>
             </tr>
         </table>
