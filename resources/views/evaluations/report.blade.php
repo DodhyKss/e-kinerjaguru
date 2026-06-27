@@ -71,9 +71,10 @@
             padding: 8px;
             vertical-align: top;
         }
-        .data-table th {
+        .data-table th, table th {
             background-color: #f2f2f2;
-            text-align: center;
+            text-align: center !important;
+            vertical-align: middle !important;
             font-weight: bold;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
@@ -125,6 +126,10 @@
             }
         }
         @media print {
+            @page {
+                size: A4 portrait;
+                margin: 15mm;
+            }
             body {
                 font-size: 10.5pt;
                 background-color: white;
@@ -222,9 +227,10 @@
         <table class="data-table">
             <thead>
                 <tr>
-                    <th style="width: 15%; background-color: transparent;">Nomor Butir Kinerja</th>
+                    <th style="width: 12%; background-color: transparent;">Nomor Butir Kinerja</th>
+                    <th style="width: 13%; background-color: transparent;">Kode Butir Kinerja</th>
                     <th style="width: 15%; background-color: transparent;">Nilai (Level Kinerja)</th>
-                    <th style="width: 70%; background-color: transparent;">Rekomendasi Tindak Lanjut</th>
+                    <th style="width: 60%; background-color: transparent;">Rekomendasi Tindak Lanjut</th>
                 </tr>
             </thead>
             <tbody>
@@ -233,10 +239,11 @@
                         $result = $resultsMap->get($ind->id);
                     @endphp
                     <tr>
-                        <td style="text-align: center;">{{ $ind->urutan_keseluruhan }} ({{ $ind->kode }})</td>
-                        <td style="text-align: center;">{{ $result && $result->status == 'selesai' ? $result->level_capaian : '-' }}</td>
+                        <td style="text-align: center; vertical-align: middle;">{{ $ind->urutan_keseluruhan }}</td>
+                        <td style="text-align: center; vertical-align: middle;">{{ $ind->kode }}</td>
+                        <td style="text-align: center; vertical-align: middle;">{{ $result && $result->status == 'selesai' ? $result->level_capaian : '-' }}</td>
                         @if($index == 0)
-                        <td rowspan="{{ $totalIndicators }}" style="vertical-align: top;">
+                        <td rowspan="{{ $totalIndicators }}" style="vertical-align: top; text-align: justify;">
                             @if($evaluation->rekomendasi)
                                 {!! nl2br(e($evaluation->rekomendasi->rekomendasi)) !!}
                             @else
@@ -297,18 +304,20 @@
                             $result = $resultsMap->get($ind->id);
                         @endphp
                         <tr>
-                            <td style="text-align: center;">{{ $ind->urutan_keseluruhan }} ({{ $ind->kode }})</td>
-                            <td>{{ $ind->nama }}</td>
-                            <td>
+                            <td style="text-align: center; vertical-align: middle;">{{ $ind->urutan_keseluruhan }}</td>
+                            <td style="text-align: center; vertical-align: middle;">{{ $ind->nama }} ({{ $ind->kode }})</td>
+                            <td style="vertical-align: middle; text-align: justify;">
                                 <b>Deskripsi:</b><br>
-                                {{ $ind->deskripsi }}
+                                <div style="text-align: justify;">{{ $ind->deskripsi }}</div>
                                 <div style="margin-top: 10px;">
                                     <b>Kesimpulan Penilai:</b><br>
+                                    <div style="text-align: justify;">
                                     @if($result && $result->status == 'selesai')
                                         {{ $result->kesimpulan }}
                                     @else
                                         <span style="color: #666;">(Belum dinilai)</span>
                                     @endif
+                                    </div>
                                 </div>
                             </td>
                             <td style="text-align: center; vertical-align: middle; font-size: 14pt;">

@@ -95,7 +95,7 @@
             }
         }
         @media print {
-            @page { size: landscape; margin: 15mm; }
+            @page { size: A4 landscape; margin: 15mm; }
             body { font-size: 10pt; background-color: white; }
             .container { width: 100%; max-width: 100%; margin: 0; padding: 0; box-shadow: none; }
             .btn-print { display: none; }
