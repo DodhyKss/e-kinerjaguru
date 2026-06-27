@@ -76,7 +76,7 @@
                     <td class="py-4 px-6 text-sm text-slate-600">{{ $kepsek->kepalaSekolah->pangkatGolongan->nama ?? '-' }}</td>
                     <td class="py-4 px-6 text-sm font-medium text-indigo-600">{{ $kepsek->school->nama ?? '-' }}</td>
                     <td class="py-4 px-6">
-                        @if($kepsek->status === 'aktif')
+                        @if($kepsek->is_active)
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">Aktif</span>
                         @else
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800">Nonaktif</span>
