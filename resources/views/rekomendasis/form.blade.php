@@ -39,11 +39,11 @@
                 
                 <div class="bg-indigo-50 text-indigo-800 p-4 rounded-xl text-sm leading-relaxed border border-indigo-100">
                     <p class="font-bold mb-2 flex items-center"><i data-lucide="lightbulb" class="w-4 h-4 mr-1.5"></i> Panduan Rekomendasi</p>
-                    Pemberian rekomendasi adalah analisis menyilang pada setiap indikator yang mencakup:
+                    Penyusunan rekomendasi ini merupakan diseminasi hasil analisis menyilang pada setiap capaian kinerja yang berpedoman pada tiga aspek evaluatif utama:
                     <ul class="list-disc ml-5 mt-2 space-y-1">
-                        <li><strong>WHAT:</strong> Apa yang menjadi kekuatan dan kelemahan guru.</li>
-                        <li><strong>WHY:</strong> Mengapa hal itu bisa terjadi.</li>
-                        <li><strong>HOW:</strong> Bagaimana cara memperbaikinya.</li>
+                        <li><strong>WHAT:</strong> mengidentifikasi kekuatan dan kelemahan guru.</li>
+                        <li><strong>WHY:</strong> mengeksplorasi faktor penyebab kondisi tersebut.</li>
+                        <li><strong>HOW:</strong> merumuskan strategi perbaikan yang aplikatif.</li>
                     </ul>
                 </div>
 
