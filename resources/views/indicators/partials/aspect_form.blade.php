@@ -18,6 +18,25 @@
                 <input type="text" name="nama_dokumen" placeholder="Nama/Bukti Dokumen yang diminta" class="w-full text-sm border-slate-300 rounded-lg p-2.5">
             </div>
             @endif
+            @if($metode == 'wawancara')
+            <div class="md:col-span-12 bg-white p-3 rounded-lg border border-slate-200">
+                <label class="block text-xs font-bold text-slate-700 mb-2">Target Responden Wawancara (Centang yang sesuai):</label>
+                <div class="flex flex-wrap gap-4">
+                    <label class="inline-flex items-center text-xs text-slate-700 font-medium cursor-pointer">
+                        <input type="checkbox" name="target_responden[]" value="kepala_wakil" checked class="rounded border-slate-300 text-indigo-600 mr-1.5 focus:ring-indigo-500"> Kepala Sekolah / Wakil
+                    </label>
+                    <label class="inline-flex items-center text-xs text-slate-700 font-medium cursor-pointer">
+                        <input type="checkbox" name="target_responden[]" value="kepala_kompetensi" checked class="rounded border-slate-300 text-indigo-600 mr-1.5 focus:ring-indigo-500"> Kajur / Kapro
+                    </label>
+                    <label class="inline-flex items-center text-xs text-slate-700 font-medium cursor-pointer">
+                        <input type="checkbox" name="target_responden[]" value="guru" checked class="rounded border-slate-300 text-indigo-600 mr-1.5 focus:ring-indigo-500"> Guru
+                    </label>
+                    <label class="inline-flex items-center text-xs text-slate-700 font-medium cursor-pointer">
+                        <input type="checkbox" name="target_responden[]" value="siswa" checked class="rounded border-slate-300 text-indigo-600 mr-1.5 focus:ring-indigo-500"> Siswa
+                    </label>
+                </div>
+            </div>
+            @endif
         </div>
         <div class="mt-3 text-right">
             <button type="submit" class="text-xs font-semibold text-white bg-slate-800 hover:bg-slate-900 px-4 py-2 rounded-lg transition-colors">Tambah Aspek</button>
@@ -41,6 +60,27 @@
             @if($metode == 'telaah_dokumen')
             <div class="pl-19">
                 <input type="text" name="nama_dokumen" value="{{ $aspect->nama_dokumen }}" placeholder="Nama/Bukti Dokumen" class="w-full text-sm border-slate-300 rounded-lg p-2">
+            </div>
+            @endif
+
+            @if($metode == 'wawancara')
+            @php $targets = $aspect->target_responden_list; @endphp
+            <div class="pl-19 bg-slate-50 p-3 rounded-lg border border-slate-200 mt-1">
+                <label class="block text-xs font-bold text-slate-700 mb-2">Target Responden Wawancara:</label>
+                <div class="flex flex-wrap gap-4">
+                    <label class="inline-flex items-center text-xs text-slate-700 font-medium cursor-pointer">
+                        <input type="checkbox" name="target_responden[]" value="kepala_wakil" {{ in_array('kepala_wakil', $targets) ? 'checked' : '' }} class="rounded border-slate-300 text-indigo-600 mr-1.5 focus:ring-indigo-500"> Kepala Sekolah / Wakil
+                    </label>
+                    <label class="inline-flex items-center text-xs text-slate-700 font-medium cursor-pointer">
+                        <input type="checkbox" name="target_responden[]" value="kepala_kompetensi" {{ in_array('kepala_kompetensi', $targets) ? 'checked' : '' }} class="rounded border-slate-300 text-indigo-600 mr-1.5 focus:ring-indigo-500"> Kajur / Kapro
+                    </label>
+                    <label class="inline-flex items-center text-xs text-slate-700 font-medium cursor-pointer">
+                        <input type="checkbox" name="target_responden[]" value="guru" {{ in_array('guru', $targets) ? 'checked' : '' }} class="rounded border-slate-300 text-indigo-600 mr-1.5 focus:ring-indigo-500"> Guru
+                    </label>
+                    <label class="inline-flex items-center text-xs text-slate-700 font-medium cursor-pointer">
+                        <input type="checkbox" name="target_responden[]" value="siswa" {{ in_array('siswa', $targets) ? 'checked' : '' }} class="rounded border-slate-300 text-indigo-600 mr-1.5 focus:ring-indigo-500"> Siswa
+                    </label>
+                </div>
             </div>
             @endif
             

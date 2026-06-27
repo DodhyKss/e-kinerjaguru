@@ -172,9 +172,18 @@
                             <td class="px-4 py-2 border-r border-slate-200 text-slate-700 leading-tight">{{ $aspect->aspek }}</td>
                             
                             @foreach(['kepala_wakil', 'kepala_kompetensi', 'guru', 'siswa'] as $responden)
-                            @php $val = $result->interviewData->where('assessment_aspect_id', $aspect->id)->where('responden', $responden)->first()?->hasil ?? ''; @endphp
-                            <td class="px-0 py-0 border-r border-slate-200 relative">
-                                <textarea name="interview[{{ $aspect->id }}][{{ $responden }}]" rows="3" {{ isset($isReadOnly) && $isReadOnly ? 'readonly disabled' : '' }} class="w-full h-full border-0 focus:ring-2 focus:ring-inset focus:ring-indigo-500 resize-y p-2 bg-transparent text-xs" placeholder="...">{{ $val }}</textarea>
+                            @php 
+                                $val = $result->interviewData->where('assessment_aspect_id', $aspect->id)->where('responden', $responden)->first()?->hasil ?? ''; 
+                                $isTarget = in_array($responden, $aspect->target_responden_list);
+                            @endphp
+                            <td class="px-0 py-0 border-r border-slate-200 relative align-top">
+                                @if($isTarget)
+                                    <textarea name="interview[{{ $aspect->id }}][{{ $responden }}]" rows="3" {{ isset($isReadOnly) && $isReadOnly ? 'readonly disabled' : '' }} class="w-full h-full border-0 focus:ring-2 focus:ring-inset focus:ring-indigo-500 resize-y p-2 bg-transparent text-xs min-h-[60px]" placeholder="...">{{ $val }}</textarea>
+                                @else
+                                    <div class="w-full h-full min-h-[60px] p-3 bg-slate-100 text-center text-slate-400 font-medium text-xs flex items-center justify-center select-none cursor-not-allowed">
+                                        -
+                                    </div>
+                                @endif
                             </td>
                             @endforeach
                         </tr>

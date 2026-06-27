@@ -3,12 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\AssessmentAspect;
+use App\Models\Indicator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class AssessmentAspectController extends Controller
 {
-    public function store(Request $request)
+    public function store(Request $request, Indicator $indicator)
     {
         if (!Auth::user()->isAdmin()) {
             abort(403);
@@ -20,14 +21,20 @@ class AssessmentAspectController extends Controller
             'aspek' => 'required|string',
             'nama_dokumen' => 'nullable|string',
             'nomor' => 'required|integer|min:1',
+            'target_responden' => 'nullable|array',
+            'target_responden.*' => 'in:kepala_wakil,kepala_kompetensi,guru,siswa',
         ]);
+
+        if ($request->metode === 'wawancara') {
+            $validated['target_responden'] = $request->input('target_responden', ['kepala_wakil', 'kepala_kompetensi', 'guru', 'siswa']);
+        }
 
         AssessmentAspect::create($validated);
 
         return back()->with('success', 'Aspek penilaian baru berhasil ditambahkan.');
     }
 
-    public function update(Request $request, AssessmentAspect $aspect)
+    public function update(Request $request, Indicator $indicator, AssessmentAspect $aspect)
     {
         if (!Auth::user()->isAdmin()) {
             abort(403);
@@ -37,14 +44,20 @@ class AssessmentAspectController extends Controller
             'aspek' => 'required|string',
             'nama_dokumen' => 'nullable|string',
             'nomor' => 'required|integer|min:1',
+            'target_responden' => 'nullable|array',
+            'target_responden.*' => 'in:kepala_wakil,kepala_kompetensi,guru,siswa',
         ]);
+
+        if ($aspect->metode === 'wawancara') {
+            $validated['target_responden'] = $request->input('target_responden', ['kepala_wakil', 'kepala_kompetensi', 'guru', 'siswa']);
+        }
 
         $aspect->update($validated);
 
         return back()->with('success', "Aspek nomor {$aspect->nomor} berhasil diperbarui.");
     }
 
-    public function destroy(AssessmentAspect $aspect)
+    public function destroy(Indicator $indicator, AssessmentAspect $aspect)
     {
         if (!Auth::user()->isAdmin()) {
             abort(403);

@@ -266,16 +266,14 @@ class EvaluationController extends Controller
             if ($request->has('interview')) {
                 foreach ($request->interview as $aspectId => $respondenData) {
                     foreach ($respondenData as $responden => $hasil) {
-                        if (!empty($hasil)) {
-                            \App\Models\InterviewData::updateOrCreate(
-                                [
-                                    'evaluation_result_id' => $result->id, 
-                                    'assessment_aspect_id' => $aspectId,
-                                    'responden' => $responden
-                                ],
-                                ['hasil' => $hasil]
-                            );
-                        }
+                        \App\Models\InterviewData::updateOrCreate(
+                            [
+                                'evaluation_result_id' => $result->id, 
+                                'assessment_aspect_id' => $aspectId,
+                                'responden' => $responden
+                            ],
+                            ['hasil' => $hasil ?? '']
+                        );
                     }
                 }
             }
