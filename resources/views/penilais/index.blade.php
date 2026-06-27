@@ -21,6 +21,7 @@
                         <th class="px-6 py-3">NIP / ID</th>
                         <th class="px-6 py-3">Jabatan & Instansi</th>
                         <th class="px-6 py-3">Penugasan Sekolah</th>
+                        <th class="px-6 py-3">Guru Yang Dinilai</th>
                         @if(auth()->user()->isAdmin())
                         <th class="px-6 py-3 text-right">Aksi</th>
                         @endif
@@ -39,6 +40,17 @@
                             <div class="text-xs text-slate-500">{{ $penilai->instansi }}</div>
                         </td>
                         <td class="px-6 py-4 text-slate-600">{{ $penilai->school->nama }}</td>
+                        <td class="px-6 py-4">
+                            <div class="flex flex-wrap gap-1 max-w-xs">
+                                @forelse($penilai->gurus as $g)
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
+                                        {{ $g->nama }}
+                                    </span>
+                                @empty
+                                    <span class="text-xs text-slate-400 italic">Belum ada guru</span>
+                                @endforelse
+                            </div>
+                        </td>
                         
                         @if(auth()->user()->isAdmin())
                         <td class="px-6 py-4 text-right">
@@ -59,7 +71,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="px-6 py-8 text-center text-slate-500">
+                        <td colspan="6" class="px-6 py-8 text-center text-slate-500">
                             Belum ada data asesor/penilai.
                         </td>
                     </tr>

@@ -1,6 +1,4 @@
 # Revisi
-1. saya ingin pada saat penilaian di tab wawancara assessment_aspects bisa di custom siapa saja yang di wawancarai bisa semuanya atau hanya beberapa atau hanya 1. Misal di wawancara aspect 1 saya hanya ingin wawancara guru dan siswa tapi di aspects dua saya hanya ingin guru saja jadi bisa di custom.
-
-# Bug
-1. di menu penilaian pada tab wawancara ketika di edit datanya tidak berubah, perbaiki!
-
+1. di menu tambah penilai atau asesor tambahkan agar bisa menambahkan guru yang dapat dinilai jadi bisa menambahkan lebih dari 1 guru
+2. di list asesor atau penilai dapat di edit siapa saja gurunya bisa ditambah atau dikurangi.
+3. di menu Data Evaluasi role penialai hanya akan muncul gurunya saja dan ketika admin menambah penugasan baru di list guru saat memilih hanya tampil guru si penialai saja

@@ -18,7 +18,7 @@ class PenilaiController extends Controller
             abort(403);
         }
         
-        $query = Penilai::with('school')->latest();
+        $query = Penilai::with(['school', 'gurus'])->latest();
         
         if (Auth::user()->isKepalaSekolah()) {
             $query->where('school_id', Auth::user()->school_id);
@@ -36,7 +36,8 @@ class PenilaiController extends Controller
         
         $schools = School::where('status', 'aktif')->get();
         $pangkatGolongans = \App\Models\PangkatGolongan::all();
-        return view('penilais.create', compact('schools', 'pangkatGolongans'));
+        $gurus = \App\Models\Guru::with('school')->where('status', 'aktif')->get();
+        return view('penilais.create', compact('schools', 'pangkatGolongans', 'gurus'));
     }
 
     public function store(Request $request)
@@ -54,6 +55,8 @@ class PenilaiController extends Controller
             'instansi' => 'required|string|max:100',
             'no_telepon' => 'nullable|string|max:20',
             'email' => 'required|email|unique:users,email|max:255',
+            'guru_ids' => 'nullable|array',
+            'guru_ids.*' => 'exists:gurus,id',
         ]);
 
         DB::transaction(function () use ($validated) {
@@ -68,7 +71,7 @@ class PenilaiController extends Controller
                 'school_id' => $validated['school_id'],
             ]);
 
-            Penilai::create([
+            $penilai = Penilai::create([
                 'user_id' => $user->id,
                 'school_id' => $validated['school_id'],
                 'pangkat_golongan_id' => $validated['pangkat_golongan_id'] ?? null,
@@ -78,6 +81,10 @@ class PenilaiController extends Controller
                 'instansi' => $validated['instansi'],
                 'no_telepon' => $validated['no_telepon'],
             ]);
+
+            if (!empty($validated['guru_ids'])) {
+                $penilai->gurus()->sync($validated['guru_ids']);
+            }
         });
 
         return redirect()->route('penilais.index')->with('success', 'Data Asesor/Penilai berhasil ditambahkan dan Akun otomatis dibuat.');
@@ -91,7 +98,9 @@ class PenilaiController extends Controller
 
         $schools = School::where('status', 'aktif')->get();
         $pangkatGolongans = \App\Models\PangkatGolongan::all();
-        return view('penilais.edit', compact('penilai', 'schools', 'pangkatGolongans'));
+        $gurus = \App\Models\Guru::with('school')->where('status', 'aktif')->get();
+        $assignedGuruIds = $penilai->gurus()->pluck('gurus.id')->toArray();
+        return view('penilais.edit', compact('penilai', 'schools', 'pangkatGolongans', 'gurus', 'assignedGuruIds'));
     }
 
     public function update(Request $request, Penilai $penilai)
@@ -109,6 +118,8 @@ class PenilaiController extends Controller
             'instansi' => 'required|string|max:100',
             'no_telepon' => 'nullable|string|max:20',
             'email' => 'required|email|max:255|unique:users,email,' . $penilai->user_id,
+            'guru_ids' => 'nullable|array',
+            'guru_ids.*' => 'exists:gurus,id',
         ]);
 
         DB::transaction(function () use ($validated, $penilai) {
@@ -127,6 +138,8 @@ class PenilaiController extends Controller
                 'instansi' => $validated['instansi'],
                 'no_telepon' => $validated['no_telepon'],
             ]);
+
+            $penilai->gurus()->sync($validated['guru_ids'] ?? []);
         });
 
         return redirect()->route('penilais.index')->with('success', 'Data Asesor/Penilai berhasil diperbarui.');

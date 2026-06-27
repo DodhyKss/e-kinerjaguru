@@ -78,6 +78,49 @@
                 <label for="no_telepon" class="block text-sm font-bold text-slate-700 mb-1">Nomor Telepon/HP</label>
                 <input type="text" name="no_telepon" id="no_telepon" value="{{ old('no_telepon') }}" class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border">
             </div>
+
+            <div class="md:col-span-2 mt-4 pt-4 border-t border-slate-100">
+                <label class="block text-sm font-bold text-slate-700 mb-1">Pilih Guru yang Dapat Dinilai oleh Asesor Ini <span class="text-xs font-normal text-slate-500">(Bisa pilih lebih dari 1)</span></label>
+                <p class="text-xs text-slate-500 mb-3">Cari dan pilih guru menggunakan kotak pencarian di bawah ini, lalu klik "Tambah ke Daftar".</p>
+                
+                <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center mb-4">
+                    <div class="flex-1 w-full">
+                        <select id="guru_search_select" class="block w-full rounded-xl border-slate-300 shadow-sm sm:text-sm select2">
+                            <option value="">-- Cari Nama atau NIP Guru --</option>
+                            @foreach($gurus as $guru)
+                                <option value="{{ $guru->id }}" data-nama="{{ $guru->nama }}" data-nip="{{ $guru->nip ?? '-' }}" data-sekolah="{{ $guru->school->nama ?? '-' }}">
+                                    {{ $guru->nama }} (NIP: {{ $guru->nip ?? '-' }}) - {{ $guru->school->nama ?? '-' }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <button type="button" id="btn_add_guru" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm rounded-xl shadow-sm transition-colors flex items-center shrink-0">
+                        <i data-lucide="plus" class="w-4 h-4 mr-1.5"></i> Tambah ke Daftar
+                    </button>
+                </div>
+
+                <div id="hidden_guru_inputs"></div>
+
+                <div class="border border-slate-200 rounded-xl overflow-hidden bg-white">
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                            <tr>
+                                <th class="p-3 w-12 text-center">No</th>
+                                <th class="p-3">Nama Guru</th>
+                                <th class="p-3">NIP</th>
+                                <th class="p-3">Sekolah</th>
+                                <th class="p-3 w-20 text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="selected_gurus_tbody" class="divide-y divide-slate-100">
+                            <!-- Diisi oleh JS -->
+                        </tbody>
+                    </table>
+                    <div id="pagination_controls" class="p-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-600">
+                        <!-- Diisi oleh JS -->
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="mt-8 pt-6 border-t border-slate-100 flex items-center justify-end gap-3">
@@ -88,4 +131,123 @@
         </div>
     </form>
 </div>
+
+@php
+    $oldGuruIds = old('guru_ids', []);
+    $initialGurus = $gurus->whereIn('id', $oldGuruIds)->values()->map(function($g) {
+        return [
+            'id' => $g->id,
+            'nama' => $g->nama,
+            'nip' => $g->nip ?? '-',
+            'sekolah' => $g->school->nama ?? '-'
+        ];
+    });
+@endphp
+
+<script>
+$(document).ready(function() {
+    $('.select2').select2({
+        width: '100%',
+        placeholder: '-- Cari Nama atau NIP Guru --'
+    });
+
+    let selectedGurus = @json($initialGurus);
+    let currentPage = 1;
+    const itemsPerPage = 5;
+
+    function renderTable() {
+        const hiddenContainer = $('#hidden_guru_inputs');
+        hiddenContainer.empty();
+        selectedGurus.forEach(g => {
+            hiddenContainer.append(`<input type="hidden" name="guru_ids[]" value="${g.id}">`);
+        });
+
+        const tbody = $('#selected_gurus_tbody');
+        tbody.empty();
+
+        if (selectedGurus.length === 0) {
+            tbody.append(`<tr><td colspan="5" class="text-center py-6 text-slate-400 italic">Belum ada guru yang dipilih ke dalam daftar.</td></tr>`);
+            $('#pagination_controls').html(`<span class="text-slate-400">Total: 0 guru</span>`);
+            return;
+        }
+
+        const totalPages = Math.ceil(selectedGurus.length / itemsPerPage) || 1;
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+
+        const startIdx = (currentPage - 1) * itemsPerPage;
+        const endIdx = Math.min(startIdx + itemsPerPage, selectedGurus.length);
+        const paginatedItems = selectedGurus.slice(startIdx, endIdx);
+
+        paginatedItems.forEach((g, idx) => {
+            tbody.append(`
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                    <td class="p-3 text-center font-medium text-slate-500">${startIdx + idx + 1}</td>
+                    <td class="p-3 font-bold text-indigo-950">${g.nama}</td>
+                    <td class="p-3 text-slate-600">${g.nip}</td>
+                    <td class="p-3"><span class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded text-xs font-medium">${g.sekolah}</span></td>
+                    <td class="p-3 text-center">
+                        <button type="button" onclick="removeGuru(${g.id})" class="text-rose-600 hover:bg-rose-50 p-1.5 rounded-lg transition-colors" title="Hapus">
+                            <i data-lucide="trash-2" class="w-4 h-4 inline"></i>
+                        </button>
+                    </td>
+                </tr>
+            `);
+        });
+
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+
+        let prevDisabled = currentPage === 1 ? 'disabled class="px-2.5 py-1 rounded border border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed"' : 'class="px-2.5 py-1 rounded border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-medium cursor-pointer" onclick="changePage(-1)"';
+        let nextDisabled = currentPage === totalPages ? 'disabled class="px-2.5 py-1 rounded border border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed"' : 'class="px-2.5 py-1 rounded border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-medium cursor-pointer" onclick="changePage(1)"';
+
+        $('#pagination_controls').html(`
+            <span>Menampilkan <strong class="font-bold text-slate-800">${startIdx + 1} - ${endIdx}</strong> dari <strong class="font-bold text-slate-800">${selectedGurus.length}</strong> guru</span>
+            <div class="flex items-center gap-1.5">
+                <button type="button" ${prevDisabled}>&laquo; Sebelumnya</button>
+                <span class="px-2 font-bold text-indigo-600">Hal. ${currentPage} / ${totalPages}</span>
+                <button type="button" ${nextDisabled}>Selanjutnya &raquo;</button>
+            </div>
+        `);
+    }
+
+    $('#btn_add_guru').on('click', function() {
+        const val = $('#guru_search_select').val();
+        if (!val) {
+            alert('Silakan cari dan pilih guru terlebih dahulu.');
+            return;
+        }
+
+        if (selectedGurus.some(g => g.id == val)) {
+            alert('Guru tersebut sudah ada di dalam daftar.');
+            return;
+        }
+
+        const selectedOption = $('#guru_search_select').find('option:selected');
+        selectedGurus.push({
+            id: parseInt(val),
+            nama: selectedOption.data('nama'),
+            nip: selectedOption.data('nip'),
+            sekolah: selectedOption.data('sekolah')
+        });
+
+        $('#guru_search_select').val('').trigger('change');
+        currentPage = Math.ceil(selectedGurus.length / itemsPerPage);
+        renderTable();
+    });
+
+    window.removeGuru = function(id) {
+        selectedGurus = selectedGurus.filter(g => g.id !== id);
+        renderTable();
+    };
+
+    window.changePage = function(dir) {
+        currentPage += dir;
+        renderTable();
+    };
+
+    renderTable();
+});
+</script>
 @endsection

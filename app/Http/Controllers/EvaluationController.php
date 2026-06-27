@@ -26,8 +26,10 @@ class EvaluationController extends Controller
                 ->latest()
                 ->paginate(15);
         } else if ($user->isPenilai()) {
+            $assignedGuruIds = $user->penilai->gurus()->pluck('gurus.id');
             $evaluations = Evaluation::with(['guru', 'evaluationPeriod'])
                 ->where('penilai_id', $user->penilai->id)
+                ->whereIn('guru_id', $assignedGuruIds)
                 ->latest()
                 ->paginate(15);
         } else if ($user->isGuru()) {
@@ -55,10 +57,10 @@ class EvaluationController extends Controller
         // Ambil guru dan penilai sesuai scope
         if ($user->isKepalaSekolah()) {
             $gurus = Guru::where('school_id', $user->school_id)->get();
-            $penilais = \App\Models\Penilai::where('school_id', $user->school_id)->get();
+            $penilais = \App\Models\Penilai::with('gurus')->where('school_id', $user->school_id)->get();
         } else {
             $gurus = Guru::with('school')->get();
-            $penilais = \App\Models\Penilai::with('school')->get();
+            $penilais = \App\Models\Penilai::with(['school', 'gurus'])->get();
         }
 
         return view('evaluations.create', compact('periods', 'gurus', 'penilais'));

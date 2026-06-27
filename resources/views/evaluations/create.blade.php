@@ -37,19 +37,6 @@
             </div>
             
             <div>
-                <label for="guru_id" class="block text-sm font-bold text-slate-700 mb-1">Guru Yang Akan Dinilai <span class="text-rose-500">*</span></label>
-                <select name="guru_id" id="guru_id" required class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3 border @error('guru_id') border-rose-300 ring-rose-500 @enderror">
-                    <option value="">-- Pilih Guru --</option>
-                    @foreach($gurus as $guru)
-                        <option value="{{ $guru->id }}" {{ old('guru_id') == $guru->id ? 'selected' : '' }}>
-                            {{ $guru->nama }} - {{ $guru->mata_pelajaran }} @if(auth()->user()->isAdmin()) ({{ $guru->school->nama }}) @endif
-                        </option>
-                    @endforeach
-                </select>
-                @error('guru_id') <p class="mt-1 text-sm text-rose-500">{{ $message }}</p> @enderror
-            </div>
-            
-            <div>
                 <label for="penilai_id" class="block text-sm font-bold text-slate-700 mb-1">Asesor / Penilai <span class="text-rose-500">*</span></label>
                 <select name="penilai_id" id="penilai_id" required class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3 border @error('penilai_id') border-rose-300 ring-rose-500 @enderror">
                     <option value="">-- Pilih Asesor Yang Ditugaskan --</option>
@@ -60,7 +47,21 @@
                     @endforeach
                 </select>
                 @error('penilai_id') <p class="mt-1 text-sm text-rose-500">{{ $message }}</p> @enderror
-                <p class="text-xs text-slate-500 mt-2"><i data-lucide="info" class="w-3 h-3 inline"></i> Asesor yang dipilih akan menerima tugas ini di dashboard mereka.</p>
+                <p class="text-xs text-slate-500 mt-2"><i data-lucide="info" class="w-3 h-3 inline"></i> Asesor yang dipilih akan menentukan daftar guru yang muncul di bawah.</p>
+            </div>
+
+            <div>
+                <label for="guru_id" class="block text-sm font-bold text-slate-700 mb-1">Guru Yang Akan Dinilai <span class="text-rose-500">*</span></label>
+                <select name="guru_id" id="guru_id" required class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3 border @error('guru_id') border-rose-300 ring-rose-500 @enderror">
+                    <option value="">-- Pilih Guru --</option>
+                    @foreach($gurus as $guru)
+                        <option value="{{ $guru->id }}" {{ old('guru_id') == $guru->id ? 'selected' : '' }}>
+                            {{ $guru->nama }} - {{ $guru->mata_pelajaran }} @if(auth()->user()->isAdmin()) ({{ $guru->school->nama }}) @endif
+                        </option>
+                    @endforeach
+                </select>
+                <p id="guru-helper-text" class="text-xs text-slate-500 mt-2"></p>
+                @error('guru_id') <p class="mt-1 text-sm text-rose-500">{{ $message }}</p> @enderror
             </div>
         </div>
 
@@ -72,4 +73,61 @@
         </div>
     </form>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const penilaiSelect = document.getElementById('penilai_id');
+    const guruSelect = document.getElementById('guru_id');
+    const helperText = document.getElementById('guru-helper-text');
+    
+    const penilaiGurusMap = @json($penilais->mapWithKeys(fn($p) => [$p->id => $p->gurus->pluck('id')->toArray()]));
+    
+    const allGuruOptions = Array.from(guruSelect.options).filter(opt => opt.value !== "");
+    const oldGuruId = "{{ old('guru_id') }}";
+
+    function filterGurus() {
+        const selectedPenilaiId = penilaiSelect.value;
+        const currentGuruVal = guruSelect.value;
+        
+        guruSelect.innerHTML = '<option value="">-- Pilih Guru --</option>';
+        
+        if (!selectedPenilaiId) {
+            allGuruOptions.forEach(opt => guruSelect.appendChild(opt.cloneNode(true)));
+            if (helperText) {
+                helperText.textContent = "Silakan pilih Asesor/Penilai terlebih dahulu untuk memfilter daftar guru.";
+                helperText.className = "text-xs text-amber-600 mt-2";
+            }
+            return;
+        }
+        
+        const allowedGuruIds = penilaiGurusMap[selectedPenilaiId] || [];
+        
+        if (allowedGuruIds.length === 0) {
+            if (helperText) {
+                helperText.textContent = "⚠️ Asesor ini belum ditugaskan ke guru manapun di menu Asesor. Silakan edit data Asesor terlebih dahulu.";
+                helperText.className = "text-xs text-rose-600 font-medium mt-2";
+            }
+        } else {
+            let count = 0;
+            allGuruOptions.forEach(opt => {
+                if (allowedGuruIds.includes(parseInt(opt.value))) {
+                    const clone = opt.cloneNode(true);
+                    if (clone.value === currentGuruVal || clone.value === oldGuruId) {
+                        clone.selected = true;
+                    }
+                    guruSelect.appendChild(clone);
+                    count++;
+                }
+            });
+            if (helperText) {
+                helperText.textContent = `Menampilkan ${count} guru yang ditugaskan kepada asesor ini.`;
+                helperText.className = "text-xs text-emerald-600 font-medium mt-2";
+            }
+        }
+    }
+
+    penilaiSelect.addEventListener('change', filterGurus);
+    filterGurus();
+});
+</script>
 @endsection
