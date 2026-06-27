@@ -159,8 +159,8 @@
                             <th class="px-4 py-2 border-b border-slate-200 text-center" colspan="4">Hasil Wawancara Responden</th>
                         </tr>
                         <tr>
-                            <th class="px-2 py-2 border-r border-slate-200 text-center w-48">Kepala / Wakil</th>
-                            <th class="px-2 py-2 border-r border-slate-200 text-center w-48">Kajur / Rekan</th>
+                            <th class="px-2 py-2 border-r border-slate-200 text-center w-48">Kepala Sekolah / Wakil</th>
+                            <th class="px-2 py-2 border-r border-slate-200 text-center w-48">Kajur / Kapro</th>
                             <th class="px-2 py-2 border-r border-slate-200 text-center w-48">Guru</th>
                             <th class="px-2 py-2 text-center w-48">Siswa</th>
                         </tr>

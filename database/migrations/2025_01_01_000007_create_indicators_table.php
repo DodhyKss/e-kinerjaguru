@@ -15,6 +15,7 @@ return new class extends Migration
             $table->string('nama');
             $table->text('deskripsi');
             $table->integer('urutan');
+            $table->integer('urutan_keseluruhan')->nullable();
             $table->boolean('has_observasi')->default(true);
             $table->boolean('has_telaah_dokumen')->default(true);
             $table->boolean('has_wawancara')->default(true);

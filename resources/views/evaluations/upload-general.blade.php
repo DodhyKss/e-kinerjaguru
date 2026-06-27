@@ -57,8 +57,8 @@
                     @if($ind->documentReviewAspects->count() > 0)
                     <div class="bg-slate-50 border border-slate-200 rounded-xl p-5">
                         <div class="flex items-center gap-2 mb-3">
+                            <h4 class="text-sm font-bold text-slate-900">{{ $ind->urutan_keseluruhan }}. {{ $ind->nama }}</h4>
                             <span class="inline-flex px-2 py-0.5 rounded text-xs font-bold bg-indigo-100 text-indigo-700 border border-indigo-200">{{ $ind->kode }}</span>
-                            <h4 class="text-sm font-bold text-slate-900">{{ $ind->nama }}</h4>
                         </div>
                         
                         <div class="space-y-3 pl-2">

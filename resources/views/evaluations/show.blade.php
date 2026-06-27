@@ -141,7 +141,7 @@
     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center gap-3">
             <div class="h-8 w-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm">
-                {{ $dim->urutan }}
+                {{ $dim->urutan_romawi ?? $dim->urutan }}
             </div>
             <div>
                 <h3 class="text-base font-bold text-slate-900">{{ $dim->nama }}</h3>
@@ -159,8 +159,8 @@
                 <div class="flex flex-col md:flex-row gap-6">
                     <div class="flex-1">
                         <div class="flex items-center gap-2 mb-2">
+                            <h4 class="text-sm font-bold text-slate-900">{{ $ind->urutan_keseluruhan }}. {{ $ind->nama }}</h4>
                             <span class="inline-flex px-2 py-0.5 rounded text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200">{{ $ind->kode }}</span>
-                            <h4 class="text-sm font-bold text-slate-900">{{ $ind->nama }}</h4>
                         </div>
                         <p class="text-sm text-slate-600 leading-relaxed">{{ $ind->deskripsi }}</p>
                         

@@ -18,7 +18,7 @@ class IndicatorController extends Controller
         }
 
         $dimensions = Dimension::orderBy('urutan')->get();
-        $indicators = Indicator::with('dimension')->orderBy('kode')->paginate(20);
+        $indicators = Indicator::with('dimension')->orderBy('urutan_keseluruhan')->paginate(20);
         
         return view('indicators.index', compact('indicators', 'dimensions'));
     }
@@ -37,7 +37,9 @@ class IndicatorController extends Controller
             $nextUrutanByDimension[$dim->id] = $maxUrutan ? $maxUrutan + 1 : 1;
         }
         
-        return view('indicators.create', compact('dimensions', 'nextUrutanByDimension'));
+        $nextUrutanKeseluruhan = Indicator::max('urutan_keseluruhan') ? Indicator::max('urutan_keseluruhan') + 1 : 1;
+        
+        return view('indicators.create', compact('dimensions', 'nextUrutanByDimension', 'nextUrutanKeseluruhan'));
     }
 
     public function store(Request $request)
@@ -59,6 +61,7 @@ class IndicatorController extends Controller
                     return $query->where('dimension_id', $request->dimension_id);
                 })
             ],
+            'urutan_keseluruhan' => 'required|integer|min:1|unique:indicators,urutan_keseluruhan',
             'has_observasi' => 'boolean',
             'has_telaah_dokumen' => 'boolean',
             'has_wawancara' => 'boolean',
@@ -124,6 +127,7 @@ class IndicatorController extends Controller
                     return $query->where('dimension_id', $request->dimension_id);
                 })->ignore($indicator->id)
             ],
+            'urutan_keseluruhan' => 'required|integer|min:1|unique:indicators,urutan_keseluruhan,' . $indicator->id,
         ]);
 
         $validated['has_observasi'] = $request->has('has_observasi');

@@ -14,6 +14,7 @@ return new class extends Migration
             $table->string('nama');
             $table->text('deskripsi')->nullable();
             $table->integer('urutan');
+            $table->string('urutan_romawi', 10)->nullable();
             $table->timestamps();
         });
     }

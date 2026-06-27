@@ -90,7 +90,7 @@ class GraphicalReportController extends Controller
                         $eq->whereHas('guru', fn($g) => $g->where('school_id', $schoolId));
                     }
                 });
-            }])->orderBy('urutan')->get();
+            }])->orderBy('urutan_keseluruhan')->get();
 
             foreach ($indicators as $ind) {
                 $indicatorLabels[] = $ind->kode; 

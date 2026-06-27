@@ -379,7 +379,7 @@ class EvaluationController extends Controller
             ->with(['documentReviewAspects'])
             ->join('dimensions', 'indicators.dimension_id', '=', 'dimensions.id')
             ->orderBy('dimensions.urutan')
-            ->orderBy('indicators.urutan')
+            ->orderBy('indicators.urutan_keseluruhan')
             ->select('indicators.*')
             ->get();
 

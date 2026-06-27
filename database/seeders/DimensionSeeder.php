@@ -15,24 +15,21 @@ class DimensionSeeder extends Seeder
                 'nama' => 'Mutu Guru',
                 'deskripsi' => 'Dimensi yang menilai kualitas guru dalam perencanaan pembelajaran, pengembangan diri, dan kompetensi profesional.',
                 'urutan' => 1,
+                'urutan_romawi' => 'I',
             ],
             [
                 'kode' => 'PROSES_PEMBELAJARAN',
                 'nama' => 'Proses Pembelajaran',
                 'deskripsi' => 'Dimensi yang menilai kualitas pelaksanaan pembelajaran, penilaian, dan pengelolaan kelas.',
                 'urutan' => 2,
+                'urutan_romawi' => 'II',
             ],
             [
-                'kode' => 'FAKTOR_INTERNAL',
-                'nama' => 'Influencing Factors - Faktor Internal',
-                'deskripsi' => 'Faktor internal yang mempengaruhi kinerja guru: komitmen, motivasi, efikasi diri, kesehatan psikologis, dan resiliensi.',
+                'kode' => 'INFLUENCING_FACTORS',
+                'nama' => 'Influencing Factors',
+                'deskripsi' => 'Faktor internal dan eksternal yang mempengaruhi kinerja guru: komitmen, motivasi, efikasi diri, kesehatan psikologis, resiliensi, kepemimpinan, iklim sekolah, sarana prasarana, kolaborasi DUDI, dan sistem penghargaan.',
                 'urutan' => 3,
-            ],
-            [
-                'kode' => 'FAKTOR_EKSTERNAL',
-                'nama' => 'Influencing Factors - Faktor Eksternal',
-                'deskripsi' => 'Faktor eksternal yang mempengaruhi kinerja guru: kepemimpinan, iklim sekolah, sarana prasarana, kolaborasi DUDI, dan sistem penghargaan.',
-                'urutan' => 4,
+                'urutan_romawi' => 'III',
             ],
         ];
 

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Dimension extends Model
 {
-    protected $fillable = ['kode', 'nama', 'deskripsi', 'urutan'];
+    protected $fillable = ['kode', 'nama', 'deskripsi', 'urutan', 'urutan_romawi'];
 
     public function indicators(): HasMany
     {

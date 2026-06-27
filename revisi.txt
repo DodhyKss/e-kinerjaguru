@@ -1,3 +1,6 @@
-1. Revisi E-Kinerja
-- Buat agar di Upload Document General agar urutan Indikator sama dengan di penilaian
-- di Informasi Penilaian Pangkat/Golongan dinaikkan di bawah NIP dan Penilai/Asesor tambahkan Golongan/Pangkat juga
+# Revisi
+1. saya ingin pada saat penilaian di tab wawancara assessment_aspects bisa di custom siapa saja yang di wawancarai bisa semuanya atau hanya beberapa atau hanya 1. Misal di wawancara aspect 1 saya hanya ingin wawancara guru dan siswa tapi di aspects dua saya hanya ingin guru saja jadi bisa di custom.
+
+# Bug
+1. di menu penilaian pada tab wawancara ketika di edit datanya tidak berubah, perbaiki!
+

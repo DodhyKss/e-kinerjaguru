@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Indicator extends Model
 {
     protected $fillable = [
-        'dimension_id', 'kode', 'nama', 'deskripsi', 'urutan',
+        'dimension_id', 'kode', 'nama', 'deskripsi', 'urutan', 'urutan_keseluruhan',
         'has_observasi', 'has_telaah_dokumen', 'has_wawancara',
     ];
 

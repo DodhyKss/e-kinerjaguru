@@ -15,6 +15,7 @@
             <table class="w-full text-sm text-left">
                 <thead class="text-xs text-slate-500 uppercase bg-slate-100/50 border-b border-slate-200">
                     <tr>
+                        <th class="px-6 py-3 w-16">No.</th>
                         <th class="px-6 py-3">Kode</th>
                         <th class="px-6 py-3">Dimensi & Nama Indikator</th>
                         <th class="px-6 py-3">Metode Penilaian</th>
@@ -24,11 +25,14 @@
                 <tbody>
                     @forelse($indicators as $indicator)
                     <tr class="border-b border-slate-100 hover:bg-slate-50">
+                        <td class="px-6 py-4 font-bold text-slate-600">
+                            {{ $indicator->urutan_keseluruhan }}
+                        </td>
                         <td class="px-6 py-4">
                             <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">{{ $indicator->kode }}</span>
                         </td>
                         <td class="px-6 py-4">
-                            <div class="text-xs text-indigo-600 font-semibold mb-1">{{ $indicator->dimension->nama }}</div>
+                            <div class="text-xs text-indigo-600 font-semibold mb-1">{{ $indicator->dimension->urutan_romawi ?? $indicator->dimension->urutan }}. {{ $indicator->dimension->nama }}</div>
                             <div class="font-bold text-slate-900">{{ $indicator->nama }}</div>
                         </td>
                         <td class="px-6 py-4">
@@ -58,7 +62,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="4" class="px-6 py-8 text-center text-slate-500">
+                        <td colspan="5" class="px-6 py-8 text-center text-slate-500">
                             Belum ada data indikator.
                         </td>
                     </tr>

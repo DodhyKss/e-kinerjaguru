@@ -233,7 +233,7 @@
                         $result = $resultsMap->get($ind->id);
                     @endphp
                     <tr>
-                        <td style="text-align: center;">{{ $ind->kode ?? ($index + 1) }}</td>
+                        <td style="text-align: center;">{{ $ind->urutan_keseluruhan }} ({{ $ind->kode }})</td>
                         <td style="text-align: center;">{{ $result && $result->status == 'selesai' ? $result->level_capaian : '-' }}</td>
                         @if($index == 0)
                         <td rowspan="{{ $totalIndicators }}" style="vertical-align: top;">
@@ -290,14 +290,14 @@
             <tbody>
                 @foreach($dimensions as $dim)
                     <tr>
-                        <td colspan="4" style="background-color: #f9f9f9; font-weight: bold;">{{ $dim->nama }}</td>
+                        <td colspan="4" style="background-color: #f9f9f9; font-weight: bold;">{{ $dim->urutan_romawi ?? $dim->urutan }}. {{ $dim->nama }}</td>
                     </tr>
                     @foreach($dim->indicators as $ind)
                         @php
                             $result = $resultsMap->get($ind->id);
                         @endphp
                         <tr>
-                            <td style="text-align: center;">{{ $ind->kode ?? $loop->iteration }}</td>
+                            <td style="text-align: center;">{{ $ind->urutan_keseluruhan }} ({{ $ind->kode }})</td>
                             <td>{{ $ind->nama }}</td>
                             <td>
                                 <b>Deskripsi:</b><br>

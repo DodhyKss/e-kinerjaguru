@@ -16,6 +16,16 @@ class IndicatorSeeder extends Seeder
         $this->seedProsePembelajaran();
         $this->seedFaktorInternal();
         $this->seedFaktorEksternal();
+
+        $allIndicators = Indicator::join('dimensions', 'indicators.dimension_id', '=', 'dimensions.id')
+            ->orderBy('dimensions.urutan')
+            ->orderBy('indicators.urutan')
+            ->select('indicators.*')
+            ->get();
+
+        foreach ($allIndicators as $index => $indicator) {
+            Indicator::where('id', $indicator->id)->update(['urutan_keseluruhan' => $index + 1]);
+        }
     }
 
     private function seedMutuGuru(): void
@@ -586,7 +596,7 @@ class IndicatorSeeder extends Seeder
 
     private function seedFaktorInternal(): void
     {
-        $dim = Dimension::where('kode', 'FAKTOR_INTERNAL')->first();
+        $dim = Dimension::where('kode', 'INFLUENCING_FACTORS')->first();
 
         $indicators = [
             ['kode' => 'FI01', 'nama' => 'Komitmen Profesional', 'deskripsi' => 'Tingkat kesungguhan, konsistensi, dan tanggung jawab guru SMK dalam menjalankan tugas dan peran profesinya.', 'urutan' => 1,
@@ -759,10 +769,10 @@ class IndicatorSeeder extends Seeder
 
     private function seedFaktorEksternal(): void
     {
-        $dim = Dimension::where('kode', 'FAKTOR_EKSTERNAL')->first();
+        $dim = Dimension::where('kode', 'INFLUENCING_FACTORS')->first();
 
         $indicators = [
-            ['kode' => 'FE01', 'nama' => 'Kepemimpinan Kepala Sekolah', 'deskripsi' => 'Kemampuan kepala sekolah dalam mengarahkan, membina, memfasilitasi, dan memotivasi guru untuk meningkatkan kinerja profesional.', 'urutan' => 1,
+            ['kode' => 'FE01', 'nama' => 'Kepemimpinan Kepala Sekolah', 'deskripsi' => 'Kemampuan kepala sekolah dalam mengarahkan, membina, memfasilitasi, dan memotivasi guru untuk meningkatkan kinerja profesional.', 'urutan' => 6,
                 'levels' => [
                     4 => 'Kepemimpinan menunjukkan arah visi yang jelas, inspiratif, dan berorientasi mutu. Supervisi akademik berkualitas. Dampak: kinerja guru tinggi dan inovatif.',
                     3 => 'Kepemimpinan berjalan efektif dan mendukung pelaksanaan tugas guru. Supervisi dan pembinaan rutin.',
@@ -793,7 +803,7 @@ class IndicatorSeeder extends Seeder
                     ],
                 ],
             ],
-            ['kode' => 'FE02', 'nama' => 'Lingkungan/Iklim Sekolah', 'deskripsi' => 'Kondisi sosial, emosional, dan profesional di lingkungan sekolah yang mencerminkan kualitas hubungan antarwarga sekolah, budaya kerja, komunikasi, kenyamanan, keamanan, serta dukungan terhadap pelaksanaan tugas guru.', 'urutan' => 2,
+            ['kode' => 'FE02', 'nama' => 'Lingkungan/Iklim Sekolah', 'deskripsi' => 'Kondisi sosial, emosional, dan profesional di lingkungan sekolah yang mencerminkan kualitas hubungan antarwarga sekolah, budaya kerja, komunikasi, kenyamanan, keamanan, serta dukungan terhadap pelaksanaan tugas guru.', 'urutan' => 7,
                 'levels' => [
                     4 => 'Lingkungan/iklim sekolah sangat kondusif, kolaboratif, aman, dan berorientasi mutu. Guru merasa dihargai, didukung, dan termotivasi untuk berinovasi.',
                     3 => 'Lingkungan/iklim sekolah kondusif dan mendukung pelaksanaan tugas guru.',
@@ -824,7 +834,7 @@ class IndicatorSeeder extends Seeder
                     ],
                 ],
             ],
-            ['kode' => 'FE03', 'nama' => 'Sarana dan Prasarana (Fisik & Digital)', 'deskripsi' => 'Seluruh fasilitas fisik dan non-fisik yang tersedia di sekolah untuk mendukung proses pembelajaran.', 'urutan' => 3,
+            ['kode' => 'FE03', 'nama' => 'Sarana dan Prasarana (Fisik & Digital)', 'deskripsi' => 'Seluruh fasilitas fisik dan non-fisik yang tersedia di sekolah untuk mendukung proses pembelajaran.', 'urutan' => 8,
                 'levels' => [
                     4 => 'Sarana dan prasarana sangat lengkap, modern, relevan dengan standar DUDI, dan terkelola dengan baik. Guru mampu memanfaatkan secara maksimal.',
                     3 => 'Sarana dan prasarana cukup lengkap dan layak digunakan untuk mendukung pembelajaran.',
@@ -855,7 +865,7 @@ class IndicatorSeeder extends Seeder
                     ],
                 ],
             ],
-            ['kode' => 'FE04', 'nama' => 'Kolaborasi dengan DUDI', 'deskripsi' => 'Bentuk kerja sama antara sekolah (SMK) dengan dunia usaha dan industri dalam rangka meningkatkan kualitas pembelajaran.', 'urutan' => 4,
+            ['kode' => 'FE04', 'nama' => 'Kolaborasi dengan DUDI', 'deskripsi' => 'Bentuk kerja sama antara sekolah (SMK) dengan dunia usaha dan industri dalam rangka meningkatkan kualitas pembelajaran.', 'urutan' => 9,
                 'levels' => [
                     4 => 'Kolaborasi dengan DUDI sangat kuat, strategis, dan berkelanjutan, serta terintegrasi dalam seluruh proses pembelajaran SMK.',
                     3 => 'Kolaborasi dengan DUDI berjalan dengan baik, ditandai adanya program PKL, kunjungan industri, atau kerja sama.',
@@ -886,7 +896,7 @@ class IndicatorSeeder extends Seeder
                     ],
                 ],
             ],
-            ['kode' => 'FE05', 'nama' => 'Sistem Penghargaan dan Jalur Karier', 'deskripsi' => 'Mekanisme yang diterapkan oleh sekolah dalam memberikan imbalan, pengakuan, dan peluang pengembangan karir kepada guru.', 'urutan' => 5,
+            ['kode' => 'FE05', 'nama' => 'Sistem Penghargaan dan Jalur Karier', 'deskripsi' => 'Mekanisme yang diterapkan oleh sekolah dalam memberikan imbalan, pengakuan, dan peluang pengembangan karir kepada guru.', 'urutan' => 10,
                 'levels' => [
                     4 => 'Sistem penghargaan, kompensasi, dan jalur karir sangat jelas, adil, transparan, dan berbasis kinerja. Guru merasa dihargai dan termotivasi tinggi.',
                     3 => 'Sistem penghargaan dan kompensasi tersedia dan berjalan cukup baik dengan mekanisme yang relatif jelas.',
