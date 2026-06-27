@@ -9,10 +9,24 @@ use Illuminate\Http\Request;
 
 class SchoolController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $schools = School::latest()->paginate(10);
-        return view('schools.index', compact('schools'));
+        $query = School::with(['provinsi', 'kabupaten'])->latest();
+
+        if ($request->filled('kabupaten_id')) {
+            $query->where('kabupaten_id', $request->kabupaten_id);
+        }
+
+        if ($request->filled('school_id')) {
+            $query->where('id', $request->school_id);
+        }
+
+        $schools = $query->paginate(10)->withQueryString();
+        
+        $kabupatens = Kabupaten::orderBy('nama')->get();
+        $allSchools = School::orderBy('nama')->get();
+
+        return view('schools.index', compact('schools', 'kabupatens', 'allSchools'));
     }
 
     public function create()

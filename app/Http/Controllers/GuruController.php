@@ -16,18 +16,32 @@ use Illuminate\Support\Facades\Hash;
 
 class GuruController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
-        $query = Guru::with('school')->latest();
+        $query = Guru::with(['school', 'mataPelajaran'])->latest();
 
-        // Jika Kepala Sekolah, hanya lihat guru di sekolahnya
         if ($user->isKepalaSekolah()) {
             $query->where('school_id', $user->school_id);
+        } elseif ($request->filled('school_id')) {
+            $query->where('school_id', $request->school_id);
         }
 
-        $gurus = $query->paginate(10);
-        return view('gurus.index', compact('gurus'));
+        if ($request->filled('mata_pelajaran_id')) {
+            $query->where('mata_pelajaran_id', $request->mata_pelajaran_id);
+        }
+
+        if ($request->filled('guru_id')) {
+            $query->where('id', $request->guru_id);
+        }
+
+        $gurus = $query->paginate(10)->withQueryString();
+        
+        $schools = $user->isAdmin() ? School::where('status', 'aktif')->orderBy('nama')->get() : collect();
+        $mataPelajarans = MataPelajaran::orderBy('nama')->get();
+        $allGurus = ($user->isKepalaSekolah() ? Guru::where('school_id', $user->school_id) : Guru::query())->orderBy('nama')->get();
+
+        return view('gurus.index', compact('gurus', 'schools', 'mataPelajarans', 'allGurus'));
     }
 
     public function create()

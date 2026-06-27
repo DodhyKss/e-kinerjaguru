@@ -12,20 +12,31 @@ use Illuminate\Support\Facades\Hash;
 
 class PenilaiController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         if (!Auth::user()->isAdmin() && !Auth::user()->isKepalaSekolah()) {
             abort(403);
         }
         
+        $user = Auth::user();
         $query = Penilai::with(['school', 'gurus'])->latest();
         
-        if (Auth::user()->isKepalaSekolah()) {
-            $query->where('school_id', Auth::user()->school_id);
+        if ($user->isKepalaSekolah()) {
+            $query->where('school_id', $user->school_id);
+        } elseif ($request->filled('school_id')) {
+            $query->where('school_id', $request->school_id);
         }
 
-        $penilais = $query->paginate(10);
-        return view('penilais.index', compact('penilais'));
+        if ($request->filled('penilai_id')) {
+            $query->where('id', $request->penilai_id);
+        }
+
+        $penilais = $query->paginate(10)->withQueryString();
+        
+        $schools = $user->isAdmin() ? School::where('status', 'aktif')->orderBy('nama')->get() : collect();
+        $allPenilais = ($user->isKepalaSekolah() ? Penilai::where('school_id', $user->school_id) : Penilai::query())->orderBy('nama')->get();
+
+        return view('penilais.index', compact('penilais', 'schools', 'allPenilais'));
     }
 
     public function create()

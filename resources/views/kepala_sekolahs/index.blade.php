@@ -12,6 +12,39 @@
     </a>
 </div>
 
+<div class="bg-white rounded-2xl shadow-sm border border-slate-200 mb-6 p-6">
+    <form method="GET" action="{{ route('kepala-sekolahs.index') }}" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+        <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Filter Sekolah</label>
+            <select name="school_id" class="block w-full rounded-xl border-slate-300 shadow-sm sm:text-sm select2">
+                <option value="">-- Semua Sekolah --</option>
+                @foreach($schools as $sch)
+                    <option value="{{ $sch->id }}" {{ request('school_id') == $sch->id ? 'selected' : '' }}>{{ $sch->nama }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Cari Spesifik Kepala Sekolah</label>
+            <select name="user_id" class="block w-full rounded-xl border-slate-300 shadow-sm sm:text-sm select2">
+                <option value="">-- Pilih Nama Kepala Sekolah --</option>
+                @foreach($allKepseks as $ak)
+                    <option value="{{ $ak->id }}" {{ request('user_id') == $ak->id ? 'selected' : '' }}>{{ $ak->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="flex items-center gap-2">
+            <button type="submit" class="bg-indigo-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-indigo-700 transition-colors flex items-center shadow-sm w-full justify-center">
+                <i data-lucide="filter" class="w-4 h-4 mr-1.5"></i> Filter
+            </button>
+            @if(request()->hasAny(['school_id', 'user_id']) && (request('school_id') || request('user_id')))
+            <a href="{{ route('kepala-sekolahs.index') }}" class="bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-slate-300 transition-colors flex items-center justify-center shrink-0" title="Reset">
+                <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+            </a>
+            @endif
+        </div>
+    </form>
+</div>
+
 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
     <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
@@ -35,33 +68,29 @@
                                 {{ $kepsek->initials }}
                             </div>
                             <div>
-                                <p class="text-sm font-bold text-slate-900">{{ $kepsek->name }}</p>
-                                <p class="text-xs text-slate-500">NIP: {{ $kepsek->kepalaSekolah->nip ?? '-' }}</p>
+                                <div class="font-bold text-slate-800">{{ $kepsek->name }}</div>
+                                <div class="text-xs text-slate-500">{{ $kepsek->kepalaSekolah->nip ?? '-' }}</div>
                             </div>
                         </div>
                     </td>
-                    <td class="py-4 px-6 text-sm text-slate-600">
-                        {{ $kepsek->kepalaSekolah->pangkatGolongan->nama ?? '-' }}
-                    </td>
-                    <td class="py-4 px-6 text-sm text-slate-600">
-                        {{ $kepsek->school->nama ?? '-' }}
-                    </td>
+                    <td class="py-4 px-6 text-sm text-slate-600">{{ $kepsek->kepalaSekolah->pangkatGolongan->nama ?? '-' }}</td>
+                    <td class="py-4 px-6 text-sm font-medium text-indigo-600">{{ $kepsek->school->nama ?? '-' }}</td>
                     <td class="py-4 px-6">
-                        @if($kepsek->is_active)
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-200">Aktif</span>
+                        @if($kepsek->status === 'aktif')
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">Aktif</span>
                         @else
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-rose-100 text-rose-800 border border-rose-200">Nonaktif</span>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800">Nonaktif</span>
                         @endif
                     </td>
                     <td class="py-4 px-6 text-right">
                         <div class="flex items-center justify-end gap-2">
-                            <a href="{{ route('kepala-sekolahs.edit', $kepsek) }}" class="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Edit">
+                            <a href="{{ route('kepala-sekolahs.edit', $kepsek) }}" class="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
                                 <i data-lucide="edit" class="w-4 h-4"></i>
                             </a>
-                            <form action="{{ route('kepala-sekolahs.destroy', $kepsek) }}" method="POST" class="inline-block" onsubmit="return confirm('Apakah Anda yakin ingin menghapus Kepala Sekolah ini?');">
+                            <form action="{{ route('kepala-sekolahs.destroy', $kepsek) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data Kepala Sekolah ini?');">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" title="Hapus">
+                                <button type="submit" class="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors">
                                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                                 </button>
                             </form>
@@ -83,4 +112,12 @@
     </div>
     @endif
 </div>
+
+<script>
+    $(document).ready(function() {
+        $('.select2').select2({
+            width: '100%'
+        });
+    });
+</script>
 @endsection

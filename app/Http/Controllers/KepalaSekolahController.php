@@ -13,10 +13,24 @@ use Illuminate\Support\Facades\DB;
 
 class KepalaSekolahController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $kepalaSekolahs = User::with(['school', 'kepalaSekolah.pangkatGolongan'])->where('role', 'kepala_sekolah')->latest()->paginate(10);
-        return view('kepala_sekolahs.index', compact('kepalaSekolahs'));
+        $query = User::with(['school', 'kepalaSekolah.pangkatGolongan'])->where('role', 'kepala_sekolah')->latest();
+
+        if ($request->filled('school_id')) {
+            $query->where('school_id', $request->school_id);
+        }
+
+        if ($request->filled('user_id')) {
+            $query->where('id', $request->user_id);
+        }
+
+        $kepalaSekolahs = $query->paginate(10)->withQueryString();
+        
+        $schools = School::orderBy('nama')->get();
+        $allKepseks = User::where('role', 'kepala_sekolah')->orderBy('name')->get();
+
+        return view('kepala_sekolahs.index', compact('kepalaSekolahs', 'schools', 'allKepseks'));
     }
 
     public function create()
