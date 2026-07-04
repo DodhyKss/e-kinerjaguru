@@ -135,7 +135,7 @@
                     </a>
 
                     <div class="pt-4 pb-2">
-                        <p class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Instrumen</p>
+                        <p class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Instrumen & Panduan</p>
                     </div>
 
                     <a href="{{ route('indicators.index') }}"
@@ -143,6 +143,13 @@
                         <i data-lucide="book-open-check"
                             class="mr-3 h-5 w-5 {{ request()->routeIs('indicators.*') ? 'text-indigo-400' : 'text-slate-400 group-hover:text-indigo-400' }}"></i>
                         Master Instrumen
+                    </a>
+
+                    <a href="{{ route('guide-books.index') }}"
+                        class="{{ request()->routeIs('guide-books.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }} group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200">
+                        <i data-lucide="file-text"
+                            class="mr-3 h-5 w-5 {{ request()->routeIs('guide-books.*') ? 'text-indigo-400' : 'text-slate-400 group-hover:text-indigo-400' }}"></i>
+                        Buku Panduan (PDF)
                     </a>
                 @endif
 

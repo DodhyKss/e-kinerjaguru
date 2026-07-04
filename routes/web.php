@@ -10,6 +10,7 @@ use App\Http\Controllers\IndicatorController;
 use App\Http\Controllers\AchievementLevelController;
 use App\Http\Controllers\AssessmentAspectController;
 use App\Http\Controllers\EvaluationController;
+use App\Http\Controllers\GuideBookController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -19,6 +20,7 @@ Route::get('/', function () {
 Route::get('/panduan', function () {
     return view('panduan');
 })->name('panduan');
+Route::get('/panduan/download', [GuideBookController::class, 'downloadActive'])->name('panduan.download');
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
@@ -47,6 +49,11 @@ Route::middleware('auth')->group(function () {
         Route::resource('kompetensi-keahlians', \App\Http\Controllers\KompetensiKeahlianController::class)->except(['show']);
         Route::resource('pangkat-golongans', \App\Http\Controllers\PangkatGolonganController::class)->except(['show']);
         Route::resource('jabatan-fungsionals', \App\Http\Controllers\JabatanFungsionalController::class)->except(['show']);
+
+        // Master Buku Panduan
+        Route::resource('guide-books', GuideBookController::class)->except(['show', 'edit', 'update']);
+        Route::patch('guide-books/{guide_book}/toggle-active', [GuideBookController::class, 'toggleActive'])->name('guide-books.toggle-active');
+        Route::get('guide-books/{guide_book}/download', [GuideBookController::class, 'download'])->name('guide-books.download');
     });
 
     // API Routes for Dropdown

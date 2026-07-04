@@ -16,6 +16,13 @@
             </a>
         </div>
 
+        @if (session('error'))
+            <div class="mb-6 bg-rose-50 text-rose-600 px-4 py-3 rounded-xl text-sm border border-rose-100 flex items-start">
+                <i data-lucide="alert-circle" class="w-5 h-5 mr-3 shrink-0 mt-0.5"></i>
+                <span>{{ session('error') }}</span>
+            </div>
+        @endif
+
         <div class="bg-white rounded-3xl shadow-xl shadow-indigo-100/50 overflow-hidden border border-slate-100">
             <!-- Hero Section -->
             <div class="bg-gradient-to-br from-indigo-900 to-slate-900 px-8 py-16 text-center text-white relative overflow-hidden">
@@ -26,6 +33,12 @@
                     </div>
                     <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">Buku Panduan Lengkap</h1>
                     <p class="text-lg text-indigo-100 max-w-2xl mx-auto">Sistem Informasi Pengelolaan & Evaluasi Kinerja Guru (E-Kinerja) SMK. Pelajari alur kerja dan fungsi detail setiap menu di dalam aplikasi.</p>
+                    
+                    <div class="mt-8 flex justify-center">
+                        <a href="{{ route('panduan.download') }}" class="inline-flex items-center justify-center px-6 py-3.5 rounded-2xl bg-white text-indigo-900 font-bold text-sm hover:bg-indigo-50 transition-all shadow-lg shadow-black/20 hover:scale-105 duration-200">
+                            <i data-lucide="download" class="w-5 h-5 mr-2 text-indigo-600"></i> Download Buku Panduan (PDF)
+                        </a>
+                    </div>
                 </div>
             </div>
 

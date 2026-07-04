@@ -40,7 +40,7 @@
                     <span class="text-indigo-300">Tingkatkan Kinerja.</span>
                 </h1>
                 <p class="text-lg text-indigo-100/80 mb-10 leading-relaxed font-light">
-                    Sistem Evaluasi Kinerja Guru (E-Kinerja) SMK. Sebuah platform modern terintegrasi untuk pengelolaan, pemantauan, dan penilaian akademik secara komprehensif dan transparan.
+                    Sistem Evaluasi Kinerja Guru (E-Kinerja) SMK. Sebuah platform modern terintegrasi untuk pengelolaan, pemantauan, dan penilaian secara komprehensif dan transparan.
                 </p>
                 
                 <div class="flex items-center gap-4 text-sm font-medium text-indigo-200">
@@ -79,6 +79,13 @@
                             <div class="mb-6 bg-rose-50 text-rose-600 px-4 py-3 rounded-xl text-sm border border-rose-100 flex items-start animate-fade-in">
                                 <i data-lucide="alert-circle" class="w-5 h-5 mr-3 shrink-0 mt-0.5"></i>
                                 <span>{{ $errors->first() }}</span>
+                            </div>
+                        @endif
+
+                        @if (session('error'))
+                            <div class="mb-6 bg-rose-50 text-rose-600 px-4 py-3 rounded-xl text-sm border border-rose-100 flex items-start animate-fade-in">
+                                <i data-lucide="alert-circle" class="w-5 h-5 mr-3 shrink-0 mt-0.5"></i>
+                                <span>{{ session('error') }}</span>
                             </div>
                         @endif
 
@@ -122,9 +129,12 @@
                     </div>
 
                     <!-- Footer Info (Demo Accounts & Guide) -->
-                    <div class="bg-slate-50/80 px-8 py-5 border-t border-slate-100 backdrop-blur-sm flex flex-col items-center">
-                        <a href="{{ route('panduan') }}" class="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-white border border-indigo-100 text-sm font-medium text-indigo-600 hover:bg-indigo-50 hover:border-indigo-200 transition-all shadow-sm w-full">
-                            <i data-lucide="book-open" class="w-4 h-4 mr-2"></i> Pelajari Cara Menggunakan E-Kinerja
+                    <div class="bg-slate-50/80 px-6 py-5 border-t border-slate-100 backdrop-blur-sm flex flex-col sm:flex-row gap-3 items-center">
+                        <a href="{{ route('panduan') }}" class="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-white border border-indigo-100 text-sm font-semibold text-indigo-600 hover:bg-indigo-50 hover:border-indigo-200 transition-all shadow-sm w-full sm:w-1/2">
+                            <i data-lucide="book-open" class="w-4 h-4 mr-2 text-indigo-500"></i> Panduan Online
+                        </a>
+                        <a href="{{ route('panduan.download') }}" class="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-indigo-600 border border-transparent text-sm font-semibold text-white hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-200 w-full sm:w-1/2">
+                            <i data-lucide="download" class="w-4 h-4 mr-2"></i> Download PDF
                         </a>
                     </div>
                 </div>
