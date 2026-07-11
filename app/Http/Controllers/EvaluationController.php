@@ -51,16 +51,41 @@ class EvaluationController extends Controller
             abort(403);
         }
 
+        // Pastikan setiap User dengan role kepala_sekolah memiliki record di tabel penilais
+        $kepalaSekolahUsers = \App\Models\User::with('kepalaSekolah')->where('role', 'kepala_sekolah')->get();
+        foreach ($kepalaSekolahUsers as $kepsekUser) {
+            \App\Models\Penilai::updateOrCreate(
+                ['user_id' => $kepsekUser->id],
+                [
+                    'school_id' => $kepsekUser->school_id,
+                    'nama' => $kepsekUser->name,
+                    'nip' => $kepsekUser->kepalaSekolah ? $kepsekUser->kepalaSekolah->nip : null,
+                    'pangkat_golongan_id' => $kepsekUser->kepalaSekolah ? $kepsekUser->kepalaSekolah->pangkat_golongan_id : null,
+                    'jabatan' => 'Kepala Sekolah',
+                    'instansi' => $kepsekUser->school ? $kepsekUser->school->nama : null,
+                    'no_telepon' => $kepsekUser->kepalaSekolah ? $kepsekUser->kepalaSekolah->no_telepon : null,
+                    'status' => $kepsekUser->is_active ? 'aktif' : 'nonaktif',
+                ]
+            );
+        }
+
         // Ambil periode aktif
         $periods = EvaluationPeriod::where('status', 'aktif')->get();
         
-        // Ambil guru dan penilai sesuai scope
+        // Ambil guru dan penilai (termasuk Kepala Sekolah yang disinkronisasi) sesuai scope
         if ($user->isKepalaSekolah()) {
-            $gurus = Guru::where('school_id', $user->school_id)->get();
-            $penilais = \App\Models\Penilai::with('gurus')->where('school_id', $user->school_id)->get();
+            $gurus = Guru::where('school_id', $user->school_id)->orderBy('nama')->get();
+            $penilais = \App\Models\Penilai::with(['user', 'gurus', 'school'])
+                ->where('school_id', $user->school_id)
+                ->where('status', 'aktif')
+                ->orderBy('nama')
+                ->get();
         } else {
-            $gurus = Guru::with('school')->get();
-            $penilais = \App\Models\Penilai::with(['school', 'gurus'])->get();
+            $gurus = Guru::with('school')->orderBy('nama')->get();
+            $penilais = \App\Models\Penilai::with(['user', 'gurus', 'school'])
+                ->where('status', 'aktif')
+                ->orderBy('nama')
+                ->get();
         }
 
         return view('evaluations.create', compact('periods', 'gurus', 'penilais'));
@@ -73,11 +98,39 @@ class EvaluationController extends Controller
             abort(403);
         }
 
+        // Pastikan sinkronisasi terbaru sebelum validasi store
+        $kepalaSekolahUsers = \App\Models\User::with('kepalaSekolah')->where('role', 'kepala_sekolah')->get();
+        foreach ($kepalaSekolahUsers as $kepsekUser) {
+            \App\Models\Penilai::updateOrCreate(
+                ['user_id' => $kepsekUser->id],
+                [
+                    'school_id' => $kepsekUser->school_id,
+                    'nama' => $kepsekUser->name,
+                    'nip' => $kepsekUser->kepalaSekolah ? $kepsekUser->kepalaSekolah->nip : null,
+                    'pangkat_golongan_id' => $kepsekUser->kepalaSekolah ? $kepsekUser->kepalaSekolah->pangkat_golongan_id : null,
+                    'jabatan' => 'Kepala Sekolah',
+                    'instansi' => $kepsekUser->school ? $kepsekUser->school->nama : null,
+                    'no_telepon' => $kepsekUser->kepalaSekolah ? $kepsekUser->kepalaSekolah->no_telepon : null,
+                    'status' => $kepsekUser->is_active ? 'aktif' : 'nonaktif',
+                ]
+            );
+        }
+
         $validated = $request->validate([
             'evaluation_period_id' => 'required|exists:evaluation_periods,id',
             'guru_id' => 'required|exists:gurus,id',
             'penilai_id' => 'required|exists:penilais,id',
         ]);
+
+        $guru = Guru::findOrFail($validated['guru_id']);
+        $penilai = \App\Models\Penilai::findOrFail($validated['penilai_id']);
+
+        // Jika Kepala Sekolah yang membuat, pastikan guru dan penilai berasal dari sekolahnya
+        if ($user->isKepalaSekolah()) {
+            if ($guru->school_id !== $user->school_id || $penilai->school_id !== $user->school_id) {
+                abort(403, 'Anda hanya dapat menugaskan evaluasi untuk sekolah Anda sendiri.');
+            }
+        }
 
         // Cek apakah sudah ada evaluasi untuk guru ini di periode ini
         $exists = Evaluation::where('evaluation_period_id', $validated['evaluation_period_id'])

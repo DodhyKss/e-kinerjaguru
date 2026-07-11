@@ -73,6 +73,19 @@ class KepalaSekolahController extends Controller
                 'no_telepon' => $validated['no_telepon'],
             ]);
 
+            $school = School::find($validated['school_id']);
+            \App\Models\Penilai::create([
+                'user_id' => $user->id,
+                'school_id' => $validated['school_id'],
+                'nama' => $validated['name'],
+                'nip' => $validated['nip'],
+                'pangkat_golongan_id' => $validated['pangkat_golongan_id'],
+                'jabatan' => 'Kepala Sekolah',
+                'instansi' => $school ? $school->nama : null,
+                'no_telepon' => $validated['no_telepon'],
+                'status' => $validated['is_active'] ? 'aktif' : 'nonaktif',
+            ]);
+
             DB::commit();
             return redirect()->route('kepala-sekolahs.index')->with('success', 'Akun Kepala Sekolah berhasil dibuat.');
         } catch (\Exception $e) {
@@ -137,6 +150,21 @@ class KepalaSekolahController extends Controller
                 ]
             );
 
+            $school = School::find($validated['school_id']);
+            \App\Models\Penilai::updateOrCreate(
+                ['user_id' => $kepala_sekolah->id],
+                [
+                    'school_id' => $validated['school_id'],
+                    'nama' => $validated['name'],
+                    'nip' => $validated['nip'],
+                    'pangkat_golongan_id' => $validated['pangkat_golongan_id'],
+                    'jabatan' => 'Kepala Sekolah',
+                    'instansi' => $school ? $school->nama : null,
+                    'no_telepon' => $validated['no_telepon'],
+                    'status' => $validated['is_active'] ? 'aktif' : 'nonaktif',
+                ]
+            );
+
             DB::commit();
             return redirect()->route('kepala-sekolahs.index')->with('success', 'Akun Kepala Sekolah berhasil diperbarui.');
         } catch (\Exception $e) {
@@ -152,6 +180,7 @@ class KepalaSekolahController extends Controller
         }
 
         try {
+            \App\Models\Penilai::where('user_id', $kepala_sekolah->id)->delete();
             if ($kepala_sekolah->kepalaSekolah) {
                 $kepala_sekolah->kepalaSekolah()->delete();
             }

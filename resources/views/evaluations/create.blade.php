@@ -37,17 +37,30 @@
             </div>
             
             <div>
-                <label for="penilai_id" class="block text-sm font-bold text-slate-700 mb-1">Asesor / Penilai <span class="text-rose-500">*</span></label>
+                <label for="penilai_id" class="block text-sm font-bold text-slate-700 mb-1">Asesor / Evaluator <span class="text-rose-500">*</span></label>
                 <select name="penilai_id" id="penilai_id" required class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3 border @error('penilai_id') border-rose-300 ring-rose-500 @enderror">
-                    <option value="">-- Pilih Asesor Yang Ditugaskan --</option>
-                    @foreach($penilais as $penilai)
-                        <option value="{{ $penilai->id }}" {{ old('penilai_id') == $penilai->id ? 'selected' : '' }}>
-                            {{ $penilai->nama }} - {{ $penilai->jabatan }} @if(auth()->user()->isAdmin()) ({{ $penilai->school->nama }}) @endif
-                        </option>
-                    @endforeach
+                    <option value="">-- Pilih Asesor atau Kepala Sekolah --</option>
+                    @if($penilais->where('jabatan', 'Kepala Sekolah')->isNotEmpty())
+                        <optgroup label="Kepala Sekolah (Evaluator)">
+                            @foreach($penilais->where('jabatan', 'Kepala Sekolah') as $penilai)
+                                <option value="{{ $penilai->id }}" data-is-kepsek="true" {{ old('penilai_id') == $penilai->id ? 'selected' : '' }}>
+                                    [Kepala Sekolah] {{ $penilai->nama }} @if(auth()->user()->isAdmin() && $penilai->school) ({{ $penilai->school->nama }}) @endif
+                                </option>
+                            @endforeach
+                        </optgroup>
+                    @endif
+                    @if($penilais->where('jabatan', '!=', 'Kepala Sekolah')->isNotEmpty())
+                        <optgroup label="Asesor / Penilai Guru">
+                            @foreach($penilais->where('jabatan', '!=', 'Kepala Sekolah') as $penilai)
+                                <option value="{{ $penilai->id }}" data-is-kepsek="false" {{ old('penilai_id') == $penilai->id ? 'selected' : '' }}>
+                                    {{ $penilai->nama }} - {{ $penilai->jabatan }} @if(auth()->user()->isAdmin() && $penilai->school) ({{ $penilai->school->nama }}) @endif
+                                </option>
+                            @endforeach
+                        </optgroup>
+                    @endif
                 </select>
                 @error('penilai_id') <p class="mt-1 text-sm text-rose-500">{{ $message }}</p> @enderror
-                <p class="text-xs text-slate-500 mt-2"><i data-lucide="info" class="w-3 h-3 inline"></i> Asesor yang dipilih akan menentukan daftar guru yang muncul di bawah.</p>
+                <p class="text-xs text-slate-500 mt-2"><i data-lucide="info" class="w-3 h-3 inline"></i> Evaluator yang dipilih (Kepala Sekolah / Asesor) akan menentukan daftar guru yang muncul di bawah.</p>
             </div>
 
             <div>
@@ -74,13 +87,23 @@
     </form>
 </div>
 
+@php
+    $penilaiGurusMap = $penilais->mapWithKeys(function ($p) use ($gurus) {
+        if ($p->jabatan === 'Kepala Sekolah') {
+            return [$p->id => $gurus->where('school_id', $p->school_id)->pluck('id')->values()->toArray()];
+        } else {
+            return [$p->id => $p->gurus->pluck('id')->values()->toArray()];
+        }
+    });
+@endphp
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const penilaiSelect = document.getElementById('penilai_id');
     const guruSelect = document.getElementById('guru_id');
     const helperText = document.getElementById('guru-helper-text');
     
-    const penilaiGurusMap = @json($penilais->mapWithKeys(fn($p) => [$p->id => $p->gurus->pluck('id')->toArray()]));
+    const penilaiGurusMap = @json($penilaiGurusMap);
     
     const allGuruOptions = Array.from(guruSelect.options).filter(opt => opt.value !== "");
     const oldGuruId = "{{ old('guru_id') }}";
@@ -88,13 +111,15 @@ document.addEventListener('DOMContentLoaded', function() {
     function filterGurus() {
         const selectedPenilaiId = penilaiSelect.value;
         const currentGuruVal = guruSelect.value;
+        const selectedOption = penilaiSelect.options[penilaiSelect.selectedIndex];
+        const isKepsek = selectedOption && selectedOption.getAttribute('data-is-kepsek') === 'true';
         
         guruSelect.innerHTML = '<option value="">-- Pilih Guru --</option>';
         
         if (!selectedPenilaiId) {
             allGuruOptions.forEach(opt => guruSelect.appendChild(opt.cloneNode(true)));
             if (helperText) {
-                helperText.textContent = "Silakan pilih Asesor/Penilai terlebih dahulu untuk memfilter daftar guru.";
+                helperText.textContent = "Silakan pilih Asesor/Evaluator terlebih dahulu untuk memfilter daftar guru.";
                 helperText.className = "text-xs text-amber-600 mt-2";
             }
             return;
@@ -104,7 +129,11 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (allowedGuruIds.length === 0) {
             if (helperText) {
-                helperText.textContent = "⚠️ Asesor ini belum ditugaskan ke guru manapun di menu Asesor. Silakan edit data Asesor terlebih dahulu.";
+                if (isKepsek) {
+                    helperText.textContent = "⚠️ Belum ada data guru yang terdaftar di sekolah Kepala Sekolah ini.";
+                } else {
+                    helperText.textContent = "⚠️ Asesor ini belum ditugaskan ke guru manapun di menu Asesor. Silakan edit data Asesor terlebih dahulu.";
+                }
                 helperText.className = "text-xs text-rose-600 font-medium mt-2";
             }
         } else {
@@ -120,7 +149,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
             if (helperText) {
-                helperText.textContent = `Menampilkan ${count} guru yang ditugaskan kepada asesor ini.`;
+                if (isKepsek) {
+                    helperText.textContent = `Menampilkan ${count} guru yang ada di sekolah Kepala Sekolah ini.`;
+                } else {
+                    helperText.textContent = `Menampilkan ${count} guru yang ditugaskan kepada asesor ini.`;
+                }
                 helperText.className = "text-xs text-emerald-600 font-medium mt-2";
             }
         }

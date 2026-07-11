@@ -19,7 +19,7 @@ class PenilaiController extends Controller
         }
         
         $user = Auth::user();
-        $query = Penilai::with(['school', 'gurus'])->latest();
+        $query = Penilai::with(['school', 'gurus'])->where('jabatan', '!=', 'Kepala Sekolah')->latest();
         
         if ($user->isKepalaSekolah()) {
             $query->where('school_id', $user->school_id);
@@ -34,7 +34,7 @@ class PenilaiController extends Controller
         $penilais = $query->paginate(10)->withQueryString();
         
         $schools = $user->isAdmin() ? School::where('status', 'aktif')->orderBy('nama')->get() : collect();
-        $allPenilais = ($user->isKepalaSekolah() ? Penilai::where('school_id', $user->school_id) : Penilai::query())->orderBy('nama')->get();
+        $allPenilais = ($user->isKepalaSekolah() ? Penilai::where('school_id', $user->school_id) : Penilai::query())->where('jabatan', '!=', 'Kepala Sekolah')->orderBy('nama')->get();
 
         return view('penilais.index', compact('penilais', 'schools', 'allPenilais'));
     }

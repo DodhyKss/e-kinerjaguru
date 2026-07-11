@@ -14,13 +14,20 @@ class DemoSeeder extends Seeder
 {
     public function run(): void
     {
+        // 0. Create Provinsi & Kabupaten
+        $provinsi = \App\Models\Provinsi::firstOrCreate(['nama' => 'Jawa Barat']);
+        $kabupaten = \App\Models\Kabupaten::firstOrCreate([
+            'provinsi_id' => $provinsi->id,
+            'nama' => 'Kota Vokasi',
+        ]);
+
         // 1. Create School
         $school = School::create([
             'nama' => 'SMK Negeri 1 Contoh',
             'npsn' => '10203040',
             'alamat' => 'Jl. Pendidikan No. 1, Kota Vokasi',
-            'kabupaten' => 'Kota Vokasi',
-            'provinsi' => 'Jawa Barat',
+            'kabupaten_id' => $kabupaten->id,
+            'provinsi_id' => $provinsi->id,
             'telepon' => '022-1234567',
             'email' => 'info@smkn1contoh.sch.id',
             'kepala_sekolah' => 'Dr. Budi Santoso, M.Pd.',
@@ -35,12 +42,23 @@ class DemoSeeder extends Seeder
         ]);
 
         // 3. Create Kepala Sekolah User
-        User::create([
+        $kepsekUser = User::create([
             'name' => 'Dr. Budi Santoso, M.Pd.',
             'email' => 'kepsek@ekg.local',
             'password' => Hash::make('password'),
             'role' => 'kepala_sekolah',
             'school_id' => $school->id,
+        ]);
+
+        Penilai::create([
+            'user_id' => $kepsekUser->id,
+            'school_id' => $school->id,
+            'nama' => 'Dr. Budi Santoso, M.Pd.',
+            'nip' => '1234567890123456',
+            'jabatan' => 'Kepala Sekolah',
+            'instansi' => 'SMK Negeri 1 Contoh',
+            'no_telepon' => '081122334455',
+            'status' => 'aktif',
         ]);
 
         // 4. Create Penilai (Asesor)
