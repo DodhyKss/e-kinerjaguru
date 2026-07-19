@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AssessmentAspect extends Model
 {
-    protected $fillable = ['indicator_id', 'metode', 'nomor', 'aspek', 'nama_dokumen', 'target_responden'];
+    protected $fillable = ['indicator_id', 'metode', 'nomor', 'aspek', 'nama_dokumen', 'target_responden', 'jenis_dokumen_id'];
 
     protected $casts = [
         'target_responden' => 'array',
@@ -24,5 +24,10 @@ class AssessmentAspect extends Model
     public function indicator(): BelongsTo
     {
         return $this->belongsTo(Indicator::class);
+    }
+
+    public function jenisDokumen(): BelongsTo
+    {
+        return $this->belongsTo(JenisDokumen::class);
     }
 }

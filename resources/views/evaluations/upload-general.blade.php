@@ -49,6 +49,19 @@
             </div>
         </div>
 
+        <div class="mb-8 p-5 bg-indigo-50/50 rounded-xl border border-indigo-100">
+            <label class="block text-sm font-bold text-slate-900 mb-2">Pilih Jenis Dokumen (Opsional)</label>
+            <p class="text-xs text-slate-500 mb-4">Memilih jenis dokumen akan otomatis mencentang aspek penilaian yang sesuai di bawah ini.</p>
+            <select id="jenis_dokumen_select" class="w-full text-sm border-slate-300 rounded-xl shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 bg-white">
+                <option value="">-- Pilih Jenis Dokumen --</option>
+                @foreach($jenisDokumens as $jd)
+                    <option value="{{ $jd->id }}" data-aspects="{{ json_encode($jd->assessmentAspects->pluck('id')) }}">
+                        {{ $jd->nama_jenis_dokumen }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
         <div class="mb-8">
             <label class="block text-sm font-bold text-slate-900 mb-4">Pilih Aspek Penilaian Terkait (Pilih lebih dari satu) <span class="text-red-500">*</span></label>
             
@@ -65,7 +78,7 @@
                             @foreach($ind->documentReviewAspects as $aspect)
                             <label class="flex items-start gap-3 cursor-pointer group">
                                 <div class="flex items-center h-5">
-                                    <input type="checkbox" name="aspect_ids[]" value="{{ $aspect->id }}" class="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 mt-0.5">
+                                    <input type="checkbox" name="aspect_ids[]" value="{{ $aspect->id }}" class="aspect-checkbox w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 mt-0.5">
                                 </div>
                                 <div class="text-sm">
                                     <span class="font-medium text-slate-700 group-hover:text-slate-900 transition-colors">{{ $aspect->aspek }}</span>
@@ -97,6 +110,27 @@
             display.classList.remove('hidden');
         } else {
             display.classList.add('hidden');
+        }
+    });
+
+    // Script untuk auto-check aspek berdasarkan jenis dokumen
+    document.getElementById('jenis_dokumen_select').addEventListener('change', function(e) {
+        // Hilangkan semua centang terlebih dahulu
+        const checkboxes = document.querySelectorAll('.aspect-checkbox');
+        checkboxes.forEach(cb => cb.checked = false);
+
+        // Jika ada yang dipilih, ambil data aspects dari atribut data
+        const selectedOption = this.options[this.selectedIndex];
+        if (selectedOption.value) {
+            const aspects = JSON.parse(selectedOption.getAttribute('data-aspects') || '[]');
+            
+            // Centang aspek yang sesuai
+            aspects.forEach(aspectId => {
+                const cb = document.querySelector(`.aspect-checkbox[value="${aspectId}"]`);
+                if (cb) {
+                    cb.checked = true;
+                }
+            });
         }
     });
 </script>

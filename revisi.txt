@@ -1,4 +1,4 @@
-# Revisi
-1. di menu tambah penilai atau asesor tambahkan agar bisa menambahkan guru yang dapat dinilai jadi bisa menambahkan lebih dari 1 guru
-2. di list asesor atau penilai dapat di edit siapa saja gurunya bisa ditambah atau dikurangi.
-3. di menu Data Evaluasi role penialai hanya akan muncul gurunya saja dan ketika admin menambah penugasan baru di list guru saat memilih hanya tampil guru si penialai saja
+# Add Fitur
+1. Buat Menu untuk admin Master atau Mapping Jenis Dokumen dengan assesments_aspects dengan relasi one to many satu jenis dokumen bisa berelasi ke banyak aspects
+2. Buat table jenis dokumen dengan relasi one to many ke assesments_asepcts
+3. Pada menu unggah/uload bukti general user harus memilih dulu jenis dokumen yang ingin di upload dan akan otomatis mencentang aspects berasarkan relasi dari jenis dokumen yang dipilih

@@ -436,7 +436,11 @@ class EvaluationController extends Controller
             ->select('indicators.*')
             ->get();
 
-        return view('evaluations.upload-general', compact('evaluation', 'indicators'));
+        $jenisDokumens = \App\Models\JenisDokumen::with(['assessmentAspects' => function($q) {
+            $q->select('id', 'jenis_dokumen_id');
+        }])->get();
+
+        return view('evaluations.upload-general', compact('evaluation', 'indicators', 'jenisDokumens'));
     }
 
     public function storeGeneralUpload(Request $request, Evaluation $evaluation)

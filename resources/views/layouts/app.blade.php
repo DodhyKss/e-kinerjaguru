@@ -145,6 +145,13 @@
                         Master Instrumen
                     </a>
 
+                    <a href="{{ route('jenis-dokumens.index') }}"
+                        class="{{ request()->routeIs('jenis-dokumens.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }} group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200">
+                        <i data-lucide="files"
+                            class="mr-3 h-5 w-5 {{ request()->routeIs('jenis-dokumens.*') ? 'text-indigo-400' : 'text-slate-400 group-hover:text-indigo-400' }}"></i>
+                        Master Jenis Dokumen
+                    </a>
+
                     <a href="{{ route('guide-books.index') }}"
                         class="{{ request()->routeIs('guide-books.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }} group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200">
                         <i data-lucide="file-text"

@@ -9,6 +9,7 @@ use App\Http\Controllers\EvaluationPeriodController;
 use App\Http\Controllers\IndicatorController;
 use App\Http\Controllers\AchievementLevelController;
 use App\Http\Controllers\AssessmentAspectController;
+use App\Http\Controllers\JenisDokumenController;
 use App\Http\Controllers\EvaluationController;
 use App\Http\Controllers\GuideBookController;
 use Illuminate\Support\Facades\Route;
@@ -40,6 +41,9 @@ Route::middleware('auth')->group(function () {
         Route::resource('indicators.levels', AchievementLevelController::class)->only(['update']);
         Route::put('indicators/{indicator}/aspects-bulk', [AssessmentAspectController::class, 'bulkUpdate'])->name('indicators.aspects.bulk');
         Route::resource('indicators.aspects', AssessmentAspectController::class)->only(['store', 'update', 'destroy']);
+        
+        // Master Jenis Dokumen
+        Route::resource('jenis-dokumens', JenisDokumenController::class);
         
         // Master Wilayah
         Route::resource('provinsis', \App\Http\Controllers\ProvinsiController::class)->except(['show']);
