@@ -174,7 +174,7 @@
                         <tr><td>NIP</td><td>: {{ $evaluation->guru->nip ?? '-' }}</td></tr>
                         <tr><td>Pangkat/Golongan</td><td>: {{ $evaluation->guru->pangkatGolongan->nama ?? '-' }} {{ isset($evaluation->guru->pangkatGolongan->golongan) ? '('.$evaluation->guru->pangkatGolongan->golongan.')' : '' }}</td></tr>
                         <tr><td>Mata Pelajaran</td><td>: {{ $evaluation->guru->mataPelajaran->nama ?? $evaluation->guru->mata_pelajaran ?? '-' }}</td></tr>
-                        <tr><td>Kelompok Mapel</td><td>: {{ $evaluation->guru->mataPelajaran->kelompokMapel->nama ?? '-' }}</td></tr>
+                        <tr><td>Kelompok Mapel</td><td>: {{ $evaluation->guru->mataPelajaran->kelompokMapel->nama_kelompok_mapel ?? '-' }}</td></tr>
                         <tr><td>Kompetensi Keahlian</td><td>: {{ $evaluation->guru->kompetensiKeahlian->nama ?? '-' }}</td></tr>
                         <tr><td>Unit Kerja (Sekolah)</td><td>: {{ $evaluation->guru->school->nama ?? '-' }}</td></tr>
                         @php
