@@ -36,9 +36,24 @@ echo "Setting permissions for storage and cache..."
 chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Run database migrations
-echo "Running migrations..."
-php artisan migrate --force || echo "Migration failed (database not ready/accessible), continuing anyway..."
+
+# Wait for database and run migrations
+echo "Waiting for database to be ready and running migrations..."
+max_tries=15
+count=0
+while [ $count -lt $max_tries ]; do
+    if php artisan migrate --force; then
+        echo "Migrations completed successfully."
+        break
+    fi
+    echo "Database not ready yet. Retrying in 3 seconds..."
+    sleep 3
+    count=$((count+1))
+done
+
+if [ $count -eq $max_tries ]; then
+    echo "Warning: Migrations did not complete successfully after multiple attempts."
+fi
 
 # Start the main process (Apache)
 exec "$@"
