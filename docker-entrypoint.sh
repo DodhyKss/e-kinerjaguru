@@ -38,7 +38,7 @@ chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Run database migrations
 echo "Running migrations..."
-php artisan migrate --force
+php artisan migrate --force || echo "Migration failed (database not ready/accessible), continuing anyway..."
 
 # Start the main process (Apache)
 exec "$@"
