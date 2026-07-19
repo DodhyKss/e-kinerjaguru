@@ -57,6 +57,35 @@ class AssessmentAspectController extends Controller
         return back()->with('success', "Aspek nomor {$aspect->nomor} berhasil diperbarui.");
     }
 
+    public function bulkUpdate(Request $request, Indicator $indicator)
+    {
+        if (!Auth::user()->isAdmin()) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'aspects' => 'required|array',
+            'aspects.*.aspek' => 'required|string',
+            'aspects.*.nomor' => 'required|integer|min:1',
+            'aspects.*.nama_dokumen' => 'nullable|string',
+            'aspects.*.target_responden' => 'nullable|array',
+            'aspects.*.target_responden.*' => 'in:kepala_wakil,kepala_kompetensi,guru,siswa',
+        ]);
+
+        foreach ($validated['aspects'] as $aspectId => $data) {
+            $aspect = AssessmentAspect::find($aspectId);
+            if ($aspect) {
+                if ($aspect->metode === 'wawancara' && !isset($data['target_responden'])) {
+                    // Jika dikosongkan (tidak ada yang dicentang), maka null.
+                    $data['target_responden'] = [];
+                }
+                $aspect->update($data);
+            }
+        }
+
+        return back()->with('success', "Semua Aspek Penilaian berhasil diperbarui.");
+    }
+
     public function destroy(Indicator $indicator, AssessmentAspect $aspect)
     {
         if (!Auth::user()->isAdmin()) {

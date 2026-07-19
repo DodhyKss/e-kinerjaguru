@@ -53,21 +53,27 @@
                 </h3>
             </div>
             <div class="p-6 space-y-6">
-                @foreach($indicator->achievementLevels as $level)
-                <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
-                    <form action="{{ route('indicators.levels.update', ['indicator' => $indicator->id, 'level' => $level->id]) }}" method="POST">
-                        @csrf
-                        @method('PUT')
-                        <div class="flex items-center justify-between mb-3">
-                            <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 font-bold text-sm">
-                                L{{ $level->level }}
-                            </span>
-                            <button type="submit" class="text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 rounded-lg transition-colors">Simpan</button>
+                <form action="{{ route('indicators.levels.bulk', ['indicator' => $indicator->id]) }}" method="POST">
+                    @csrf
+                    @method('PUT')
+                    
+                    <div class="space-y-6">
+                        @foreach($indicator->achievementLevels as $level)
+                        <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 font-bold text-sm">
+                                    L{{ $level->level }}
+                                </span>
+                            </div>
+                            <textarea name="levels[{{ $level->id }}][deskripsi]" rows="3" class="w-full text-sm border-slate-300 rounded-lg shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2.5" required>{{ $level->deskripsi }}</textarea>
                         </div>
-                        <textarea name="deskripsi" rows="3" class="w-full text-sm border-slate-300 rounded-lg shadow-sm focus:border-emerald-500 focus:ring-emerald-500 p-2.5" required>{{ $level->deskripsi }}</textarea>
-                    </form>
-                </div>
-                @endforeach
+                        @endforeach
+                    </div>
+                    
+                    <div class="mt-6 text-right">
+                        <button type="submit" class="text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 px-5 py-2 rounded-xl transition-colors shadow-sm">Simpan Semua Level</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

@@ -45,62 +45,73 @@
 </div>
 
 <!-- Daftar Aspek -->
-<div class="space-y-4">
-    @forelse($aspects as $aspect)
-    <div class="border border-slate-200 p-4 rounded-xl">
-        <form action="{{ route('indicators.aspects.update', ['indicator' => $indicator->id, 'aspect' => $aspect->id]) }}" method="POST" class="flex flex-col gap-3">
-            @csrf
-            @method('PUT')
-            
-            <div class="flex gap-3">
-                <input type="number" name="nomor" value="{{ $aspect->nomor }}" required class="w-16 text-sm border-slate-300 rounded-lg p-2">
-                <textarea name="aspek" rows="2" required class="flex-1 text-sm border-slate-300 rounded-lg p-2">{{ $aspect->aspek }}</textarea>
-            </div>
-            
-            @if($metode == 'telaah_dokumen')
-            <div class="pl-19">
-                <input type="text" name="nama_dokumen" value="{{ $aspect->nama_dokumen }}" placeholder="Nama/Bukti Dokumen" class="w-full text-sm border-slate-300 rounded-lg p-2">
-            </div>
-            @endif
-
-            @if($metode == 'wawancara')
-            @php $targets = $aspect->target_responden_list; @endphp
-            <div class="pl-19 bg-slate-50 p-3 rounded-lg border border-slate-200 mt-1">
-                <label class="block text-xs font-bold text-slate-700 mb-2">Target Responden Wawancara:</label>
-                <div class="flex flex-wrap gap-4">
-                    <label class="inline-flex items-center text-xs text-slate-700 font-medium cursor-pointer">
-                        <input type="checkbox" name="target_responden[]" value="kepala_wakil" {{ in_array('kepala_wakil', $targets) ? 'checked' : '' }} class="rounded border-slate-300 text-indigo-600 mr-1.5 focus:ring-indigo-500"> Kepala Sekolah / Wakil
-                    </label>
-                    <label class="inline-flex items-center text-xs text-slate-700 font-medium cursor-pointer">
-                        <input type="checkbox" name="target_responden[]" value="kepala_kompetensi" {{ in_array('kepala_kompetensi', $targets) ? 'checked' : '' }} class="rounded border-slate-300 text-indigo-600 mr-1.5 focus:ring-indigo-500"> Kajur / Kapro
-                    </label>
-                    <label class="inline-flex items-center text-xs text-slate-700 font-medium cursor-pointer">
-                        <input type="checkbox" name="target_responden[]" value="guru" {{ in_array('guru', $targets) ? 'checked' : '' }} class="rounded border-slate-300 text-indigo-600 mr-1.5 focus:ring-indigo-500"> Guru
-                    </label>
-                    <label class="inline-flex items-center text-xs text-slate-700 font-medium cursor-pointer">
-                        <input type="checkbox" name="target_responden[]" value="siswa" {{ in_array('siswa', $targets) ? 'checked' : '' }} class="rounded border-slate-300 text-indigo-600 mr-1.5 focus:ring-indigo-500"> Siswa
-                    </label>
-                </div>
-            </div>
-            @endif
-            
-            <div class="flex justify-between items-center pl-19 mt-1">
-                <span class="text-xs text-slate-400">ID: {{ $aspect->id }}</span>
-                <div class="flex gap-2">
-                    <button type="submit" class="text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-lg transition-colors">Simpan Edit</button>
-                    </form>
+<div class="space-y-4 relative">
+    <form action="{{ route('indicators.aspects.bulk', ['indicator' => $indicator->id]) }}" method="POST" id="bulk-aspect-form-{{ $metode }}">
+        @csrf
+        @method('PUT')
+        
+        <div class="space-y-4">
+            @forelse($aspects as $aspect)
+            <div class="border border-slate-200 p-4 rounded-xl relative">
+                <div class="flex flex-col gap-3">
+                    <div class="flex gap-3">
+                        <input type="number" name="aspects[{{ $aspect->id }}][nomor]" value="{{ $aspect->nomor }}" required class="w-16 text-sm border-slate-300 rounded-lg p-2">
+                        <textarea name="aspects[{{ $aspect->id }}][aspek]" rows="2" required class="flex-1 text-sm border-slate-300 rounded-lg p-2">{{ $aspect->aspek }}</textarea>
+                    </div>
                     
-                    <form action="{{ route('indicators.aspects.destroy', ['indicator' => $indicator->id, 'aspect' => $aspect->id]) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin menghapus aspek penilaian ini? Jika sudah digunakan oleh asesor, penghapusan akan digagalkan oleh sistem.');">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-lg transition-colors">Hapus</button>
-                    </form>
+                    @if($metode == 'telaah_dokumen')
+                    <div class="pl-19">
+                        <input type="text" name="aspects[{{ $aspect->id }}][nama_dokumen]" value="{{ $aspect->nama_dokumen }}" placeholder="Nama/Bukti Dokumen" class="w-full text-sm border-slate-300 rounded-lg p-2">
+                    </div>
+                    @endif
+
+                    @if($metode == 'wawancara')
+                    @php $targets = $aspect->target_responden_list; @endphp
+                    <div class="pl-19 bg-slate-50 p-3 rounded-lg border border-slate-200 mt-1">
+                        <label class="block text-xs font-bold text-slate-700 mb-2">Target Responden Wawancara:</label>
+                        <div class="flex flex-wrap gap-4">
+                            <label class="inline-flex items-center text-xs text-slate-700 font-medium cursor-pointer">
+                                <input type="checkbox" name="aspects[{{ $aspect->id }}][target_responden][]" value="kepala_wakil" {{ in_array('kepala_wakil', $targets) ? 'checked' : '' }} class="rounded border-slate-300 text-indigo-600 mr-1.5 focus:ring-indigo-500"> Kepala Sekolah / Wakil
+                            </label>
+                            <label class="inline-flex items-center text-xs text-slate-700 font-medium cursor-pointer">
+                                <input type="checkbox" name="aspects[{{ $aspect->id }}][target_responden][]" value="kepala_kompetensi" {{ in_array('kepala_kompetensi', $targets) ? 'checked' : '' }} class="rounded border-slate-300 text-indigo-600 mr-1.5 focus:ring-indigo-500"> Kajur / Kapro
+                            </label>
+                            <label class="inline-flex items-center text-xs text-slate-700 font-medium cursor-pointer">
+                                <input type="checkbox" name="aspects[{{ $aspect->id }}][target_responden][]" value="guru" {{ in_array('guru', $targets) ? 'checked' : '' }} class="rounded border-slate-300 text-indigo-600 mr-1.5 focus:ring-indigo-500"> Guru
+                            </label>
+                            <label class="inline-flex items-center text-xs text-slate-700 font-medium cursor-pointer">
+                                <input type="checkbox" name="aspects[{{ $aspect->id }}][target_responden][]" value="siswa" {{ in_array('siswa', $targets) ? 'checked' : '' }} class="rounded border-slate-300 text-indigo-600 mr-1.5 focus:ring-indigo-500"> Siswa
+                            </label>
+                        </div>
+                    </div>
+                    @endif
+                    
+                    <div class="flex justify-between items-center pl-19 mt-1">
+                        <span class="text-xs text-slate-400">ID: {{ $aspect->id }}</span>
+                        <div class="flex gap-2">
+                            <button form="delete-form-{{ $aspect->id }}" type="submit" class="text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-lg transition-colors">Hapus</button>
+                        </div>
+                    </div>
                 </div>
             </div>
-    </div>
-    @empty
-    <div class="text-center py-6 text-slate-500 text-sm bg-slate-50 rounded-xl border border-dashed border-slate-300">
-        Belum ada aspek untuk metode ini. Silakan tambahkan.
-    </div>
-    @endforelse
+            @empty
+            <div class="text-center py-6 text-slate-500 text-sm bg-slate-50 rounded-xl border border-dashed border-slate-300">
+                Belum ada aspek untuk metode ini. Silakan tambahkan.
+            </div>
+            @endforelse
+        </div>
+        
+        @if(count($aspects) > 0)
+        <div class="mt-4 text-right">
+            <button type="submit" class="text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 px-5 py-2 rounded-xl transition-colors shadow-sm">Simpan Semua Aspek {{ $metodeLabel }}</button>
+        </div>
+        @endif
+    </form>
+    
+    @foreach($aspects as $aspect)
+    <form id="delete-form-{{ $aspect->id }}" action="{{ route('indicators.aspects.destroy', ['indicator' => $indicator->id, 'aspect' => $aspect->id]) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin menghapus aspek penilaian ini?');" class="hidden">
+        @csrf
+        @method('DELETE')
+    </form>
+    @endforeach
 </div>

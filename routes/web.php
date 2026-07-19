@@ -36,7 +36,9 @@ Route::middleware('auth')->group(function () {
         
         // Master Instrumen
         Route::resource('indicators', IndicatorController::class);
+        Route::put('indicators/{indicator}/levels-bulk', [AchievementLevelController::class, 'bulkUpdate'])->name('indicators.levels.bulk');
         Route::resource('indicators.levels', AchievementLevelController::class)->only(['update']);
+        Route::put('indicators/{indicator}/aspects-bulk', [AssessmentAspectController::class, 'bulkUpdate'])->name('indicators.aspects.bulk');
         Route::resource('indicators.aspects', AssessmentAspectController::class)->only(['store', 'update', 'destroy']);
         
         // Master Wilayah
