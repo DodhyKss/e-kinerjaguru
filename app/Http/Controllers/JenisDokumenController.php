@@ -53,26 +53,22 @@ class JenisDokumenController extends Controller
         return redirect()->route('jenis-dokumens.index')->with('success', 'Jenis Dokumen dan pemetaan berhasil ditambahkan.');
     }
 
-    public function edit(JenisDokumen $jenisDokuman)
+    public function edit(JenisDokumen $jenisDokumen)
     {
         if (!Auth::user()->isAdmin()) {
             abort(403);
         }
-
-        $jenisDokumen = $jenisDokuman;
         $aspects = AssessmentAspect::with('indicator')->where('metode', 'telaah_dokumen')->get()->groupBy('indicator_id');
         $selectedAspects = $jenisDokumen->assessmentAspects->pluck('id')->toArray();
         
         return view('jenis-dokumens.edit', compact('jenisDokumen', 'aspects', 'selectedAspects'));
     }
 
-    public function update(Request $request, JenisDokumen $jenisDokuman)
+    public function update(Request $request, JenisDokumen $jenisDokumen)
     {
         if (!Auth::user()->isAdmin()) {
             abort(403);
         }
-
-        $jenisDokumen = $jenisDokuman;
         $validated = $request->validate([
             'nama_jenis_dokumen' => 'required|string|max:255|unique:jenis_dokumens,nama_jenis_dokumen,' . $jenisDokumen->id,
             'aspects' => 'nullable|array',
@@ -94,7 +90,7 @@ class JenisDokumenController extends Controller
         return redirect()->route('jenis-dokumens.index')->with('success', 'Jenis Dokumen dan pemetaan berhasil diperbarui.');
     }
 
-    public function destroy(JenisDokumen $jenisDokuman)
+    public function destroy(JenisDokumen $jenisDokumen)
     {
         if (!Auth::user()->isAdmin()) {
             abort(403);
@@ -102,7 +98,7 @@ class JenisDokumenController extends Controller
         
         // Karena on delete null diset di migration, menghapus jenis dokumen akan
         // men-set jenis_dokumen_id di tabel aspects menjadi null otomatis.
-        $jenisDokuman->delete();
+        $jenisDokumen->delete();
 
         return redirect()->route('jenis-dokumens.index')->with('success', 'Jenis Dokumen berhasil dihapus.');
     }
