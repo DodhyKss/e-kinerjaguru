@@ -8,10 +8,29 @@ use Illuminate\Http\Request;
 
 class KabupatenController extends Controller
 {
-    public function index()
+    public function index(\Illuminate\Http\Request $request)
     {
-        $kabupatens = Kabupaten::with('provinsi')->latest()->paginate(10);
-        return view('kabupatens.index', compact('kabupatens'));
+        $query = \App\Models\Kabupaten::query();
+        
+        // Add specific eager loads or orders
+        if ('Kabupaten' === 'MataPelajaran') {
+            $query->with('kelompokMapel')->latest();
+        } elseif ('Kabupaten' === 'Kabupaten') {
+            $query->with('provinsi')->latest();
+        } elseif ('Kabupaten' === 'KelompokMapel') {
+            $query->orderBy('nama_kelompok_mapel');
+        } else {
+            $query->latest();
+        }
+
+        if ($request->filled('search_id')) {
+            $query->where('id', $request->search_id);
+        }
+
+        $kabupatens = $query->paginate(10)->withQueryString();
+        $allData = \App\Models\Kabupaten::orderBy('nama')->get(['id', 'nama']);
+
+        return view('kabupatens.index', compact('kabupatens', 'allData'));
     }
 
     public function create()

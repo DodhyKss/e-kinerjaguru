@@ -12,6 +12,28 @@
     </a>
 </div>
 
+
+<div class="mb-6 p-5 bg-white rounded-2xl shadow-sm border border-slate-200">
+    <form action="{{ route('pangkat-golongans.index') }}" method="GET" class="flex flex-col sm:flex-row gap-4 items-end" id="searchForm">
+        <div class="w-full sm:w-1/2">
+            <label class="block text-sm font-bold text-slate-700 mb-2">Cari / Filter Data</label>
+            <select name="search_id" class="select2-filter w-full" onchange="document.getElementById('searchForm').submit()">
+                <option value="">Semua Data...</option>
+                @foreach($allData as $item)
+                    <option value="{{ $item->id }}" {{ request('search_id') == $item->id ? 'selected' : '' }}>
+                        {{ $item->nama }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        @if(request('search_id'))
+            <a href="{{ route('pangkat-golongans.index') }}" class="bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-slate-300 transition-colors">
+                Reset Filter
+            </a>
+        @endif
+    </form>
+</div>
+
 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
     <div class="overflow-x-auto">
         <table class="w-full text-sm text-left text-slate-700 whitespace-nowrap">
@@ -56,4 +78,17 @@
     </div>
     @endif
 </div>
+
+@push('scripts')
+<script>
+    $(document).ready(function() {
+        $('.select2-filter').select2({
+            placeholder: "Cari data...",
+            allowClear: true,
+            width: '100%'
+        });
+    });
+</script>
+@endpush
+
 @endsection

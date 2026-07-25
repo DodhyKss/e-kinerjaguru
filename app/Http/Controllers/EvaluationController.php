@@ -14,48 +14,59 @@ use Illuminate\Support\Facades\DB;
 
 class EvaluationController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
         
+        $query = Evaluation::with(['guru', 'penilai', 'evaluationPeriod'])->latest();
+
         if ($user->isAdmin() || $user->isKepalaSekolah()) {
-            $evaluations = Evaluation::with(['guru', 'penilai', 'evaluationPeriod'])
-                ->when($user->isKepalaSekolah(), function($q) use ($user) {
-                    $q->whereHas('guru', fn($g) => $g->where('school_id', $user->school_id));
-                })
-                ->latest()
-                ->paginate(15);
+            $query->when($user->isKepalaSekolah(), function($q) use ($user) {
+                $q->whereHas('guru', fn($g) => $g->where('school_id', $user->school_id));
+            });
         } else if ($user->isPenilai()) {
             $assignedGuruIds = $user->penilai->gurus()->pluck('gurus.id');
             
             if ($user->guru) {
-                $evaluations = Evaluation::with(['guru', 'penilai', 'evaluationPeriod'])
-                    ->where(function($query) use ($user, $assignedGuruIds) {
-                        $query->where('penilai_id', $user->penilai->id)
-                              ->whereIn('guru_id', $assignedGuruIds);
-                    })
-                    ->orWhere(function($query) use ($user) {
-                        $query->where('guru_id', $user->guru->id);
-                    })
-                    ->latest()
-                    ->paginate(15);
+                $query->where(function($q) use ($user, $assignedGuruIds) {
+                    $q->where(function($q2) use ($user, $assignedGuruIds) {
+                        $q2->where('penilai_id', $user->penilai->id)
+                           ->whereIn('guru_id', $assignedGuruIds);
+                    })->orWhere('guru_id', $user->guru->id);
+                });
             } else {
-                $evaluations = Evaluation::with(['guru', 'evaluationPeriod'])
-                    ->where('penilai_id', $user->penilai->id)
-                    ->whereIn('guru_id', $assignedGuruIds)
-                    ->latest()
-                    ->paginate(15);
+                $query->where('penilai_id', $user->penilai->id)
+                      ->whereIn('guru_id', $assignedGuruIds);
             }
         } else if ($user->isGuru()) {
-            $evaluations = Evaluation::with(['penilai', 'evaluationPeriod'])
-                ->where('guru_id', $user->guru->id)
-                ->latest()
-                ->paginate(15);
+            $query->where('guru_id', $user->guru->id);
         } else {
             abort(403);
         }
 
-        return view('evaluations.index', compact('evaluations'));
+        if ($request->filled('period_id')) {
+            $query->where('evaluation_period_id', $request->period_id);
+        }
+        if ($request->filled('guru_id')) {
+            $query->where('guru_id', $request->guru_id);
+        }
+
+        $evaluations = $query->paginate(15)->withQueryString();
+
+        $periods = EvaluationPeriod::orderBy('nama', 'desc')->get();
+        
+        // Fetch relevant gurus for the dropdown
+        if ($user->isAdmin() || $user->isKepalaSekolah()) {
+            $gurus = Guru::when($user->isKepalaSekolah(), function($q) use ($user) {
+                $q->where('school_id', $user->school_id);
+            })->orderBy('nama')->get();
+        } else if ($user->isPenilai()) {
+            $gurus = $user->penilai->gurus()->orderBy('nama')->get();
+        } else {
+            $gurus = collect([]); // Guru doesn't need to filter by Guru
+        }
+
+        return view('evaluations.index', compact('evaluations', 'periods', 'gurus'));
     }
 
     public function create()

@@ -7,10 +7,29 @@ use Illuminate\Http\Request;
 
 class KompetensiKeahlianController extends Controller
 {
-    public function index()
+    public function index(\Illuminate\Http\Request $request)
     {
-        $data = KompetensiKeahlian::latest()->paginate(10);
-        return view('kompetensi-keahlians.index', compact('data'));
+        $query = \App\Models\KompetensiKeahlian::query();
+        
+        // Add specific eager loads or orders
+        if ('KompetensiKeahlian' === 'MataPelajaran') {
+            $query->with('kelompokMapel')->latest();
+        } elseif ('KompetensiKeahlian' === 'Kabupaten') {
+            $query->with('provinsi')->latest();
+        } elseif ('KompetensiKeahlian' === 'KelompokMapel') {
+            $query->orderBy('nama_kelompok_mapel');
+        } else {
+            $query->latest();
+        }
+
+        if ($request->filled('search_id')) {
+            $query->where('id', $request->search_id);
+        }
+
+        $data = $query->paginate(10)->withQueryString();
+        $allData = \App\Models\KompetensiKeahlian::orderBy('nama')->get(['id', 'nama']);
+
+        return view('kompetensi-keahlians.index', compact('data', 'allData'));
     }
 
     public function create()

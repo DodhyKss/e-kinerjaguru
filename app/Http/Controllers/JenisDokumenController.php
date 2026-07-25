@@ -9,14 +9,22 @@ use Illuminate\Support\Facades\Auth;
 
 class JenisDokumenController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         if (!Auth::user()->isAdmin()) {
             abort(403);
         }
 
-        $jenisDokumens = JenisDokumen::withCount('assessmentAspects')->latest()->paginate(10);
-        return view('jenis-dokumens.index', compact('jenisDokumens'));
+        $query = JenisDokumen::withCount('assessmentAspects')->latest();
+        
+        if ($request->filled('search_id')) {
+            $query->where('id', $request->search_id);
+        }
+
+        $jenisDokumens = $query->paginate(10)->withQueryString();
+        $allData = JenisDokumen::orderBy('nama_jenis_dokumen')->get(['id', 'nama_jenis_dokumen']);
+
+        return view('jenis-dokumens.index', compact('jenisDokumens', 'allData'));
     }
 
     public function create()

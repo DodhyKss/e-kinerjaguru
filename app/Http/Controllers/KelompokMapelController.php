@@ -7,10 +7,29 @@ use Illuminate\Http\Request;
 
 class KelompokMapelController extends Controller
 {
-    public function index()
+    public function index(\Illuminate\Http\Request $request)
     {
-        $kelompokMapels = KelompokMapel::orderBy('nama_kelompok_mapel')->paginate(10);
-        return view('kelompok_mapels.index', compact('kelompokMapels'));
+        $query = \App\Models\KelompokMapel::query();
+        
+        // Add specific eager loads or orders
+        if ('KelompokMapel' === 'MataPelajaran') {
+            $query->with('kelompokMapel')->latest();
+        } elseif ('KelompokMapel' === 'Kabupaten') {
+            $query->with('provinsi')->latest();
+        } elseif ('KelompokMapel' === 'KelompokMapel') {
+            $query->orderBy('nama_kelompok_mapel');
+        } else {
+            $query->latest();
+        }
+
+        if ($request->filled('search_id')) {
+            $query->where('id', $request->search_id);
+        }
+
+        $kelompokMapels = $query->paginate(10)->withQueryString();
+        $allData = \App\Models\KelompokMapel::orderBy('nama_kelompok_mapel')->get(['id', 'nama_kelompok_mapel']);
+
+        return view('kelompok_mapels.index', compact('kelompokMapels', 'allData'));
     }
 
     public function create()

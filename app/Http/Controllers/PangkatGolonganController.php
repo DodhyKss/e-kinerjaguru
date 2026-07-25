@@ -7,10 +7,29 @@ use Illuminate\Http\Request;
 
 class PangkatGolonganController extends Controller
 {
-    public function index()
+    public function index(\Illuminate\Http\Request $request)
     {
-        $data = PangkatGolongan::latest()->paginate(10);
-        return view('pangkat-golongans.index', compact('data'));
+        $query = \App\Models\PangkatGolongan::query();
+        
+        // Add specific eager loads or orders
+        if ('PangkatGolongan' === 'MataPelajaran') {
+            $query->with('kelompokMapel')->latest();
+        } elseif ('PangkatGolongan' === 'Kabupaten') {
+            $query->with('provinsi')->latest();
+        } elseif ('PangkatGolongan' === 'KelompokMapel') {
+            $query->orderBy('nama_kelompok_mapel');
+        } else {
+            $query->latest();
+        }
+
+        if ($request->filled('search_id')) {
+            $query->where('id', $request->search_id);
+        }
+
+        $data = $query->paginate(10)->withQueryString();
+        $allData = \App\Models\PangkatGolongan::orderBy('nama')->get(['id', 'nama']);
+
+        return view('pangkat-golongans.index', compact('data', 'allData'));
     }
 
     public function create()

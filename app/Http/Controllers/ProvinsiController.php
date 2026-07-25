@@ -7,10 +7,29 @@ use Illuminate\Http\Request;
 
 class ProvinsiController extends Controller
 {
-    public function index()
+    public function index(\Illuminate\Http\Request $request)
     {
-        $provinsis = Provinsi::latest()->paginate(10);
-        return view('provinsis.index', compact('provinsis'));
+        $query = \App\Models\Provinsi::query();
+        
+        // Add specific eager loads or orders
+        if ('Provinsi' === 'MataPelajaran') {
+            $query->with('kelompokMapel')->latest();
+        } elseif ('Provinsi' === 'Kabupaten') {
+            $query->with('provinsi')->latest();
+        } elseif ('Provinsi' === 'KelompokMapel') {
+            $query->orderBy('nama_kelompok_mapel');
+        } else {
+            $query->latest();
+        }
+
+        if ($request->filled('search_id')) {
+            $query->where('id', $request->search_id);
+        }
+
+        $provinsis = $query->paginate(10)->withQueryString();
+        $allData = \App\Models\Provinsi::orderBy('nama')->get(['id', 'nama']);
+
+        return view('provinsis.index', compact('provinsis', 'allData'));
     }
 
     public function create()
