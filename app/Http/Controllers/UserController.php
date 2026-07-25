@@ -14,15 +14,22 @@ class UserController extends Controller
         
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where('name', 'like', "%{$search}%")
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('school_id')) {
+            $query->where('school_id', $request->school_id);
         }
 
         $users = $query->orderBy('role')->latest()->paginate(15)->withQueryString();
 
         $allUsers = User::orderBy('name')->get(['id', 'name', 'email']);
+        $schools = \App\Models\School::orderBy('nama')->get(['id', 'nama']);
 
-        return view('users.index', compact('users', 'allUsers'));
+        return view('users.index', compact('users', 'allUsers', 'schools'));
     }
 
     public function resetPassword(User $user)

@@ -8,9 +8,19 @@
             <h3 class="text-lg font-medium text-slate-900">Daftar Akun Pengguna</h3>
             <p class="text-xs text-slate-500 mt-1">Mengelola akses login dan mereset password pengguna.</p>
         </div>
-        <form action="{{ route('users.index') }}" method="GET" class="w-full md:w-auto" id="searchForm">
+        <form action="{{ route('users.index') }}" method="GET" class="w-full md:w-auto flex flex-col sm:flex-row gap-3" id="searchForm">
             <div class="relative">
-                <select name="search" class="select2-search w-full md:w-64" onchange="document.getElementById('searchForm').submit()">
+                <select name="school_id" class="select2-school w-full sm:w-64" onchange="document.getElementById('searchForm').submit()">
+                    <option value="">Semua Sekolah...</option>
+                    @foreach($schools as $school)
+                        <option value="{{ $school->id }}" {{ request('school_id') == $school->id ? 'selected' : '' }}>
+                            {{ $school->nama }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="relative">
+                <select name="search" class="select2-search w-full sm:w-64" onchange="document.getElementById('searchForm').submit()">
                     <option value="">Semua Akun Pengguna...</option>
                     @foreach($allUsers as $u)
                         <option value="{{ $u->name }}" {{ request('search') == $u->name ? 'selected' : '' }}>
@@ -19,8 +29,10 @@
                     @endforeach
                 </select>
             </div>
-            @if(request('search'))
-                <a href="{{ route('users.index') }}" class="inline-block mt-2 text-xs text-indigo-600 hover:text-indigo-800">Tampilkan Semua</a>
+            @if(request('search') || request('school_id'))
+                <div class="flex items-center">
+                    <a href="{{ route('users.index') }}" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">Reset Filter</a>
+                </div>
             @endif
         </form>
     </div>
@@ -131,6 +143,11 @@
     $(document).ready(function() {
         $('.select2-search').select2({
             placeholder: "Cari dan pilih nama pengguna...",
+            allowClear: true,
+            width: '100%'
+        });
+        $('.select2-school').select2({
+            placeholder: "Pilih Sekolah...",
             allowClear: true,
             width: '100%'
         });
