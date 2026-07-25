@@ -78,14 +78,18 @@ class EvaluationController extends Controller
             $penilais = \App\Models\Penilai::with(['user', 'gurus', 'school'])
                 ->where('school_id', $user->school_id)
                 ->where('status', 'aktif')
+                ->orderBy('user_id', 'desc')
                 ->orderBy('nama')
-                ->get();
+                ->get()
+                ->unique('nama');
         } else {
             $gurus = Guru::with('school')->orderBy('nama')->get();
             $penilais = \App\Models\Penilai::with(['user', 'gurus', 'school'])
                 ->where('status', 'aktif')
+                ->orderBy('user_id', 'desc')
                 ->orderBy('nama')
-                ->get();
+                ->get()
+                ->unique('nama');
         }
 
         return view('evaluations.create', compact('periods', 'gurus', 'penilais'));
@@ -149,6 +153,98 @@ class EvaluationController extends Controller
         ]);
 
         return redirect()->route('evaluations.index')->with('success', 'Penugasan evaluasi berhasil dibuat.');
+    }
+
+    public function edit(Evaluation $evaluation)
+    {
+        $user = Auth::user();
+        if (!$user->isAdmin() && !$user->isKepalaSekolah()) {
+            abort(403);
+        }
+
+        if ($user->isKepalaSekolah() && $evaluation->guru->school_id !== $user->school_id) {
+            abort(403);
+        }
+
+        // Ambil periode aktif
+        $periods = EvaluationPeriod::where('status', 'aktif')->get();
+        
+        if ($user->isKepalaSekolah()) {
+            $gurus = Guru::where('school_id', $user->school_id)->orderBy('nama')->get();
+            $penilais = \App\Models\Penilai::with(['user', 'gurus', 'school'])
+                ->where('school_id', $user->school_id)
+                ->where('status', 'aktif')
+                ->orderBy('user_id', 'desc')
+                ->orderBy('nama')
+                ->get()
+                ->unique('nama');
+        } else {
+            $gurus = Guru::with('school')->orderBy('nama')->get();
+            $penilais = \App\Models\Penilai::with(['user', 'gurus', 'school'])
+                ->where('status', 'aktif')
+                ->orderBy('user_id', 'desc')
+                ->orderBy('nama')
+                ->get()
+                ->unique('nama');
+        }
+
+        return view('evaluations.edit', compact('evaluation', 'periods', 'gurus', 'penilais'));
+    }
+
+    public function update(Request $request, Evaluation $evaluation)
+    {
+        $user = Auth::user();
+        if (!$user->isAdmin() && !$user->isKepalaSekolah()) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'evaluation_period_id' => 'required|exists:evaluation_periods,id',
+            'guru_id' => 'required|exists:gurus,id',
+            'penilai_id' => 'required|exists:penilais,id',
+        ]);
+
+        $guru = Guru::findOrFail($validated['guru_id']);
+        $penilai = \App\Models\Penilai::findOrFail($validated['penilai_id']);
+
+        if ($user->isKepalaSekolah()) {
+            if ($guru->school_id !== $user->school_id || $penilai->school_id !== $user->school_id) {
+                abort(403, 'Anda hanya dapat menugaskan evaluasi untuk sekolah Anda sendiri.');
+            }
+        }
+
+        $exists = Evaluation::where('evaluation_period_id', $validated['evaluation_period_id'])
+                            ->where('guru_id', $validated['guru_id'])
+                            ->where('id', '!=', $evaluation->id)
+                            ->exists();
+
+        if ($exists) {
+            return back()->with('error', 'Guru tersebut sudah memiliki penugasan evaluasi pada periode ini.')->withInput();
+        }
+
+        $evaluation->update([
+            'evaluation_period_id' => $validated['evaluation_period_id'],
+            'guru_id' => $validated['guru_id'],
+            'penilai_id' => $validated['penilai_id'],
+        ]);
+
+        return redirect()->route('evaluations.index')->with('success', 'Data penugasan evaluasi berhasil diperbarui.');
+    }
+
+    public function destroy(Evaluation $evaluation)
+    {
+        $user = Auth::user();
+        if (!$user->isAdmin() && !$user->isKepalaSekolah()) {
+            abort(403);
+        }
+
+        if ($user->isKepalaSekolah() && $evaluation->guru->school_id !== $user->school_id) {
+            abort(403);
+        }
+
+        $evaluation->delete();
+
+        return redirect()->route('evaluations.index')->with('success', 'Data penugasan evaluasi berhasil dihapus/dibatalkan.');
     }
 
     public function show(Evaluation $evaluation)

@@ -60,9 +60,23 @@
                         @endif
                     </td>
                     <td class="px-6 py-4 text-right">
-                        <a href="{{ route('evaluations.show', $eval) }}" class="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors">
-                            <i data-lucide="eye" class="w-4 h-4 mr-1.5"></i> Detail
-                        </a>
+                        <div class="flex items-center justify-end gap-2">
+                            <a href="{{ route('evaluations.show', $eval) }}" class="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors">
+                                <i data-lucide="eye" class="w-4 h-4 mr-1.5"></i> Detail
+                            </a>
+                            @if(auth()->user()->isAdmin() || auth()->user()->isKepalaSekolah())
+                                <a href="{{ route('evaluations.edit', $eval) }}" class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors">
+                                    <i data-lucide="edit" class="w-4 h-4 mr-1.5"></i> Edit
+                                </a>
+                                <form action="{{ route('evaluations.destroy', $eval) }}" method="POST" class="inline-block" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data penugasan ini?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="inline-flex items-center text-sm font-medium text-rose-600 hover:text-rose-900 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-lg transition-colors">
+                                        <i data-lucide="trash-2" class="w-4 h-4 mr-1.5"></i> Hapus
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
                     </td>
                 </tr>
                 @empty

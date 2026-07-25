@@ -91,6 +91,9 @@ Route::middleware('auth')->group(function () {
         Route::middleware('role:admin,kepala_sekolah')->group(function () {
             Route::get('/create', [EvaluationController::class, 'create'])->name('create');
             Route::post('/', [EvaluationController::class, 'store'])->name('store');
+            Route::get('/{evaluation}/edit', [EvaluationController::class, 'edit'])->name('edit');
+            Route::put('/{evaluation}', [EvaluationController::class, 'update'])->name('update');
+            Route::delete('/{evaluation}', [EvaluationController::class, 'destroy'])->name('destroy');
             Route::post('/{evaluation}/approve', [EvaluationController::class, 'approve'])->name('approve');
         });
 

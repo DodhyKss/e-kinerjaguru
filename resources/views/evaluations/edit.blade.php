@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Buat Penugasan Evaluasi Baru')
+@section('title', 'Edit Penugasan Evaluasi')
 
 @section('content')
 <div class="mb-6">
@@ -14,13 +14,14 @@
             <i data-lucide="clipboard-signature" class="w-6 h-6"></i>
         </div>
         <div>
-            <h3 class="text-lg font-bold text-slate-900">Penugasan Evaluasi Baru</h3>
-            <p class="text-sm text-slate-600 mt-1">Tugaskan Asesor untuk melakukan penilaian kinerja pada seorang Guru di periode tertentu.</p>
+            <h3 class="text-lg font-bold text-slate-900">Edit Penugasan Evaluasi</h3>
+            <p class="text-sm text-slate-600 mt-1">Ubah data Asesor atau Guru pada penugasan evaluasi ini.</p>
         </div>
     </div>
     
-    <form action="{{ route('evaluations.store') }}" method="POST" class="p-8">
+    <form action="{{ route('evaluations.update', $evaluation) }}" method="POST" class="p-8">
         @csrf
+        @method('PUT')
         
         <div class="space-y-6">
             <div>
@@ -28,7 +29,7 @@
                 <select name="evaluation_period_id" id="evaluation_period_id" required class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3 border @error('evaluation_period_id') border-rose-300 ring-rose-500 @enderror">
                     <option value="">-- Pilih Periode Aktif --</option>
                     @foreach($periods as $period)
-                        <option value="{{ $period->id }}" {{ old('evaluation_period_id') == $period->id ? 'selected' : '' }}>
+                        <option value="{{ $period->id }}" {{ old('evaluation_period_id', $evaluation->evaluation_period_id) == $period->id ? 'selected' : '' }}>
                             {{ $period->nama }} ({{ $period->school->nama }})
                         </option>
                     @endforeach
@@ -43,7 +44,7 @@
                     @if($penilais->where('jabatan', 'Kepala Sekolah')->isNotEmpty())
                         <optgroup label="Kepala Sekolah (Evaluator)">
                             @foreach($penilais->where('jabatan', 'Kepala Sekolah') as $penilai)
-                                <option value="{{ $penilai->id }}" data-is-kepsek="true" {{ old('penilai_id') == $penilai->id ? 'selected' : '' }}>
+                                <option value="{{ $penilai->id }}" data-is-kepsek="true" {{ old('penilai_id', $evaluation->penilai_id) == $penilai->id ? 'selected' : '' }}>
                                     [Kepala Sekolah] {{ $penilai->nama }} @if(auth()->user()->isAdmin() && $penilai->school) ({{ $penilai->school->nama }}) @endif
                                 </option>
                             @endforeach
@@ -52,7 +53,7 @@
                     @if($penilais->where('jabatan', '!=', 'Kepala Sekolah')->isNotEmpty())
                         <optgroup label="Asesor / Penilai Guru">
                             @foreach($penilais->where('jabatan', '!=', 'Kepala Sekolah') as $penilai)
-                                <option value="{{ $penilai->id }}" data-is-kepsek="false" {{ old('penilai_id') == $penilai->id ? 'selected' : '' }}>
+                                <option value="{{ $penilai->id }}" data-is-kepsek="false" {{ old('penilai_id', $evaluation->penilai_id) == $penilai->id ? 'selected' : '' }}>
                                     {{ $penilai->nama }} - {{ $penilai->jabatan }} @if(auth()->user()->isAdmin() && $penilai->school) ({{ $penilai->school->nama }}) @endif
                                 </option>
                             @endforeach
@@ -68,7 +69,7 @@
                 <select name="guru_id" id="guru_id" required class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3 border @error('guru_id') border-rose-300 ring-rose-500 @enderror">
                     <option value="">-- Pilih Guru --</option>
                     @foreach($gurus as $guru)
-                        <option value="{{ $guru->id }}" {{ old('guru_id') == $guru->id ? 'selected' : '' }}>
+                        <option value="{{ $guru->id }}" {{ old('guru_id', $evaluation->guru_id) == $guru->id ? 'selected' : '' }}>
                             {{ $guru->nama }} - {{ $guru->mata_pelajaran }} @if(auth()->user()->isAdmin()) ({{ $guru->school->nama }}) @endif
                         </option>
                     @endforeach
@@ -81,7 +82,7 @@
         <div class="mt-8 pt-6 border-t border-slate-100 flex items-center justify-end gap-3">
             <button type="reset" class="px-5 py-2.5 text-sm font-medium text-slate-600 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition-colors">Reset</button>
             <button type="submit" class="px-5 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 shadow-sm transition-colors flex items-center">
-                <i data-lucide="send" class="w-4 h-4 mr-2"></i> Buat Penugasan
+                <i data-lucide="save" class="w-4 h-4 mr-2"></i> Simpan Perubahan
             </button>
         </div>
     </form>
@@ -117,7 +118,7 @@ $(document).ready(function() {
         }
     });
     
-    const oldGuruId = "{{ old('guru_id') }}";
+    const oldGuruId = "{{ old('guru_id', $evaluation->guru_id) }}";
 
     function filterGurus() {
         const selectedPenilaiId = penilaiSelect.val();

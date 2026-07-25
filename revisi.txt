@@ -1,4 +1,4 @@
-# Add Fitur
-1. Buat Menu untuk admin Master atau Mapping Jenis Dokumen dengan assesments_aspects dengan relasi one to many satu jenis dokumen bisa berelasi ke banyak aspects
-2. Buat table jenis dokumen dengan relasi one to many ke assesments_asepcts
-3. Pada menu unggah/uload bukti general user harus memilih dulu jenis dokumen yang ingin di upload dan akan otomatis mencentang aspects berasarkan relasi dari jenis dokumen yang dipilih
+1. Tambahkan Edit dan Hapus di menu data evaluasi admin agar dapat membatalkan dan mengedit data penugasan/evaluasi
+2. Saat Membuat Penugasan buat agar semua select nya pakai select2
+3. Saat memilih Asesor atau evaluator 
+4. perbaiki double nama muncul penilai ketika kepala sekolah ditambahkan otomatis masuk ke penilai jadi pada saat memilih namanya double ada dua
