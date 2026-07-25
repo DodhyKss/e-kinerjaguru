@@ -45,24 +45,24 @@
 
     <div class="p-6">
         <div class="overflow-x-auto">
-            <table class="w-full text-sm text-left">
-                <thead class="text-xs text-slate-500 uppercase bg-slate-100/50 border-b border-slate-200">
+            <table class="w-full text-sm text-left text-slate-700 whitespace-nowrap">
+                <thead class="text-xs text-slate-600 uppercase bg-slate-100 border-b border-slate-200 tracking-wider">
                     <tr>
-                        <th class="px-6 py-3">NPSN</th>
-                        <th class="px-6 py-3">Nama Sekolah</th>
-                        <th class="px-6 py-3">Kepala Sekolah</th>
-                        <th class="px-6 py-3">Kab/Kota</th>
-                        <th class="px-6 py-3 text-center">Status</th>
-                        <th class="px-6 py-3 text-right">Aksi</th>
+                        <th class="px-6 py-4 font-semibold">NPSN</th>
+                        <th class="px-6 py-4 font-semibold">Nama Sekolah</th>
+                        <th class="px-6 py-4 font-semibold">Kepala Sekolah</th>
+                        <th class="px-6 py-4 font-semibold">Kab/Kota</th>
+                        <th class="px-6 py-4 font-semibold">Status</th>
+                        <th class="px-6 py-4 font-semibold">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($schools as $school)
-                    <tr class="border-b border-slate-100 hover:bg-slate-50">
-                        <td class="px-6 py-4 font-medium text-slate-900">{{ $school->npsn }}</td>
-                        <td class="px-6 py-4 text-slate-700">{{ $school->nama }}</td>
-                        <td class="px-6 py-4 text-slate-600">{{ $school->kepala_sekolah ?? '-' }}</td>
-                        <td class="px-6 py-4 text-slate-600">{{ $school->kabupaten->nama ?? '-' }}</td>
+                    <tr class="bg-white border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                        <td class="px-6 py-4 font-medium">{{ $school->npsn }}</td>
+                        <td class="px-6 py-4">{{ $school->nama }}</td>
+                        <td class="px-6 py-4">{{ $school->kepala_sekolah ?? '-' }}</td>
+                        <td class="px-6 py-4">{{ $school->kabupaten->nama ?? '-' }}</td>
                         <td class="px-6 py-4 text-center">
                             @if($school->status == 'aktif')
                                 <span class="bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full text-xs font-semibold border border-emerald-200">Aktif</span>
@@ -87,7 +87,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="px-6 py-8 text-center text-slate-500">
+                        <td colspan="6" class="px-6 py-4 text-center">
                             Belum ada data sekolah.
                         </td>
                     </tr>

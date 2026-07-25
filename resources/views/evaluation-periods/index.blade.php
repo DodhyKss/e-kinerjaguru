@@ -12,27 +12,27 @@
     
     <div class="p-6">
         <div class="overflow-x-auto">
-            <table class="w-full text-sm text-left">
-                <thead class="text-xs text-slate-500 uppercase bg-slate-100/50 border-b border-slate-200">
+            <table class="w-full text-sm text-left text-slate-700 whitespace-nowrap">
+                <thead class="text-xs text-slate-600 uppercase bg-slate-100 border-b border-slate-200 tracking-wider">
                     <tr>
-                        <th class="px-6 py-3">Nama Periode</th>
-                        <th class="px-6 py-3">Sekolah Tujuan</th>
-                        <th class="px-6 py-3">Tahun Ajaran / Smt</th>
-                        <th class="px-6 py-3">Jadwal Pelaksanaan</th>
-                        <th class="px-6 py-3 text-center">Status</th>
-                        <th class="px-6 py-3 text-right">Aksi</th>
+                        <th class="px-6 py-4 font-semibold">Nama Periode</th>
+                        <th class="px-6 py-4 font-semibold">Sekolah Tujuan</th>
+                        <th class="px-6 py-4 font-semibold">Tahun Ajaran / Smt</th>
+                        <th class="px-6 py-4 font-semibold">Jadwal Pelaksanaan</th>
+                        <th class="px-6 py-4 font-semibold">Status</th>
+                        <th class="px-6 py-4 font-semibold">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($periods as $period)
-                    <tr class="border-b border-slate-100 hover:bg-slate-50">
-                        <td class="px-6 py-4 font-bold text-slate-900">{{ $period->nama }}</td>
-                        <td class="px-6 py-4 text-slate-700">{{ $period->school->nama }}</td>
+                    <tr class="bg-white border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                        <td class="px-6 py-4">{{ $period->nama }}</td>
+                        <td class="px-6 py-4">{{ $period->school->nama }}</td>
                         <td class="px-6 py-4">
                             <span class="font-medium">{{ $period->tahun_ajaran }}</span>
                             <span class="text-xs text-slate-500 ml-1">({{ ucfirst($period->semester) }})</span>
                         </td>
-                        <td class="px-6 py-4 text-slate-600 text-xs">
+                        <td class="px-6 py-4">
                             {{ \Carbon\Carbon::parse($period->tanggal_mulai)->format('d M Y') }} - <br>
                             {{ \Carbon\Carbon::parse($period->tanggal_selesai)->format('d M Y') }}
                         </td>
@@ -60,7 +60,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="px-6 py-8 text-center text-slate-500">
+                        <td colspan="6" class="px-6 py-4 text-center">
                             Belum ada data periode evaluasi.
                         </td>
                     </tr>

@@ -21,10 +21,15 @@ class ReportController extends Controller
             $query->whereHas('guru', function($q) use ($user) {
                 $q->where('school_id', $user->school_id);
             });
-        } elseif ($user->isPenilai()) {
-            $query->where('penilai_id', $user->penilai->id);
-        } elseif ($user->isGuru()) {
-            $query->where('guru_id', $user->guru->id);
+        } elseif ($user->isPenilai() || $user->isGuru()) {
+            $query->where(function($q) use ($user) {
+                if ($user->isPenilai()) {
+                    $q->orWhere('penilai_id', $user->penilai->id);
+                }
+                if ($user->isGuru()) {
+                    $q->orWhere('guru_id', $user->guru->id);
+                }
+            });
         }
         
         // Apply Filters

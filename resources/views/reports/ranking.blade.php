@@ -81,7 +81,7 @@
             <tbody>
                 @forelse($rankings as $index => $eval)
                     @php
-                        $rank = $index + 1;
+                        $rank = $rankings->firstItem() + $index;
                         $isTop1 = $rank === 1;
                         $isTop2 = $rank === 2;
                         $isTop3 = $rank === 3;
@@ -152,5 +152,11 @@
             </tbody>
         </table>
     </div>
+
+    @if($rankings->hasPages())
+    <div class="px-6 py-4 border-t border-slate-100">
+        {{ $rankings->links() }}
+    </div>
+    @endif
 </div>
 @endsection

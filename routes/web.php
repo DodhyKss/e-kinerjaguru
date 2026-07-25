@@ -67,13 +67,18 @@ Route::middleware('auth')->group(function () {
 
     // Master Data Guru & Penilai & Kepsek (Admin & Kepsek)
     Route::middleware('role:admin,kepala_sekolah')->group(function () {
+        Route::get('gurus/create-from-penilai', [GuruController::class, 'createFromPenilai'])->name('gurus.createFromPenilai');
         Route::resource('gurus', GuruController::class)->except(['show']);
+        Route::get('penilais/create-from-guru', [PenilaiController::class, 'createFromGuru'])->name('penilais.createFromGuru');
         Route::resource('penilais', PenilaiController::class)->except(['show']);
     });
     
-    // Master Kepala Sekolah (Admin only)
+    // Master Kepala Sekolah & Users (Admin only)
     Route::middleware('role:admin')->group(function () {
         Route::resource('kepala-sekolahs', \App\Http\Controllers\KepalaSekolahController::class)->except(['show']);
+        
+        Route::get('users', [\App\Http\Controllers\UserController::class, 'index'])->name('users.index');
+        Route::post('users/{user}/reset-password', [\App\Http\Controllers\UserController::class, 'resetPassword'])->name('users.reset-password');
     });
 
     // Evaluations

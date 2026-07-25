@@ -12,28 +12,32 @@
         @endif
     </div>
     <div class="overflow-x-auto">
-        <table class="w-full text-sm text-left">
-            <thead class="text-xs text-slate-500 uppercase bg-slate-100/50 border-b border-slate-100">
+        <table class="w-full text-sm text-left text-slate-700 whitespace-nowrap">
+            <thead class="text-xs text-slate-600 uppercase bg-slate-100 border-b border-slate-200 tracking-wider">
                 <tr>
-                    <th class="px-6 py-3">Periode</th>
-                    <th class="px-6 py-3">Guru Yang Dinilai</th>
-                    <th class="px-6 py-3">Asesor/Penilai</th>
-                    <th class="px-6 py-3">Status</th>
-                    <th class="px-6 py-3">Skor (Rata-rata)</th>
-                    <th class="px-6 py-3 text-right">Aksi</th>
+                    <th class="px-6 py-4 font-semibold">Periode</th>
+                    <th class="px-6 py-4 font-semibold">Guru Yang Dinilai</th>
+                    <th class="px-6 py-4 font-semibold">Asesor/Penilai</th>
+                    <th class="px-6 py-4 font-semibold">Status</th>
+                    <th class="px-6 py-4 font-semibold">Skor (Rata-rata)</th>
+                    <th class="px-6 py-4 font-semibold">Aksi</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($evaluations as $eval)
-                <tr class="bg-white border-b border-slate-50 hover:bg-slate-50/80 transition-colors">
-                    <td class="px-6 py-4 font-medium text-slate-900">{{ $eval->evaluationPeriod->nama }}</td>
+                <tr class="bg-white border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                    <td class="px-6 py-4 font-medium">{{ $eval->evaluationPeriod->nama }}</td>
                     <td class="px-6 py-4">
-                        <div class="font-medium text-slate-900">{{ $eval->guru->nama }}</div>
-                        <div class="text-xs text-slate-500">{{ $eval->guru->mata_pelajaran }}</div>
+                        @if(auth()->user()->guru && $eval->guru_id === auth()->user()->guru->id)
+                            <div class="font-bold text-indigo-600 bg-indigo-50 inline-block px-2 py-0.5 rounded text-xs mb-1">Anda</div>
+                        @else
+                            <div class="font-medium text-slate-900">{{ $eval->guru->nama }}</div>
+                            <div class="text-xs text-slate-500">{{ $eval->guru->mata_pelajaran }}</div>
+                        @endif
                     </td>
                     <td class="px-6 py-4">
-                        @if(auth()->user()->isPenilai())
-                            <span class="text-indigo-600 font-medium">Anda</span>
+                        @if(auth()->user()->penilai && $eval->penilai_id === auth()->user()->penilai->id)
+                            <span class="text-indigo-600 font-bold bg-indigo-50 inline-block px-2 py-0.5 rounded text-xs">Anda</span>
                         @else
                             {{ $eval->penilai->nama }}
                         @endif
@@ -81,7 +85,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="px-6 py-12 text-center text-slate-500">
+                    <td colspan="6" class="px-6 py-4 text-center">
                         <div class="flex flex-col items-center justify-center">
                             <i data-lucide="inbox" class="h-10 w-10 text-slate-300 mb-3"></i>
                             <p>Belum ada data evaluasi yang ditemukan.</p>

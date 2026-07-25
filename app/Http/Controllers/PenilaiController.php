@@ -36,7 +36,16 @@ class PenilaiController extends Controller
         $schools = $user->isAdmin() ? School::where('status', 'aktif')->orderBy('nama')->get() : collect();
         $allPenilais = ($user->isKepalaSekolah() ? Penilai::where('school_id', $user->school_id) : Penilai::query())->where('jabatan', '!=', 'Kepala Sekolah')->orderBy('nama')->get();
 
-        return view('penilais.index', compact('penilais', 'schools', 'allPenilais'));
+        $gurusBelumPenilai = \App\Models\Guru::whereDoesntHave('user.penilai')
+            ->whereDoesntHave('user.kepalaSekolah')
+            ->whereNotNull('user_id')
+            ->when($user->isKepalaSekolah(), function($q) use ($user) {
+                $q->where('school_id', $user->school_id);
+            })
+            ->orderBy('nama')
+            ->get();
+
+        return view('penilais.index', compact('penilais', 'schools', 'allPenilais', 'gurusBelumPenilai'));
     }
 
     public function create()
@@ -49,6 +58,20 @@ class PenilaiController extends Controller
         $pangkatGolongans = \App\Models\PangkatGolongan::all();
         $gurus = \App\Models\Guru::with('school')->where('status', 'aktif')->get();
         return view('penilais.create', compact('schools', 'pangkatGolongans', 'gurus'));
+    }
+
+    public function createFromGuru(Request $request)
+    {
+        if (!Auth::user()->isAdmin()) {
+            abort(403);
+        }
+
+        $guru = \App\Models\Guru::findOrFail($request->guru_id);
+
+        $schools = School::where('status', 'aktif')->get();
+        $pangkatGolongans = \App\Models\PangkatGolongan::all();
+        $gurus = \App\Models\Guru::with('school')->where('status', 'aktif')->get();
+        return view('penilais.create', compact('schools', 'pangkatGolongans', 'gurus', 'guru'));
     }
 
     public function store(Request $request)
@@ -65,22 +88,31 @@ class PenilaiController extends Controller
             'jabatan' => 'required|string|max:100',
             'instansi' => 'required|string|max:100',
             'no_telepon' => 'nullable|string|max:20',
-            'email' => 'required|email|unique:users,email|max:255',
+            'email' => 'required|email|max:255',
             'guru_ids' => 'nullable|array',
             'guru_ids.*' => 'exists:gurus,id',
         ]);
 
-        DB::transaction(function () use ($validated) {
-            // Default password for Penilai is "password123" if NIP is empty, otherwise NIP
-            $password = !empty($validated['nip']) ? $validated['nip'] : 'password123';
+        $existingUser = User::where('email', $validated['email'])->first();
+        if ($existingUser && $existingUser->penilai) {
+            return back()->withErrors(['email' => 'Email ini sudah terdaftar sebagai Asesor.'])->withInput();
+        }
 
-            $user = User::create([
-                'name' => $validated['nama'],
-                'email' => $validated['email'],
-                'password' => Hash::make($password),
-                'role' => 'penilai',
-                'school_id' => $validated['school_id'],
-            ]);
+        DB::transaction(function () use ($validated, $existingUser) {
+            if ($existingUser) {
+                $user = $existingUser;
+            } else {
+                // Default password for Penilai is "password123" if NIP is empty, otherwise NIP
+                $password = !empty($validated['nip']) ? $validated['nip'] : 'password123';
+
+                $user = User::create([
+                    'name' => $validated['nama'],
+                    'email' => $validated['email'],
+                    'password' => Hash::make($password),
+                    'role' => 'penilai',
+                    'school_id' => $validated['school_id'],
+                ]);
+            }
 
             $penilai = Penilai::create([
                 'user_id' => $user->id,
@@ -98,7 +130,7 @@ class PenilaiController extends Controller
             }
         });
 
-        return redirect()->route('penilais.index')->with('success', 'Data Asesor/Penilai berhasil ditambahkan dan Akun otomatis dibuat.');
+        return redirect()->route('penilais.index')->with('success', 'Data Asesor/Penilai berhasil ditambahkan (Dual Profile terhubung jika menggunakan email Guru).');
     }
 
     public function edit(Penilai $penilai)
@@ -109,7 +141,10 @@ class PenilaiController extends Controller
 
         $schools = School::where('status', 'aktif')->get();
         $pangkatGolongans = \App\Models\PangkatGolongan::all();
-        $gurus = \App\Models\Guru::with('school')->where('status', 'aktif')->get();
+        $gurus = \App\Models\Guru::with('school')
+            ->where('status', 'aktif')
+            ->where('user_id', '!=', $penilai->user_id)
+            ->get();
         $assignedGuruIds = $penilai->gurus()->pluck('gurus.id')->toArray();
         return view('penilais.edit', compact('penilai', 'schools', 'pangkatGolongans', 'gurus', 'assignedGuruIds'));
     }
@@ -150,7 +185,13 @@ class PenilaiController extends Controller
                 'no_telepon' => $validated['no_telepon'],
             ]);
 
-            $penilai->gurus()->sync($validated['guru_ids'] ?? []);
+            $guruIdsToSync = [];
+            if (!empty($validated['guru_ids'])) {
+                $guruIdsToSync = \App\Models\Guru::whereIn('id', $validated['guru_ids'])
+                    ->where('user_id', '!=', $penilai->user_id)
+                    ->pluck('id')->toArray();
+            }
+            $penilai->gurus()->sync($guruIdsToSync);
         });
 
         return redirect()->route('penilais.index')->with('success', 'Data Asesor/Penilai berhasil diperbarui.');

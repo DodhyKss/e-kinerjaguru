@@ -27,11 +27,25 @@ class EvaluationController extends Controller
                 ->paginate(15);
         } else if ($user->isPenilai()) {
             $assignedGuruIds = $user->penilai->gurus()->pluck('gurus.id');
-            $evaluations = Evaluation::with(['guru', 'evaluationPeriod'])
-                ->where('penilai_id', $user->penilai->id)
-                ->whereIn('guru_id', $assignedGuruIds)
-                ->latest()
-                ->paginate(15);
+            
+            if ($user->guru) {
+                $evaluations = Evaluation::with(['guru', 'penilai', 'evaluationPeriod'])
+                    ->where(function($query) use ($user, $assignedGuruIds) {
+                        $query->where('penilai_id', $user->penilai->id)
+                              ->whereIn('guru_id', $assignedGuruIds);
+                    })
+                    ->orWhere(function($query) use ($user) {
+                        $query->where('guru_id', $user->guru->id);
+                    })
+                    ->latest()
+                    ->paginate(15);
+            } else {
+                $evaluations = Evaluation::with(['guru', 'evaluationPeriod'])
+                    ->where('penilai_id', $user->penilai->id)
+                    ->whereIn('guru_id', $assignedGuruIds)
+                    ->latest()
+                    ->paginate(15);
+            }
         } else if ($user->isGuru()) {
             $evaluations = Evaluation::with(['penilai', 'evaluationPeriod'])
                 ->where('guru_id', $user->guru->id)
@@ -129,6 +143,10 @@ class EvaluationController extends Controller
         $guru = Guru::findOrFail($validated['guru_id']);
         $penilai = \App\Models\Penilai::findOrFail($validated['penilai_id']);
 
+        if ($penilai->user_id && $guru->user_id && $penilai->user_id === $guru->user_id) {
+            return back()->with('error', 'Seorang Asesor tidak dapat menilai dirinya sendiri.')->withInput();
+        }
+
         // Jika Kepala Sekolah yang membuat, pastikan guru dan penilai berasal dari sekolahnya
         if ($user->isKepalaSekolah()) {
             if ($guru->school_id !== $user->school_id || $penilai->school_id !== $user->school_id) {
@@ -207,6 +225,10 @@ class EvaluationController extends Controller
         $guru = Guru::findOrFail($validated['guru_id']);
         $penilai = \App\Models\Penilai::findOrFail($validated['penilai_id']);
 
+        if ($penilai->user_id && $guru->user_id && $penilai->user_id === $guru->user_id) {
+            return back()->with('error', 'Seorang Asesor tidak dapat menilai dirinya sendiri.')->withInput();
+        }
+
         if ($user->isKepalaSekolah()) {
             if ($guru->school_id !== $user->school_id || $penilai->school_id !== $user->school_id) {
                 abort(403, 'Anda hanya dapat menugaskan evaluasi untuk sekolah Anda sendiri.');
@@ -252,13 +274,12 @@ class EvaluationController extends Controller
         $user = Auth::user();
         
         // Authorization check
-        if ($user->isPenilai() && $evaluation->penilai_id !== $user->penilai->id) {
-            abort(403);
-        }
-        if ($user->isGuru() && $evaluation->guru_id !== $user->guru->id) {
-            abort(403);
-        }
-        if ($user->isKepalaSekolah() && $evaluation->guru->school_id !== $user->school_id) {
+        $isAssignedPenilai = $user->penilai && $evaluation->penilai_id === $user->penilai->id;
+        $isEvaluatedGuru = $user->guru && $evaluation->guru_id === $user->guru->id;
+        $isKepsekOfSchool = $user->isKepalaSekolah() && $evaluation->guru->school_id === $user->school_id;
+        $isAdmin = $user->isAdmin();
+
+        if (!$isAssignedPenilai && !$isEvaluatedGuru && !$isKepsekOfSchool && !$isAdmin) {
             abort(403);
         }
 
@@ -285,13 +306,12 @@ class EvaluationController extends Controller
         $user = Auth::user();
         
         // Authorization check
-        if ($user->isPenilai() && $evaluation->penilai_id !== $user->penilai->id) {
-            abort(403);
-        }
-        if ($user->isGuru() && $evaluation->guru_id !== $user->guru->id) {
-            abort(403);
-        }
-        if ($user->isKepalaSekolah() && $evaluation->guru->school_id !== $user->school_id) {
+        $isAssignedPenilai = $user->penilai && $evaluation->penilai_id === $user->penilai->id;
+        $isEvaluatedGuru = $user->guru && $evaluation->guru_id === $user->guru->id;
+        $isKepsekOfSchool = $user->isKepalaSekolah() && $evaluation->guru->school_id === $user->school_id;
+        $isAdmin = $user->isAdmin();
+
+        if (!$isAssignedPenilai && !$isEvaluatedGuru && !$isKepsekOfSchool && !$isAdmin) {
             abort(403);
         }
 
@@ -330,7 +350,7 @@ class EvaluationController extends Controller
     public function indicatorForm(Evaluation $evaluation, Indicator $indicator)
     {
         $user = Auth::user();
-        $isAssignedPenilai = $user->isPenilai() && $evaluation->penilai_id === $user->penilai->id;
+        $isAssignedPenilai = $user->penilai && $evaluation->penilai_id === $user->penilai->id;
         $isKepsekOfSchool = $user->isKepalaSekolah() && $evaluation->guru->school_id === $user->school_id;
 
         if (!$isAssignedPenilai && !$isKepsekOfSchool) {
@@ -351,7 +371,7 @@ class EvaluationController extends Controller
     public function saveIndicatorForm(Request $request, Evaluation $evaluation, Indicator $indicator)
     {
         $user = Auth::user();
-        $isAssignedPenilai = $user->isPenilai() && $evaluation->penilai_id === $user->penilai->id;
+        $isAssignedPenilai = $user->penilai && $evaluation->penilai_id === $user->penilai->id;
         $isKepsekOfSchool = $user->isKepalaSekolah() && $evaluation->guru->school_id === $user->school_id;
 
         if (!$isAssignedPenilai && !$isKepsekOfSchool) {
@@ -444,8 +464,9 @@ class EvaluationController extends Controller
 
     public function uploadDokumenForm(Evaluation $evaluation, Indicator $indicator)
     {
+        $user = Auth::user();
         // Hanya Guru yang dinilai yang boleh akses
-        if (!Auth::user()->isGuru() || $evaluation->guru_id !== Auth::user()->guru->id) {
+        if (!$user->guru || $evaluation->guru_id !== $user->guru->id) {
             abort(403);
         }
 
@@ -466,7 +487,8 @@ class EvaluationController extends Controller
 
     public function storeDokumen(Request $request, Evaluation $evaluation, Indicator $indicator)
     {
-        if (!Auth::user()->isGuru() || $evaluation->guru_id !== Auth::user()->guru->id) {
+        $user = Auth::user();
+        if (!$user->guru || $evaluation->guru_id !== $user->guru->id) {
             abort(403);
         }
 
@@ -514,7 +536,8 @@ class EvaluationController extends Controller
 
     public function generalUploadForm(Evaluation $evaluation)
     {
-        if (!Auth::user()->isGuru() || $evaluation->guru_id !== Auth::user()->guru->id) {
+        $user = Auth::user();
+        if (!$user->guru || $evaluation->guru_id !== $user->guru->id) {
             abort(403);
         }
 
@@ -541,7 +564,8 @@ class EvaluationController extends Controller
 
     public function storeGeneralUpload(Request $request, Evaluation $evaluation)
     {
-        if (!Auth::user()->isGuru() || $evaluation->guru_id !== Auth::user()->guru->id) {
+        $user = Auth::user();
+        if (!$user->guru || $evaluation->guru_id !== $user->guru->id) {
             abort(403);
         }
 
@@ -598,7 +622,7 @@ class EvaluationController extends Controller
     public function submit(Evaluation $evaluation)
     {
         $user = Auth::user();
-        $isAssignedPenilai = $user->isPenilai() && $evaluation->penilai_id === $user->penilai->id;
+        $isAssignedPenilai = $user->penilai && $evaluation->penilai_id === $user->penilai->id;
         $isKepsekOfSchool = $user->isKepalaSekolah() && $evaluation->guru->school_id === $user->school_id;
 
         if (!$isAssignedPenilai && !$isKepsekOfSchool) {
@@ -644,13 +668,12 @@ class EvaluationController extends Controller
         $user = Auth::user();
         
         // Authorization check
-        if ($user->isPenilai() && $evaluation->penilai_id !== $user->penilai->id) {
-            abort(403);
-        }
-        if ($user->isGuru() && $evaluation->guru_id !== $user->guru->id) {
-            abort(403);
-        }
-        if ($user->isKepalaSekolah() && $evaluation->guru->school_id !== $user->school_id) {
+        $isAssignedPenilai = $user->penilai && $evaluation->penilai_id === $user->penilai->id;
+        $isEvaluatedGuru = $user->guru && $evaluation->guru_id === $user->guru->id;
+        $isKepsekOfSchool = $user->isKepalaSekolah() && $evaluation->guru->school_id === $user->school_id;
+        $isAdmin = $user->isAdmin();
+
+        if (!$isAssignedPenilai && !$isEvaluatedGuru && !$isKepsekOfSchool && !$isAdmin) {
             abort(403);
         }
 

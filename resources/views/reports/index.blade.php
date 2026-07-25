@@ -95,8 +95,12 @@
                 <tr class="bg-white border-b border-slate-50 hover:bg-slate-50/80 transition-colors">
                     <td class="px-6 py-4 font-medium text-slate-900">{{ $eval->evaluationPeriod->nama }}</td>
                     <td class="px-6 py-4">
-                        <div class="font-medium text-slate-900">{{ $eval->guru->nama }}</div>
-                        <div class="text-xs text-slate-500">{{ $eval->guru->mata_pelajaran }}</div>
+                        @if(auth()->user()->guru && $eval->guru_id === auth()->user()->guru->id)
+                            <div class="font-bold text-indigo-600 bg-indigo-50 inline-block px-2 py-0.5 rounded text-xs mb-1">Anda</div>
+                        @else
+                            <div class="font-medium text-slate-900">{{ $eval->guru->nama }}</div>
+                            <div class="text-xs text-slate-500">{{ $eval->guru->mata_pelajaran }}</div>
+                        @endif
                     </td>
                     @if(!auth()->user()->isGuru())
                         <td class="px-6 py-4 text-slate-600">
@@ -104,8 +108,8 @@
                         </td>
                     @endif
                     <td class="px-6 py-4">
-                        @if(auth()->user()->isPenilai())
-                            <span class="text-indigo-600 font-medium">Anda</span>
+                        @if(auth()->user()->penilai && $eval->penilai_id === auth()->user()->penilai->id)
+                            <span class="text-indigo-600 font-bold bg-indigo-50 inline-block px-2 py-0.5 rounded text-xs">Anda</span>
                         @else
                             {{ $eval->penilai->nama }}
                         @endif

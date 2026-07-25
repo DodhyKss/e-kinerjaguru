@@ -11,21 +11,21 @@
 
 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
     <div class="overflow-x-auto">
-        <table class="w-full text-sm text-left">
-            <thead class="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
+        <table class="w-full text-sm text-left text-slate-700 whitespace-nowrap">
+            <thead class="text-xs text-slate-600 uppercase bg-slate-100 border-b border-slate-200 tracking-wider">
                 <tr>
-                    <th class="px-6 py-4">Periode</th>
-                    <th class="px-6 py-4">Guru yang Dinilai</th>
-                    <th class="px-6 py-4">Penilai</th>
-                    <th class="px-6 py-4 text-center">Skor Akhir</th>
-                    <th class="px-6 py-4">Status Rekomendasi</th>
-                    <th class="px-6 py-4 text-right">Aksi</th>
+                    <th class="px-6 py-4 font-semibold">Periode</th>
+                    <th class="px-6 py-4 font-semibold">Guru yang Dinilai</th>
+                    <th class="px-6 py-4 font-semibold">Penilai</th>
+                    <th class="px-6 py-4 font-semibold">Skor Akhir</th>
+                    <th class="px-6 py-4 font-semibold">Status Rekomendasi</th>
+                    <th class="px-6 py-4 font-semibold">Aksi</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-200">
                 @forelse($evaluations as $item)
-                <tr class="hover:bg-slate-50 transition-colors">
-                    <td class="px-6 py-4 font-medium text-slate-900">{{ $item->evaluationPeriod->nama }}</td>
+                <tr class="bg-white border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                    <td class="px-6 py-4 font-medium">{{ $item->evaluationPeriod->nama }}</td>
                     <td class="px-6 py-4">
                         <div class="font-medium text-slate-900">{{ $item->guru->nama }}</div>
                         <div class="text-xs text-slate-500">NIP. {{ $item->guru->nip }}</div>
@@ -61,7 +61,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="px-6 py-8 text-center text-slate-500">
+                    <td colspan="6" class="px-6 py-4 text-center">
                         <div class="flex flex-col items-center">
                             <i data-lucide="inbox" class="w-10 h-10 text-slate-300 mb-3"></i>
                             <p>Belum ada evaluasi yang selesai untuk diberikan rekomendasi.</p>

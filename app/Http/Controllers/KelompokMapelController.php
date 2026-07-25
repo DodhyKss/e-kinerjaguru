@@ -9,7 +9,7 @@ class KelompokMapelController extends Controller
 {
     public function index()
     {
-        $kelompokMapels = KelompokMapel::orderBy('nama_kelompok_mapel')->get();
+        $kelompokMapels = KelompokMapel::orderBy('nama_kelompok_mapel')->paginate(10);
         return view('kelompok_mapels.index', compact('kelompokMapels'));
     }
 

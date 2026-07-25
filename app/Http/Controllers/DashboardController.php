@@ -15,13 +15,19 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        return match ($user->role) {
-            'admin' => $this->adminDashboard(),
-            'kepala_sekolah' => $this->kepsekDashboard($user),
-            'penilai' => $this->penilaiDashboard($user),
-            'guru' => $this->guruDashboard($user),
-            default => abort(403),
-        };
+        if ($user->isAdmin()) {
+            return $this->adminDashboard();
+        }
+        
+        if ($user->isKepalaSekolah()) {
+            return $this->kepsekDashboard($user);
+        }
+
+        if ($user->isGuru() || $user->isPenilai()) {
+            return $this->guruPenilaiDashboard($user);
+        }
+
+        abort(403);
     }
 
     private function adminDashboard()
@@ -62,40 +68,43 @@ class DashboardController extends Controller
         return view('dashboard.kepala_sekolah', compact('stats', 'recentEvaluations'));
     }
 
-    private function penilaiDashboard($user)
+    private function guruPenilaiDashboard($user)
     {
-        $penilaiId = $user->penilai->id;
-        $stats = [
-            'total_assigned' => Evaluation::where('penilai_id', $penilaiId)->count(),
-            'in_progress' => Evaluation::where('penilai_id', $penilaiId)->whereIn('status', ['draft', 'in_progress'])->count(),
-            'completed' => Evaluation::where('penilai_id', $penilaiId)->whereIn('status', ['completed', 'approved'])->count(),
+        $data = [
+            'isPenilai' => $user->isPenilai(),
+            'isGuru' => $user->isGuru(),
         ];
 
-        $evaluations = Evaluation::with(['guru', 'evaluationPeriod'])
-            ->where('penilai_id', $penilaiId)
-            ->orderByRaw("FIELD(status, 'in_progress', 'draft', 'completed', 'approved')")
-            ->latest()
-            ->get();
+        if ($data['isPenilai']) {
+            $penilaiId = $user->penilai->id;
+            $data['penilaiStats'] = [
+                'total_assigned' => Evaluation::where('penilai_id', $penilaiId)->count(),
+                'in_progress' => Evaluation::where('penilai_id', $penilaiId)->whereIn('status', ['draft', 'in_progress'])->count(),
+                'completed' => Evaluation::where('penilai_id', $penilaiId)->whereIn('status', ['completed', 'approved'])->count(),
+            ];
 
-        return view('dashboard.penilai', compact('stats', 'evaluations'));
-    }
+            $data['penilaiEvaluations'] = Evaluation::with(['guru', 'evaluationPeriod'])
+                ->where('penilai_id', $penilaiId)
+                ->orderByRaw("FIELD(status, 'in_progress', 'draft', 'completed', 'approved')")
+                ->latest()
+                ->get();
+        }
 
-    private function guruDashboard($user)
-    {
-        $guruId = $user->guru->id;
-        
-        $currentEvaluation = Evaluation::with(['evaluationPeriod', 'penilai'])
-            ->where('guru_id', $guruId)
-            ->whereHas('evaluationPeriod', function($q) {
-                $q->where('status', 'aktif');
-            })->first();
-            
-        $historyEvaluations = Evaluation::with(['evaluationPeriod'])
-            ->where('guru_id', $guruId)
-            ->whereIn('status', ['completed', 'approved'])
-            ->latest()
-            ->get();
+        if ($data['isGuru']) {
+            $guruId = $user->guru->id;
+            $data['guruCurrentEvaluation'] = Evaluation::with(['evaluationPeriod', 'penilai'])
+                ->where('guru_id', $guruId)
+                ->whereHas('evaluationPeriod', function($q) {
+                    $q->where('status', 'aktif');
+                })->first();
+                
+            $data['guruHistoryEvaluations'] = Evaluation::with(['evaluationPeriod'])
+                ->where('guru_id', $guruId)
+                ->whereIn('status', ['completed', 'approved'])
+                ->latest()
+                ->get();
+        }
 
-        return view('dashboard.guru', compact('currentEvaluation', 'historyEvaluations'));
+        return view('dashboard.guru_penilai', $data);
     }
 }

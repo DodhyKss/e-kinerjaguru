@@ -6,9 +6,14 @@
     <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
         <h3 class="text-lg font-medium text-slate-900">Daftar Asesor Kinerja</h3>
         @if(auth()->user()->isAdmin())
-        <a href="{{ route('penilais.create') }}" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors inline-flex items-center">
-            <i data-lucide="plus" class="w-4 h-4 mr-1"></i> Tambah Asesor
-        </a>
+        <div class="flex gap-2">
+            <button type="button" onclick="document.getElementById('modalTambahDariGuru').classList.remove('hidden')" class="bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors inline-flex items-center">
+                <i data-lucide="user-plus" class="w-4 h-4 mr-1"></i> Tambah dari Guru
+            </button>
+            <a href="{{ route('penilais.create') }}" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors inline-flex items-center">
+                <i data-lucide="plus" class="w-4 h-4 mr-1"></i> Tambah Asesor Baru
+            </a>
+        </div>
         @endif
     </div>
     
@@ -49,32 +54,32 @@
 
     <div class="p-6">
         <div class="overflow-x-auto">
-            <table class="w-full text-sm text-left">
-                <thead class="text-xs text-slate-500 uppercase bg-slate-100/50 border-b border-slate-200">
+            <table class="w-full text-sm text-left text-slate-700 whitespace-nowrap">
+                <thead class="text-xs text-slate-600 uppercase bg-slate-100 border-b border-slate-200 tracking-wider">
                     <tr>
-                        <th class="px-6 py-3">Nama Asesor</th>
-                        <th class="px-6 py-3">NIP / ID</th>
-                        <th class="px-6 py-3">Jabatan & Instansi</th>
-                        <th class="px-6 py-3">Penugasan Sekolah</th>
-                        <th class="px-6 py-3">Guru Yang Dinilai</th>
+                        <th class="px-6 py-4 font-semibold">Nama Asesor</th>
+                        <th class="px-6 py-4 font-semibold">NIP / ID</th>
+                        <th class="px-6 py-4 font-semibold">Jabatan & Instansi</th>
+                        <th class="px-6 py-4 font-semibold">Penugasan Sekolah</th>
+                        <th class="px-6 py-4 font-semibold">Guru Yang Dinilai</th>
                         @if(auth()->user()->isAdmin())
-                        <th class="px-6 py-3 text-right">Aksi</th>
+                        <th class="px-6 py-4 font-semibold">Aksi</th>
                         @endif
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($penilais as $penilai)
-                    <tr class="border-b border-slate-100 hover:bg-slate-50">
+                    <tr class="bg-white border-b border-slate-100 hover:bg-slate-50 transition-colors">
                         <td class="px-6 py-4">
                             <div class="font-bold text-indigo-900">{{ $penilai->nama }}</div>
                             <div class="text-xs text-slate-500">{{ $penilai->user->email ?? '-' }}</div>
                         </td>
-                        <td class="px-6 py-4 font-medium text-slate-900">{{ $penilai->nip ?? '-' }}</td>
+                        <td class="px-6 py-4 font-medium">{{ $penilai->nip ?? '-' }}</td>
                         <td class="px-6 py-4">
                             <div class="text-slate-800">{{ $penilai->jabatan }}</div>
                             <div class="text-xs text-slate-500">{{ $penilai->instansi }}</div>
                         </td>
-                        <td class="px-6 py-4 text-slate-600">{{ $penilai->school->nama ?? '-' }}</td>
+                        <td class="px-6 py-4">{{ $penilai->school->nama ?? '-' }}</td>
                         <td class="px-6 py-4">
                             @if($penilai->gurus && $penilai->gurus->count() > 0)
                                 <div class="flex flex-wrap gap-1 max-w-xs">
@@ -132,4 +137,46 @@
         });
     });
 </script>
+
+<!-- Modal Tambah dari Guru -->
+<div id="modalTambahDariGuru" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:p-0">
+        <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" aria-hidden="true" onclick="document.getElementById('modalTambahDariGuru').classList.add('hidden')"></div>
+        <div class="relative inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-slate-100">
+            <form action="{{ route('penilais.createFromGuru') }}" method="GET">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mt-3 text-center sm:mt-0 sm:text-left w-full">
+                            <h3 class="text-lg leading-6 font-bold text-slate-900" id="modal-title">
+                                Tambah Asesor dari Data Guru
+                            </h3>
+                            <div class="mt-4">
+                                <p class="text-sm text-slate-500 mb-4">
+                                    Pilih Guru yang ingin ditugaskan sebagai Asesor. Form pembuatan Asesor akan terbuka otomatis terisi dengan data mereka.
+                                </p>
+                                <select name="guru_id" class="block w-full rounded-xl border-slate-300 shadow-sm sm:text-sm p-2.5 border" required>
+                                    <option value="">-- Pilih Guru --</option>
+                                    @forelse($gurusBelumPenilai as $g)
+                                        <option value="{{ $g->id }}">{{ $g->nama }} ({{ $g->nip ?? '-' }})</option>
+                                    @empty
+                                        <option value="" disabled>Semua Guru sudah terdaftar sebagai Asesor</option>
+                                    @endforelse
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-slate-50 px-4 py-4 sm:px-6 sm:flex sm:flex-row-reverse border-t border-slate-100">
+                    <button type="submit" class="w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm transition-colors">
+                        Lanjut ke Form
+                    </button>
+                    <button type="button" onclick="document.getElementById('modalTambahDariGuru').classList.add('hidden')" class="mt-3 w-full inline-flex justify-center rounded-xl border border-slate-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-slate-700 hover:bg-slate-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
+                        Batal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @endsection

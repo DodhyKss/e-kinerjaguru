@@ -106,7 +106,7 @@
                         $eval = $guru->evaluations->first();
                     @endphp
                 <tr class="border-b border-slate-50 hover:bg-slate-50/80 transition-colors">
-                    <td class="px-6 py-4 text-slate-500">{{ $index + 1 }}</td>
+                    <td class="px-6 py-4 text-slate-500">{{ $gurus->firstItem() + $index }}</td>
                     <td class="px-6 py-4">
                         <div class="font-bold text-slate-900">{{ $guru->nama }}</div>
                         <div class="text-xs text-slate-500 mt-0.5">{{ $guru->nip ?? '-' }}</div>
@@ -170,6 +170,12 @@
             </tbody>
         </table>
     </div>
+
+    @if($gurus->hasPages())
+    <div class="px-6 py-4 border-t border-slate-100">
+        {{ $gurus->links() }}
+    </div>
+    @endif
 </div>
 @endif
 

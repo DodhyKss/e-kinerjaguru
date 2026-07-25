@@ -15,7 +15,11 @@
         </div>
         <div>
             <h3 class="text-lg font-bold text-slate-900">Form Tambah Guru</h3>
+            @if(isset($penilai))
+            <p class="text-sm text-emerald-600 mt-1 font-medium"><i data-lucide="check-circle" class="w-4 h-4 inline mr-1"></i> Mode Penambahan Profil Ganda. Sebagian data telah diisi otomatis dari Profil Asesor.</p>
+            @else
             <p class="text-sm text-slate-600 mt-1">Sistem akan secara otomatis membuatkan akun pengguna dengan <span class="font-bold text-indigo-700">password default menggunakan NIP</span>.</p>
+            @endif
         </div>
     </div>
     
@@ -29,7 +33,7 @@
                 <select name="school_id" id="school_id" required class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border @error('school_id') border-rose-300 ring-rose-500 @enderror">
                     <option value="">-- Pilih Sekolah --</option>
                     @foreach($schools as $school)
-                        <option value="{{ $school->id }}" {{ old('school_id') == $school->id ? 'selected' : '' }}>{{ $school->npsn }} - {{ $school->nama }}</option>
+                        <option value="{{ $school->id }}" {{ old('school_id', isset($penilai) ? $penilai->school_id : '') == $school->id ? 'selected' : '' }}>{{ $school->npsn }} - {{ $school->nama }}</option>
                     @endforeach
                 </select>
                 @error('school_id') <p class="mt-1 text-sm text-rose-500">{{ $message }}</p> @enderror
@@ -37,19 +41,22 @@
             
             <div>
                 <label for="nama" class="block text-sm font-bold text-slate-700 mb-1">Nama Lengkap (beserta gelar) <span class="text-rose-500">*</span></label>
-                <input type="text" name="nama" id="nama" value="{{ old('nama') }}" required class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border @error('nama') border-rose-300 ring-rose-500 @enderror">
+                <input type="text" name="nama" id="nama" value="{{ old('nama', isset($penilai) ? $penilai->nama : '') }}" required class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border @error('nama') border-rose-300 ring-rose-500 @enderror">
                 @error('nama') <p class="mt-1 text-sm text-rose-500">{{ $message }}</p> @enderror
             </div>
             
             <div>
                 <label for="email" class="block text-sm font-bold text-slate-700 mb-1">Email (Untuk Login) <span class="text-rose-500">*</span></label>
-                <input type="email" name="email" id="email" value="{{ old('email') }}" required class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border @error('email') border-rose-300 ring-rose-500 @enderror">
+                <input type="email" name="email" id="email" value="{{ old('email', (isset($penilai) && $penilai->user) ? $penilai->user->email : '') }}" required {{ isset($penilai) ? 'readonly' : '' }} class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border {{ isset($penilai) ? 'bg-slate-100 text-slate-500' : '' }} @error('email') border-rose-300 ring-rose-500 @enderror">
+                @if(isset($penilai))
+                    <p class="mt-1 text-xs text-emerald-600">Email dikunci untuk menghubungkan dengan akun yang sama.</p>
+                @endif
                 @error('email') <p class="mt-1 text-sm text-rose-500">{{ $message }}</p> @enderror
             </div>
 
             <div>
                 <label for="nip" class="block text-sm font-bold text-slate-700 mb-1">NIP (Juga untuk Password) <span class="text-rose-500">*</span></label>
-                <input type="text" name="nip" id="nip" value="{{ old('nip') }}" required class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border @error('nip') border-rose-300 ring-rose-500 @enderror">
+                <input type="text" name="nip" id="nip" value="{{ old('nip', isset($penilai) ? $penilai->nip : '') }}" required class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border @error('nip') border-rose-300 ring-rose-500 @enderror">
                 @error('nip') <p class="mt-1 text-sm text-rose-500">{{ $message }}</p> @enderror
             </div>
 
@@ -68,7 +75,7 @@
 
             <div>
                 <label for="no_telepon" class="block text-sm font-bold text-slate-700 mb-1">Nomor Telepon/HP</label>
-                <input type="text" name="no_telepon" id="no_telepon" value="{{ old('no_telepon') }}" class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border">
+                <input type="text" name="no_telepon" id="no_telepon" value="{{ old('no_telepon', isset($penilai) ? $penilai->no_telepon : '') }}" class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border">
             </div>
         </div>
 
@@ -105,7 +112,7 @@
                 <select name="pangkat_golongan_id" id="pangkat_golongan_id" class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border select2">
                     <option value="">-- Pilih Pangkat/Golongan --</option>
                     @foreach($pangkatGolongans as $item)
-                        <option value="{{ $item->id }}" {{ old('pangkat_golongan_id') == $item->id ? 'selected' : '' }}>{{ $item->nama }}</option>
+                        <option value="{{ $item->id }}" {{ old('pangkat_golongan_id', isset($penilai) ? $penilai->pangkat_golongan_id : '') == $item->id ? 'selected' : '' }}>{{ $item->nama }}</option>
                     @endforeach
                 </select>
             </div>

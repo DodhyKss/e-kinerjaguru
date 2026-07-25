@@ -60,9 +60,9 @@ class RecapController extends Controller
         // Fetch all matching gurus. 
         // For Admin, if no school is selected, we return empty collection to force them to select one.
         if (!$schoolId && $user->isAdmin()) {
-            $gurus = collect(); 
+            $gurus = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10); 
         } else {
-            $gurus = $query->orderBy('nama', 'asc')->get();
+            $gurus = $query->orderBy('nama', 'asc')->paginate(10)->withQueryString();
         }
 
         // Supporting data for filters

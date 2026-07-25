@@ -63,21 +63,21 @@
             <h3 class="text-lg font-bold text-slate-900 mb-6 flex items-center"><i data-lucide="eye" class="w-5 h-5 mr-2 text-indigo-600"></i> Tabel Pengumpulan Data Observasi</h3>
             
             <div class="overflow-x-auto mb-6">
-                <table class="w-full text-sm text-left">
-                    <thead class="text-xs text-slate-500 uppercase bg-slate-50 border border-slate-200">
+                <table class="w-full text-sm text-left text-slate-700 whitespace-nowrap">
+                    <thead class="text-xs text-slate-600 uppercase bg-slate-100 border-b border-slate-200 tracking-wider">
                         <tr>
-                            <th class="px-4 py-3 border-r border-slate-200 w-12 text-center">No</th>
-                            <th class="px-4 py-3 border-r border-slate-200 w-1/2">Aspek yang Diobservasi</th>
-                            <th class="px-4 py-3">Hasil Observasi (Faktual)</th>
+                            <th class="px-6 py-4 font-semibold">No</th>
+                            <th class="px-6 py-4 font-semibold">Aspek yang Diobservasi</th>
+                            <th class="px-6 py-4 font-semibold">Hasil Observasi (Faktual)</th>
                         </tr>
                     </thead>
                     <tbody class="border border-slate-200">
                         @foreach($indicator->observationAspects as $aspect)
                         @php $val = $result->observationData->where('assessment_aspect_id', $aspect->id)->first()?->hasil ?? ''; @endphp
-                        <tr class="border-b border-slate-200">
-                            <td class="px-4 py-3 border-r border-slate-200 text-center text-slate-500">{{ $aspect->nomor }}</td>
-                            <td class="px-4 py-3 border-r border-slate-200 text-slate-700">{{ $aspect->aspek }}</td>
-                            <td class="px-0 py-0 relative">
+                        <tr class="bg-white border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                            <td class="px-6 py-4 text-center">{{ $aspect->nomor }}</td>
+                            <td class="px-6 py-4">{{ $aspect->aspek }}</td>
+                            <td class="px-6 py-4">
                                 <textarea name="observation[{{ $aspect->id }}]" rows="2" {{ isset($isReadOnly) && $isReadOnly ? 'readonly disabled' : '' }} class="w-full h-full min-h-[60px] border-0 focus:ring-2 focus:ring-inset focus:ring-indigo-500 resize-y p-3 bg-transparent" placeholder="Catat hasil observasi...">{{ $val }}</textarea>
                             </td>
                         </tr>
@@ -99,13 +99,13 @@
             <h3 class="text-lg font-bold text-slate-900 mb-6 flex items-center"><i data-lucide="file-text" class="w-5 h-5 mr-2 text-indigo-600"></i> Tabel Pengumpulan Data Telaah Dokumen</h3>
             
             <div class="overflow-x-auto mb-6">
-                <table class="w-full text-sm text-left">
-                    <thead class="text-xs text-slate-500 uppercase bg-slate-50 border border-slate-200">
+                <table class="w-full text-sm text-left text-slate-700 whitespace-nowrap">
+                    <thead class="text-xs text-slate-600 uppercase bg-slate-100 border-b border-slate-200 tracking-wider">
                         <tr>
-                            <th class="px-4 py-3 border-r border-slate-200 w-12 text-center">No</th>
-                            <th class="px-4 py-3 border-r border-slate-200 w-1/3">Aspek yang Ditelaah</th>
-                            <th class="px-4 py-3 border-r border-slate-200 w-1/4">Nama Dokumen</th>
-                            <th class="px-4 py-3">Hasil Telaah Dokumen</th>
+                            <th class="px-6 py-4 font-semibold">No</th>
+                            <th class="px-6 py-4 font-semibold">Aspek yang Ditelaah</th>
+                            <th class="px-6 py-4 font-semibold">Nama Dokumen</th>
+                            <th class="px-6 py-4 font-semibold">Hasil Telaah Dokumen</th>
                         </tr>
                     </thead>
                     <tbody class="border border-slate-200">
@@ -114,10 +114,10 @@
                             $docData = $result->documentReviewData->where('assessment_aspect_id', $aspect->id)->first();
                             $val = $docData?->hasil ?? ''; 
                         @endphp
-                        <tr class="border-b border-slate-200">
-                            <td class="px-4 py-3 border-r border-slate-200 text-center text-slate-500">{{ $aspect->nomor }}</td>
-                            <td class="px-4 py-3 border-r border-slate-200 text-slate-700">{{ $aspect->aspek }}</td>
-                            <td class="px-4 py-3 border-r border-slate-200 text-slate-600 text-xs font-mono bg-slate-50">
+                        <tr class="bg-white border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                            <td class="px-6 py-4 text-center">{{ $aspect->nomor }}</td>
+                            <td class="px-6 py-4">{{ $aspect->aspek }}</td>
+                            <td class="px-6 py-4">
                                 <div class="mb-2">{{ $aspect->nama_dokumen }}</div>
                                 @if($docData && $docData->file_path)
                                     <a href="{{ asset($docData->file_path) }}" target="_blank" class="inline-flex items-center text-indigo-600 hover:text-indigo-800 font-sans font-medium bg-indigo-50 px-2 py-1 rounded border border-indigo-100">
@@ -129,7 +129,7 @@
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-0 py-0 relative">
+                            <td class="px-6 py-4">
                                 <textarea name="document_review[{{ $aspect->id }}]" rows="2" {{ isset($isReadOnly) && $isReadOnly ? 'readonly disabled' : '' }} class="w-full h-full min-h-[60px] border-0 focus:ring-2 focus:ring-inset focus:ring-indigo-500 resize-y p-3 bg-transparent" placeholder="Catat hasil telaah...">{{ $val }}</textarea>
                             </td>
                         </tr>
@@ -151,32 +151,32 @@
             <h3 class="text-lg font-bold text-slate-900 mb-6 flex items-center"><i data-lucide="mic" class="w-5 h-5 mr-2 text-indigo-600"></i> Tabel Pengumpulan Data Wawancara</h3>
             
             <div class="overflow-x-auto mb-6">
-                <table class="w-full text-sm text-left">
-                    <thead class="text-[10px] text-slate-500 uppercase bg-slate-50 border border-slate-200">
+                <table class="w-full text-sm text-left text-slate-700 whitespace-nowrap">
+                    <thead class="text-xs text-slate-600 uppercase bg-slate-100 border-b border-slate-200 tracking-wider">
                         <tr>
-                            <th class="px-2 py-3 border-r border-slate-200 w-10 text-center" rowspan="2">No</th>
-                            <th class="px-4 py-3 border-r border-slate-200 w-64" rowspan="2">Aspek Wawancara</th>
-                            <th class="px-4 py-2 border-b border-slate-200 text-center" colspan="4">Hasil Wawancara Responden</th>
+                            <th class="px-6 py-4 font-semibold" rowspan="2">No</th>
+                            <th class="px-6 py-4 font-semibold" rowspan="2">Aspek Wawancara</th>
+                            <th class="px-6 py-4 font-semibold" colspan="4">Hasil Wawancara Responden</th>
                         </tr>
                         <tr>
-                            <th class="px-2 py-2 border-r border-slate-200 text-center w-48">Kepala Sekolah / Wakil</th>
-                            <th class="px-2 py-2 border-r border-slate-200 text-center w-48">Kajur / Kapro</th>
-                            <th class="px-2 py-2 border-r border-slate-200 text-center w-48">Guru</th>
-                            <th class="px-2 py-2 text-center w-48">Siswa</th>
+                            <th class="px-6 py-4 font-semibold">Kepala Sekolah / Wakil</th>
+                            <th class="px-6 py-4 font-semibold">Kajur / Kapro</th>
+                            <th class="px-6 py-4 font-semibold">Guru</th>
+                            <th class="px-6 py-4 font-semibold">Siswa</th>
                         </tr>
                     </thead>
                     <tbody class="border border-slate-200 text-xs">
                         @foreach($indicator->interviewAspects as $aspect)
-                        <tr class="border-b border-slate-200">
-                            <td class="px-2 py-2 border-r border-slate-200 text-center text-slate-500">{{ $aspect->nomor }}</td>
-                            <td class="px-4 py-2 border-r border-slate-200 text-slate-700 leading-tight">{{ $aspect->aspek }}</td>
+                        <tr class="bg-white border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                            <td class="px-6 py-4 text-center">{{ $aspect->nomor }}</td>
+                            <td class="px-6 py-4">{{ $aspect->aspek }}</td>
                             
                             @foreach(['kepala_wakil', 'kepala_kompetensi', 'guru', 'siswa'] as $responden)
                             @php 
                                 $val = $result->interviewData->where('assessment_aspect_id', $aspect->id)->where('responden', $responden)->first()?->hasil ?? ''; 
                                 $isTarget = in_array($responden, $aspect->target_responden_list);
                             @endphp
-                            <td class="px-0 py-0 border-r border-slate-200 relative align-top">
+                            <td class="px-6 py-4">
                                 @if($isTarget)
                                     <textarea name="interview[{{ $aspect->id }}][{{ $responden }}]" rows="3" {{ isset($isReadOnly) && $isReadOnly ? 'readonly disabled' : '' }} class="w-full h-full border-0 focus:ring-2 focus:ring-inset focus:ring-indigo-500 resize-y p-2 bg-transparent text-xs min-h-[60px]" placeholder="...">{{ $val }}</textarea>
                                 @else

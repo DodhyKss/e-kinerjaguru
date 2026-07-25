@@ -13,7 +13,7 @@ class GuideBookController extends Controller
      */
     public function index()
     {
-        $guideBooks = GuideBook::orderBy('created_at', 'desc')->get();
+        $guideBooks = GuideBook::orderBy('created_at', 'desc')->paginate(10);
         return view('guide_books.index', compact('guideBooks'));
     }
 

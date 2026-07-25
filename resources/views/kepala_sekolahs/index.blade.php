@@ -47,22 +47,22 @@
 
 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
     <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-            <thead>
-                <tr class="bg-slate-50 border-b border-slate-200">
-                    <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider w-16">No</th>
-                    <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Nama & NIP</th>
-                    <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Pangkat / Gol.</th>
-                    <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Unit Kerja (Sekolah)</th>
-                    <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
-                    <th class="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider text-right w-32">Aksi</th>
+        <table class="w-full text-sm text-left text-slate-700 whitespace-nowrap">
+            <thead class="text-xs text-slate-600 uppercase bg-slate-100 border-b border-slate-200 tracking-wider">
+                <tr class="bg-white border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                    <th class="px-6 py-4 font-semibold">No</th>
+                    <th class="px-6 py-4 font-semibold">Nama & NIP</th>
+                    <th class="px-6 py-4 font-semibold">Pangkat / Gol.</th>
+                    <th class="px-6 py-4 font-semibold">Unit Kerja (Sekolah)</th>
+                    <th class="px-6 py-4 font-semibold">Status</th>
+                    <th class="px-6 py-4 font-semibold">Aksi</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
                 @forelse($kepalaSekolahs as $index => $kepsek)
-                <tr class="hover:bg-slate-50/50 transition-colors">
-                    <td class="py-4 px-6 text-sm text-slate-600">{{ $kepalaSekolahs->firstItem() + $index }}</td>
-                    <td class="py-4 px-6">
+                <tr class="bg-white border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                    <td class="px-6 py-4">{{ $kepalaSekolahs->firstItem() + $index }}</td>
+                    <td class="px-6 py-4">
                         <div class="flex items-center gap-3">
                             <div class="h-10 w-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm">
                                 {{ $kepsek->initials }}
@@ -73,16 +73,16 @@
                             </div>
                         </div>
                     </td>
-                    <td class="py-4 px-6 text-sm text-slate-600">{{ $kepsek->kepalaSekolah->pangkatGolongan->nama ?? '-' }}</td>
-                    <td class="py-4 px-6 text-sm font-medium text-indigo-600">{{ $kepsek->school->nama ?? '-' }}</td>
-                    <td class="py-4 px-6">
+                    <td class="px-6 py-4">{{ $kepsek->kepalaSekolah->pangkatGolongan->nama ?? '-' }}</td>
+                    <td class="px-6 py-4 font-medium">{{ $kepsek->school->nama ?? '-' }}</td>
+                    <td class="px-6 py-4">
                         @if($kepsek->is_active)
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">Aktif</span>
                         @else
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800">Nonaktif</span>
                         @endif
                     </td>
-                    <td class="py-4 px-6 text-right">
+                    <td class="px-6 py-4 text-right">
                         <div class="flex items-center justify-end gap-2">
                             <a href="{{ route('kepala-sekolahs.edit', $kepsek) }}" class="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
                                 <i data-lucide="edit" class="w-4 h-4"></i>
@@ -99,7 +99,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="py-8 px-6 text-center text-slate-500">Belum ada data Kepala Sekolah.</td>
+                    <td colspan="6" class="px-6 py-4 text-center">Belum ada data Kepala Sekolah.</td>
                 </tr>
                 @endforelse
             </tbody>

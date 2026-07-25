@@ -14,22 +14,22 @@
 
 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
     <div class="overflow-x-auto">
-        <table class="w-full text-sm text-left">
-            <thead class="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
+        <table class="w-full text-sm text-left text-slate-700 whitespace-nowrap">
+            <thead class="text-xs text-slate-600 uppercase bg-slate-100 border-b border-slate-200 tracking-wider">
                 <tr>
-                    <th class="px-6 py-4 w-16">No</th>
-                    <th class="px-6 py-4">Judul Panduan</th>
-                    <th class="px-6 py-4">Nama File Asli</th>
-                    <th class="px-6 py-4">Status</th>
-                    <th class="px-6 py-4">Tanggal Unggah</th>
-                    <th class="px-6 py-4 text-right">Aksi</th>
+                    <th class="px-6 py-4 font-semibold">No</th>
+                    <th class="px-6 py-4 font-semibold">Judul Panduan</th>
+                    <th class="px-6 py-4 font-semibold">Nama File Asli</th>
+                    <th class="px-6 py-4 font-semibold">Status</th>
+                    <th class="px-6 py-4 font-semibold">Tanggal Unggah</th>
+                    <th class="px-6 py-4 font-semibold">Aksi</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-200">
                 @forelse($guideBooks as $index => $item)
                 <tr class="hover:bg-slate-50/80 transition-colors {{ $item->is_active ? 'bg-indigo-50/30' : '' }}">
-                    <td class="px-6 py-4 font-medium text-slate-900">{{ $index + 1 }}</td>
-                    <td class="px-6 py-4 font-semibold text-slate-800">
+                    <td class="px-6 py-4 font-medium">{{ $index + 1 }}</td>
+                    <td class="px-6 py-4">
                         <div class="flex items-center gap-3">
                             <div class="p-2 bg-rose-50 text-rose-600 rounded-lg shrink-0">
                                 <i data-lucide="file-text" class="w-5 h-5"></i>
@@ -37,7 +37,7 @@
                             <span>{{ $item->judul }}</span>
                         </div>
                     </td>
-                    <td class="px-6 py-4 text-slate-600">
+                    <td class="px-6 py-4">
                         <span class="inline-flex items-center text-xs font-mono bg-slate-100 px-2.5 py-1 rounded-md text-slate-700 border border-slate-200">
                             {{ $item->original_filename }}
                         </span>
@@ -57,7 +57,7 @@
                         </form>
                         @endif
                     </td>
-                    <td class="px-6 py-4 text-slate-500 text-xs">
+                    <td class="px-6 py-4">
                         {{ $item->created_at->format('d M Y, H:i') }}
                     </td>
                     <td class="px-6 py-4 text-right">
@@ -77,7 +77,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="px-6 py-12 text-center text-slate-500">
+                    <td colspan="6" class="px-6 py-4 text-center">
                         <div class="flex flex-col items-center justify-center">
                             <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-3">
                                 <i data-lucide="file-x" class="w-6 h-6"></i>
@@ -91,5 +91,11 @@
             </tbody>
         </table>
     </div>
+
+    @if($guideBooks->hasPages())
+    <div class="px-6 py-4 border-t border-slate-100">
+        {{ $guideBooks->links() }}
+    </div>
+    @endif
 </div>
 @endsection

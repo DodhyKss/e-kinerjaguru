@@ -12,20 +12,20 @@
     
     <div class="p-6">
         <div class="overflow-x-auto">
-            <table class="w-full text-sm text-left">
-                <thead class="text-xs text-slate-500 uppercase bg-slate-100/50 border-b border-slate-200">
+            <table class="w-full text-sm text-left text-slate-700 whitespace-nowrap">
+                <thead class="text-xs text-slate-600 uppercase bg-slate-100 border-b border-slate-200 tracking-wider">
                     <tr>
-                        <th class="px-6 py-3 w-16">No.</th>
-                        <th class="px-6 py-3">Kode</th>
-                        <th class="px-6 py-3">Dimensi & Nama Indikator</th>
-                        <th class="px-6 py-3">Metode Penilaian</th>
-                        <th class="px-6 py-3 text-right">Aksi</th>
+                        <th class="px-6 py-4 font-semibold">No.</th>
+                        <th class="px-6 py-4 font-semibold">Kode</th>
+                        <th class="px-6 py-4 font-semibold">Dimensi & Nama Indikator</th>
+                        <th class="px-6 py-4 font-semibold">Metode Penilaian</th>
+                        <th class="px-6 py-4 font-semibold">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($indicators as $indicator)
-                    <tr class="border-b border-slate-100 hover:bg-slate-50">
-                        <td class="px-6 py-4 font-bold text-slate-600">
+                    <tr class="bg-white border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                        <td class="px-6 py-4">
                             {{ $indicator->urutan_keseluruhan }}
                         </td>
                         <td class="px-6 py-4">
@@ -62,7 +62,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="px-6 py-8 text-center text-slate-500">
+                        <td colspan="5" class="px-6 py-4 text-center">
                             Belum ada data indikator.
                         </td>
                     </tr>

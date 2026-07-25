@@ -68,22 +68,22 @@
         <h3 class="text-lg font-medium text-slate-900">Riwayat Evaluasi</h3>
     </div>
     <div class="overflow-x-auto">
-        <table class="w-full text-sm text-left">
-            <thead class="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-100">
+        <table class="w-full text-sm text-left text-slate-700 whitespace-nowrap">
+            <thead class="text-xs text-slate-600 uppercase bg-slate-100 border-b border-slate-200 tracking-wider">
                 <tr>
-                    <th class="px-6 py-3">Periode</th>
-                    <th class="px-6 py-3">Skor Total</th>
-                    <th class="px-6 py-3">Skor Rata-rata</th>
-                    <th class="px-6 py-3">Status</th>
-                    <th class="px-6 py-3">Aksi</th>
+                    <th class="px-6 py-4 font-semibold">Periode</th>
+                    <th class="px-6 py-4 font-semibold">Skor Total</th>
+                    <th class="px-6 py-4 font-semibold">Skor Rata-rata</th>
+                    <th class="px-6 py-4 font-semibold">Status</th>
+                    <th class="px-6 py-4 font-semibold">Aksi</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($historyEvaluations as $eval)
-                <tr class="bg-white border-b border-slate-50 hover:bg-slate-50">
-                    <td class="px-6 py-4 font-medium text-slate-900">{{ $eval->evaluationPeriod->nama }}</td>
+                <tr class="bg-white border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                    <td class="px-6 py-4 font-medium">{{ $eval->evaluationPeriod->nama }}</td>
                     <td class="px-6 py-4">{{ $eval->total_skor }}</td>
-                    <td class="px-6 py-4 font-bold text-indigo-600">{{ $eval->rata_rata }}</td>
+                    <td class="px-6 py-4">{{ $eval->rata_rata }}</td>
                     <td class="px-6 py-4">
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $eval->status == 'approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800' }}">
                             {{ $eval->status == 'approved' ? 'Disetujui' : 'Selesai' }}
@@ -95,7 +95,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="5" class="px-6 py-8 text-center text-slate-500">Belum ada riwayat evaluasi yang selesai.</td>
+                    <td colspan="5" class="px-6 py-4 text-center">Belum ada riwayat evaluasi yang selesai.</td>
                 </tr>
                 @endforelse
             </tbody>

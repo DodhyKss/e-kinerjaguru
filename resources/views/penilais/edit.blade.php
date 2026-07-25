@@ -103,14 +103,14 @@
                 <div id="hidden_guru_inputs"></div>
 
                 <div class="border border-slate-200 rounded-xl overflow-hidden bg-white">
-                    <table class="w-full text-sm text-left">
-                        <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                    <table class="w-full text-sm text-left text-slate-700 whitespace-nowrap">
+                        <thead class="text-xs text-slate-600 uppercase bg-slate-100 border-b border-slate-200 tracking-wider">
                             <tr>
-                                <th class="p-3 w-12 text-center">No</th>
-                                <th class="p-3">Nama Guru</th>
-                                <th class="p-3">NIP</th>
-                                <th class="p-3">Sekolah</th>
-                                <th class="p-3 w-20 text-center">Aksi</th>
+                                <th class="px-6 py-4 font-semibold">No</th>
+                                <th class="px-6 py-4 font-semibold">Nama Guru</th>
+                                <th class="px-6 py-4 font-semibold">NIP</th>
+                                <th class="px-6 py-4 font-semibold">Sekolah</th>
+                                <th class="px-6 py-4 font-semibold">Aksi</th>
                             </tr>
                         </thead>
                         <tbody id="selected_gurus_tbody" class="divide-y divide-slate-100">
@@ -167,7 +167,7 @@ $(document).ready(function() {
         tbody.empty();
 
         if (selectedGurus.length === 0) {
-            tbody.append(`<tr><td colspan="5" class="text-center py-6 text-slate-400 italic">Belum ada guru yang dipilih ke dalam daftar.</td></tr>`);
+            tbody.append(`<tr><td colspan="5" class="px-6 py-4 text-center">Belum ada guru yang dipilih ke dalam daftar.</td></tr>`);
             $('#pagination_controls').html(`<span class="text-slate-400">Total: 0 guru</span>`);
             return;
         }
@@ -182,12 +182,12 @@ $(document).ready(function() {
 
         paginatedItems.forEach((g, idx) => {
             tbody.append(`
-                <tr class="hover:bg-slate-50/50 transition-colors">
-                    <td class="p-3 text-center font-medium text-slate-500">${startIdx + idx + 1}</td>
-                    <td class="p-3 font-bold text-indigo-950">${g.nama}</td>
-                    <td class="p-3 text-slate-600">${g.nip}</td>
-                    <td class="p-3"><span class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded text-xs font-medium">${g.sekolah}</span></td>
-                    <td class="p-3 text-center">
+                <tr class="bg-white border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                    <td class="px-6 py-4 text-center font-medium">${startIdx + idx + 1}</td>
+                    <td class="px-6 py-4">${g.nama}</td>
+                    <td class="px-6 py-4">${g.nip}</td>
+                    <td class="px-6 py-4"><span class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded text-xs font-medium">${g.sekolah}</span></td>
+                    <td class="px-6 py-4 text-center">
                         <button type="button" onclick="removeGuru(${g.id})" class="text-rose-600 hover:bg-rose-50 p-1.5 rounded-lg transition-colors" title="Hapus">
                             <i data-lucide="trash-2" class="w-4 h-4 inline"></i>
                         </button>

@@ -132,6 +132,8 @@
     @php
         $canEvaluate = (auth()->user()->isPenilai() && $evaluation->penilai_id === auth()->user()->penilai->id) ||
             (auth()->user()->isKepalaSekolah() && $evaluation->guru->school_id === auth()->user()->school_id);
+            
+        $isEvaluatedGuru = auth()->user()->guru && $evaluation->guru_id === auth()->user()->guru->id;
     @endphp
 
     @if($canEvaluate && in_array($evaluation->status, ['in_progress', 'draft']))
@@ -154,7 +156,7 @@
         @endif
     @endif
 
-    @if(auth()->user()->isGuru() && in_array($evaluation->status, ['draft', 'in_progress']))
+    @if($isEvaluatedGuru && in_array($evaluation->status, ['draft', 'in_progress']))
         <div
             class="bg-indigo-50 border border-indigo-200 rounded-2xl p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <div>
@@ -248,7 +250,7 @@
                                             </a>
                                         @endif
 
-                                        @if(auth()->user()->isGuru() && $ind->has_telaah_dokumen && in_array($evaluation->status, ['draft', 'in_progress']))
+                                        @if($isEvaluatedGuru && $ind->has_telaah_dokumen && in_array($evaluation->status, ['draft', 'in_progress']))
                                             <a href="{{ route('evaluations.upload', [$evaluation, $ind]) }}"
                                                 class="inline-flex items-center justify-center w-full px-4 py-2 bg-indigo-50 text-indigo-700 border border-indigo-200 text-sm font-medium rounded-xl hover:bg-indigo-100 transition-colors shadow-sm">
                                                 <i data-lucide="upload-cloud" class="w-4 h-4 mr-2"></i> Upload Bukti

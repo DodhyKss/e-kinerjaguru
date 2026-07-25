@@ -40,22 +40,22 @@
         <a href="{{ route('evaluations.index') }}" class="text-sm text-indigo-600 hover:text-indigo-800 font-medium">Lihat Semua</a>
     </div>
     <div class="overflow-x-auto">
-        <table class="w-full text-sm text-left">
-            <thead class="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-100">
+        <table class="w-full text-sm text-left text-slate-700 whitespace-nowrap">
+            <thead class="text-xs text-slate-600 uppercase bg-slate-100 border-b border-slate-200 tracking-wider">
                 <tr>
-                    <th class="px-6 py-3">Guru</th>
-                    <th class="px-6 py-3">Penilai</th>
-                    <th class="px-6 py-3">Skor Rata-rata</th>
-                    <th class="px-6 py-3">Status</th>
-                    <th class="px-6 py-3">Aksi</th>
+                    <th class="px-6 py-4 font-semibold">Guru</th>
+                    <th class="px-6 py-4 font-semibold">Penilai</th>
+                    <th class="px-6 py-4 font-semibold">Skor Rata-rata</th>
+                    <th class="px-6 py-4 font-semibold">Status</th>
+                    <th class="px-6 py-4 font-semibold">Aksi</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($recentEvaluations as $eval)
-                <tr class="bg-white border-b border-slate-50 hover:bg-slate-50">
-                    <td class="px-6 py-4 font-medium text-slate-900">{{ $eval->guru->nama }}</td>
+                <tr class="bg-white border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                    <td class="px-6 py-4 font-medium">{{ $eval->guru->nama }}</td>
                     <td class="px-6 py-4">{{ $eval->penilai->nama }}</td>
-                    <td class="px-6 py-4 font-bold text-indigo-600">{{ $eval->rata_rata ?? '-' }}</td>
+                    <td class="px-6 py-4">{{ $eval->rata_rata ?? '-' }}</td>
                     <td class="px-6 py-4">
                         @if($eval->status == 'completed')
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Menunggu Review</span>
@@ -73,7 +73,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="5" class="px-6 py-8 text-center text-slate-500">Belum ada data evaluasi.</td>
+                    <td colspan="5" class="px-6 py-4 text-center">Belum ada data evaluasi.</td>
                 </tr>
                 @endforelse
             </tbody>

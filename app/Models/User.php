@@ -50,6 +50,17 @@ class User extends Authenticatable
         return $this->hasOne(KepalaSekolah::class);
     }
 
+    public function hasRole($role): bool
+    {
+        if ($this->role === $role) return true;
+        
+        if ($role === 'guru') return $this->guru()->count() > 0;
+        if ($role === 'penilai') return $this->penilai()->count() > 0;
+        if ($role === 'kepala_sekolah') return $this->kepalaSekolah()->count() > 0;
+        
+        return false;
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
@@ -57,17 +68,17 @@ class User extends Authenticatable
 
     public function isKepalaSekolah(): bool
     {
-        return $this->role === 'kepala_sekolah';
+        return $this->hasRole('kepala_sekolah');
     }
 
     public function isPenilai(): bool
     {
-        return $this->role === 'penilai';
+        return $this->hasRole('penilai');
     }
 
     public function isGuru(): bool
     {
-        return $this->role === 'guru';
+        return $this->hasRole('guru');
     }
 
     public function getInitialsAttribute(): string

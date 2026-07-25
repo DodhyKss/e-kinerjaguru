@@ -41,6 +41,13 @@
                         <p class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Master Data</p>
                     </div>
 
+                    <a href="{{ route('users.index') }}"
+                        class="{{ request()->routeIs('users.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }} group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200">
+                        <i data-lucide="users"
+                            class="mr-3 h-5 w-5 {{ request()->routeIs('users.*') ? 'text-indigo-400' : 'text-slate-400 group-hover:text-indigo-400' }}"></i>
+                        Manajemen Akun
+                    </a>
+
                     <a href="{{ route('schools.index') }}"
                         class="{{ request()->routeIs('schools.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }} group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200">
                         <i data-lucide="school"
@@ -312,6 +319,7 @@
             backdrop.classList.toggle('hidden');
         }
     </script>
+    @stack('scripts')
 </body>
 
 </html>

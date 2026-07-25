@@ -63,7 +63,7 @@ class RankingController extends Controller
         // and if there's a tie, maybe by guru name.
         $rankings = $query->orderBy('rata_rata', 'desc')
                           ->orderBy('total_skor', 'desc')
-                          ->get();
+                          ->paginate(15)->withQueryString();
 
         // Pass filters data to view
         $periods = EvaluationPeriod::orderBy('tanggal_mulai', 'desc')->get();

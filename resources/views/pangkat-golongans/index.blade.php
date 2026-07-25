@@ -14,18 +14,18 @@
 
 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
     <div class="overflow-x-auto">
-        <table class="w-full text-sm text-left">
-            <thead class="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
+        <table class="w-full text-sm text-left text-slate-700 whitespace-nowrap">
+            <thead class="text-xs text-slate-600 uppercase bg-slate-100 border-b border-slate-200 tracking-wider">
                 <tr>
-                    <th class="px-6 py-4">ID</th>
-                    <th class="px-6 py-4">Nama Pangkat / Golongan</th>
-                    <th class="px-6 py-4 text-right">Aksi</th>
+                    <th class="px-6 py-4 font-semibold">ID</th>
+                    <th class="px-6 py-4 font-semibold">Nama Pangkat / Golongan</th>
+                    <th class="px-6 py-4 font-semibold">Aksi</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-200">
                 @forelse($data as $item)
-                <tr class="hover:bg-slate-50 transition-colors">
-                    <td class="px-6 py-4 font-medium text-slate-900">{{ $item->id }}</td>
+                <tr class="bg-white border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                    <td class="px-6 py-4 font-medium">{{ $item->id }}</td>
                     <td class="px-6 py-4">{{ $item->nama }}</td>
                     <td class="px-6 py-4 text-right">
                         <div class="flex justify-end gap-2">
@@ -44,7 +44,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="3" class="px-6 py-8 text-center text-slate-500">Belum ada data</td>
+                    <td colspan="3" class="px-6 py-4 text-center">Belum ada data</td>
                 </tr>
                 @endforelse
             </tbody>

@@ -39,20 +39,20 @@
         <h3 class="text-lg font-medium text-slate-900">Daftar Evaluasi Anda</h3>
     </div>
     <div class="overflow-x-auto">
-        <table class="w-full text-sm text-left">
-            <thead class="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-100">
+        <table class="w-full text-sm text-left text-slate-700 whitespace-nowrap">
+            <thead class="text-xs text-slate-600 uppercase bg-slate-100 border-b border-slate-200 tracking-wider">
                 <tr>
-                    <th class="px-6 py-3">Guru Yang Dinilai</th>
-                    <th class="px-6 py-3">Periode</th>
-                    <th class="px-6 py-3">Progres</th>
-                    <th class="px-6 py-3">Status</th>
-                    <th class="px-6 py-3">Aksi</th>
+                    <th class="px-6 py-4 font-semibold">Guru Yang Dinilai</th>
+                    <th class="px-6 py-4 font-semibold">Periode</th>
+                    <th class="px-6 py-4 font-semibold">Progres</th>
+                    <th class="px-6 py-4 font-semibold">Status</th>
+                    <th class="px-6 py-4 font-semibold">Aksi</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($evaluations as $eval)
-                <tr class="bg-white border-b border-slate-50 hover:bg-slate-50">
-                    <td class="px-6 py-4 font-medium text-slate-900">{{ $eval->guru->nama }}</td>
+                <tr class="bg-white border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                    <td class="px-6 py-4 font-medium">{{ $eval->guru->nama }}</td>
                     <td class="px-6 py-4">{{ $eval->evaluationPeriod->nama }}</td>
                     <td class="px-6 py-4">
                         <div class="flex items-center gap-2">
@@ -81,7 +81,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="5" class="px-6 py-8 text-center text-slate-500">Belum ada tugas evaluasi.</td>
+                    <td colspan="5" class="px-6 py-4 text-center">Belum ada tugas evaluasi.</td>
                 </tr>
                 @endforelse
             </tbody>

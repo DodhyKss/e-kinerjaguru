@@ -15,7 +15,11 @@
         </div>
         <div>
             <h3 class="text-lg font-bold text-slate-900">Form Tambah Asesor / Penilai</h3>
+            @if(isset($guru))
+            <p class="text-sm text-emerald-600 mt-1 font-medium"><i data-lucide="check-circle" class="w-4 h-4 inline mr-1"></i> Mode Penambahan Profil Ganda. Sebagian data telah diisi otomatis dari Profil Guru.</p>
+            @else
             <p class="text-sm text-slate-600 mt-1">Sistem akan secara otomatis membuatkan akun pengguna dengan <span class="font-bold text-indigo-700">password default menggunakan NIP atau 'password123'</span>.</p>
+            @endif
         </div>
     </div>
     
@@ -28,7 +32,7 @@
                 <select name="school_id" id="school_id" required class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border @error('school_id') border-rose-300 ring-rose-500 @enderror">
                     <option value="">-- Pilih Sekolah Tujuan Penilaian --</option>
                     @foreach($schools as $school)
-                        <option value="{{ $school->id }}" {{ old('school_id') == $school->id ? 'selected' : '' }}>{{ $school->npsn }} - {{ $school->nama }}</option>
+                        <option value="{{ $school->id }}" {{ old('school_id', isset($guru) ? $guru->school_id : '') == $school->id ? 'selected' : '' }}>{{ $school->npsn }} - {{ $school->nama }}</option>
                     @endforeach
                 </select>
                 @error('school_id') <p class="mt-1 text-sm text-rose-500">{{ $message }}</p> @enderror
@@ -36,19 +40,22 @@
             
             <div class="md:col-span-2">
                 <label for="nama" class="block text-sm font-bold text-slate-700 mb-1">Nama Lengkap (beserta gelar) <span class="text-rose-500">*</span></label>
-                <input type="text" name="nama" id="nama" value="{{ old('nama') }}" required class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border @error('nama') border-rose-300 ring-rose-500 @enderror">
+                <input type="text" name="nama" id="nama" value="{{ old('nama', isset($guru) ? $guru->nama : '') }}" required class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border @error('nama') border-rose-300 ring-rose-500 @enderror">
                 @error('nama') <p class="mt-1 text-sm text-rose-500">{{ $message }}</p> @enderror
             </div>
             
             <div>
                 <label for="email" class="block text-sm font-bold text-slate-700 mb-1">Email (Untuk Login) <span class="text-rose-500">*</span></label>
-                <input type="email" name="email" id="email" value="{{ old('email') }}" required class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border @error('email') border-rose-300 ring-rose-500 @enderror">
+                <input type="email" name="email" id="email" value="{{ old('email', (isset($guru) && $guru->user) ? $guru->user->email : '') }}" required {{ isset($guru) ? 'readonly' : '' }} class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border {{ isset($guru) ? 'bg-slate-100 text-slate-500' : '' }} @error('email') border-rose-300 ring-rose-500 @enderror">
+                @if(isset($guru))
+                    <p class="mt-1 text-xs text-emerald-600">Email dikunci untuk menghubungkan dengan akun yang sama.</p>
+                @endif
                 @error('email') <p class="mt-1 text-sm text-rose-500">{{ $message }}</p> @enderror
             </div>
 
             <div>
                 <label for="nip" class="block text-sm font-bold text-slate-700 mb-1">NIP (Opsional)</label>
-                <input type="text" name="nip" id="nip" value="{{ old('nip') }}" class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border">
+                <input type="text" name="nip" id="nip" value="{{ old('nip', isset($guru) ? $guru->nip : '') }}" class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border">
             </div>
 
             <div>
@@ -62,7 +69,7 @@
                 <select name="pangkat_golongan_id" id="pangkat_golongan_id" class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border @error('pangkat_golongan_id') border-rose-300 ring-rose-500 @enderror">
                     <option value="">-- Pilih Pangkat/Golongan --</option>
                     @foreach($pangkatGolongans as $pg)
-                        <option value="{{ $pg->id }}" {{ old('pangkat_golongan_id') == $pg->id ? 'selected' : '' }}>{{ $pg->nama }} ({{ $pg->golongan }})</option>
+                        <option value="{{ $pg->id }}" {{ old('pangkat_golongan_id', isset($guru) ? $guru->pangkat_golongan_id : '') == $pg->id ? 'selected' : '' }}>{{ $pg->nama }} ({{ $pg->golongan }})</option>
                     @endforeach
                 </select>
                 @error('pangkat_golongan_id') <p class="mt-1 text-sm text-rose-500">{{ $message }}</p> @enderror
@@ -76,7 +83,7 @@
 
             <div class="md:col-span-2">
                 <label for="no_telepon" class="block text-sm font-bold text-slate-700 mb-1">Nomor Telepon/HP</label>
-                <input type="text" name="no_telepon" id="no_telepon" value="{{ old('no_telepon') }}" class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border">
+                <input type="text" name="no_telepon" id="no_telepon" value="{{ old('no_telepon', isset($guru) ? $guru->no_telepon : '') }}" class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border">
             </div>
 
             <div class="md:col-span-2 mt-4 pt-4 border-t border-slate-100">
@@ -102,14 +109,14 @@
                 <div id="hidden_guru_inputs"></div>
 
                 <div class="border border-slate-200 rounded-xl overflow-hidden bg-white">
-                    <table class="w-full text-sm text-left">
-                        <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+                    <table class="w-full text-sm text-left text-slate-700 whitespace-nowrap">
+                        <thead class="text-xs text-slate-600 uppercase bg-slate-100 border-b border-slate-200 tracking-wider">
                             <tr>
-                                <th class="p-3 w-12 text-center">No</th>
-                                <th class="p-3">Nama Guru</th>
-                                <th class="p-3">NIP</th>
-                                <th class="p-3">Sekolah</th>
-                                <th class="p-3 w-20 text-center">Aksi</th>
+                                <th class="px-6 py-4 font-semibold">No</th>
+                                <th class="px-6 py-4 font-semibold">Nama Guru</th>
+                                <th class="px-6 py-4 font-semibold">NIP</th>
+                                <th class="px-6 py-4 font-semibold">Sekolah</th>
+                                <th class="px-6 py-4 font-semibold">Aksi</th>
                             </tr>
                         </thead>
                         <tbody id="selected_gurus_tbody" class="divide-y divide-slate-100">
@@ -166,7 +173,7 @@ $(document).ready(function() {
         tbody.empty();
 
         if (selectedGurus.length === 0) {
-            tbody.append(`<tr><td colspan="5" class="text-center py-6 text-slate-400 italic">Belum ada guru yang dipilih ke dalam daftar.</td></tr>`);
+            tbody.append(`<tr><td colspan="5" class="px-6 py-4 text-center">Belum ada guru yang dipilih ke dalam daftar.</td></tr>`);
             $('#pagination_controls').html(`<span class="text-slate-400">Total: 0 guru</span>`);
             return;
         }
@@ -181,12 +188,12 @@ $(document).ready(function() {
 
         paginatedItems.forEach((g, idx) => {
             tbody.append(`
-                <tr class="hover:bg-slate-50/50 transition-colors">
-                    <td class="p-3 text-center font-medium text-slate-500">${startIdx + idx + 1}</td>
-                    <td class="p-3 font-bold text-indigo-950">${g.nama}</td>
-                    <td class="p-3 text-slate-600">${g.nip}</td>
-                    <td class="p-3"><span class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded text-xs font-medium">${g.sekolah}</span></td>
-                    <td class="p-3 text-center">
+                <tr class="bg-white border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                    <td class="px-6 py-4 text-center font-medium">${startIdx + idx + 1}</td>
+                    <td class="px-6 py-4">${g.nama}</td>
+                    <td class="px-6 py-4">${g.nip}</td>
+                    <td class="px-6 py-4"><span class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded text-xs font-medium">${g.sekolah}</span></td>
+                    <td class="px-6 py-4 text-center">
                         <button type="button" onclick="removeGuru(${g.id})" class="text-rose-600 hover:bg-rose-50 p-1.5 rounded-lg transition-colors" title="Hapus">
                             <i data-lucide="trash-2" class="w-4 h-4 inline"></i>
                         </button>

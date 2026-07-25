@@ -49,19 +49,19 @@
         <h3 class="text-lg font-medium text-slate-900">Sekolah Terbaru</h3>
     </div>
     <div class="overflow-x-auto">
-        <table class="w-full text-sm text-left">
-            <thead class="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-100">
+        <table class="w-full text-sm text-left text-slate-700 whitespace-nowrap">
+            <thead class="text-xs text-slate-600 uppercase bg-slate-100 border-b border-slate-200 tracking-wider">
                 <tr>
-                    <th class="px-6 py-3">NPSN</th>
-                    <th class="px-6 py-3">Nama Sekolah</th>
-                    <th class="px-6 py-3">Kepala Sekolah</th>
-                    <th class="px-6 py-3">Status</th>
+                    <th class="px-6 py-4 font-semibold">NPSN</th>
+                    <th class="px-6 py-4 font-semibold">Nama Sekolah</th>
+                    <th class="px-6 py-4 font-semibold">Kepala Sekolah</th>
+                    <th class="px-6 py-4 font-semibold">Status</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($recentSchools as $school)
-                <tr class="bg-white border-b border-slate-50 hover:bg-slate-50">
-                    <td class="px-6 py-4 font-medium text-slate-900">{{ $school->npsn }}</td>
+                <tr class="bg-white border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                    <td class="px-6 py-4 font-medium">{{ $school->npsn }}</td>
                     <td class="px-6 py-4">{{ $school->nama }}</td>
                     <td class="px-6 py-4">{{ $school->kepala_sekolah }}</td>
                     <td class="px-6 py-4">

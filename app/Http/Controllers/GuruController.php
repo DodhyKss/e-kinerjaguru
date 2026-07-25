@@ -41,7 +41,18 @@ class GuruController extends Controller
         $mataPelajarans = MataPelajaran::orderBy('nama')->get();
         $allGurus = ($user->isKepalaSekolah() ? Guru::where('school_id', $user->school_id) : Guru::query())->orderBy('nama')->get();
 
-        return view('gurus.index', compact('gurus', 'schools', 'mataPelajarans', 'allGurus'));
+        $penilaisBelumGuru = \App\Models\Penilai::whereDoesntHave('user.guru')
+            ->whereNotNull('user_id')
+            ->whereHas('user', function($q) {
+                $q->where('role', '!=', 'kepala_sekolah');
+            })
+            ->when($user->isKepalaSekolah(), function($q) use ($user) {
+                $q->where('school_id', $user->school_id);
+            })
+            ->orderBy('nama')
+            ->get();
+
+        return view('gurus.index', compact('gurus', 'schools', 'mataPelajarans', 'allGurus', 'penilaisBelumGuru'));
     }
 
     public function create()
@@ -58,6 +69,23 @@ class GuruController extends Controller
         $jabatanFungsionals = JabatanFungsional::orderBy('nama')->get();
         
         return view('gurus.create', compact('schools', 'mataPelajarans', 'kompetensiKeahlians', 'pangkatGolongans', 'jabatanFungsionals'));
+    }
+
+    public function createFromPenilai(Request $request)
+    {
+        if (!Auth::user()->isAdmin()) {
+            abort(403);
+        }
+
+        $penilai = \App\Models\Penilai::findOrFail($request->penilai_id);
+
+        $schools = School::where('status', 'aktif')->get();
+        $mataPelajarans = MataPelajaran::with('kelompokMapel')->orderBy('nama')->get();
+        $kompetensiKeahlians = KompetensiKeahlian::orderBy('nama')->get();
+        $pangkatGolongans = PangkatGolongan::orderBy('nama')->get();
+        $jabatanFungsionals = JabatanFungsional::orderBy('nama')->get();
+        
+        return view('gurus.create', compact('schools', 'mataPelajarans', 'kompetensiKeahlians', 'pangkatGolongans', 'jabatanFungsionals', 'penilai'));
     }
 
     public function store(Request $request)
@@ -77,18 +105,28 @@ class GuruController extends Controller
             'jabatan_fungsional_id' => 'nullable|exists:jabatan_fungsionals,id',
             'jenis_kelamin' => 'required|in:L,P',
             'no_telepon' => 'nullable|string|max:20',
-            'email' => 'required|email|unique:users,email|max:255',
+            'email' => 'required|email|max:255',
         ]);
 
-        DB::transaction(function () use ($validated) {
-            // 1. Create User account for the Guru
-            $user = User::create([
-                'name' => $validated['nama'],
-                'email' => $validated['email'],
-                'password' => Hash::make($validated['nip']), // Default password = NIP
-                'role' => 'guru',
-                'school_id' => $validated['school_id'],
-            ]);
+        $existingUser = User::where('email', $validated['email'])->first();
+        if ($existingUser && $existingUser->guru) {
+            return back()->withErrors(['email' => 'Email ini sudah terdaftar sebagai Guru.'])->withInput();
+        }
+
+        DB::transaction(function () use ($validated, $existingUser) {
+            if ($existingUser) {
+                // Gunakan user yang sudah ada (misal dari data Penilai)
+                $user = $existingUser;
+            } else {
+                // 1. Create User account for the Guru
+                $user = User::create([
+                    'name' => $validated['nama'],
+                    'email' => $validated['email'],
+                    'password' => Hash::make($validated['nip']), // Default password = NIP
+                    'role' => 'guru',
+                    'school_id' => $validated['school_id'],
+                ]);
+            }
 
             // 2. Create Guru profile
             Guru::create([
@@ -106,7 +144,7 @@ class GuruController extends Controller
             ]);
         });
 
-        return redirect()->route('gurus.index')->with('success', 'Data Guru berhasil ditambahkan dan Akun otomatis dibuat (Password default: NIP).');
+        return redirect()->route('gurus.index')->with('success', 'Data Guru berhasil ditambahkan (Dual Profile terhubung jika menggunakan email Asesor).');
     }
 
     public function edit(Guru $guru)
