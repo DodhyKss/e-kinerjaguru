@@ -9,14 +9,26 @@ use Illuminate\Support\Facades\Auth;
 
 class EvaluationPeriodController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         if (!Auth::user()->isAdmin()) {
             abort(403);
         }
 
-        $periods = EvaluationPeriod::with('school')->latest()->paginate(10);
-        return view('evaluation-periods.index', compact('periods'));
+        $query = EvaluationPeriod::with('school')->latest();
+
+        if ($request->filled('search_id')) {
+            $query->where('id', $request->search_id);
+        }
+        if ($request->filled('school_id')) {
+            $query->where('school_id', $request->school_id);
+        }
+
+        $periods = $query->paginate(10)->withQueryString();
+        $allData = EvaluationPeriod::orderBy('nama')->get(['id', 'nama', 'tahun_ajaran']);
+        $schools = School::orderBy('nama')->get(['id', 'nama']);
+
+        return view('evaluation-periods.index', compact('periods', 'allData', 'schools'));
     }
 
     public function create()

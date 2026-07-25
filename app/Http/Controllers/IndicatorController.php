@@ -11,16 +11,27 @@ use Illuminate\Validation\Rule;
 
 class IndicatorController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         if (!Auth::user()->isAdmin()) {
             abort(403);
         }
 
+        $query = Indicator::with('dimension')->orderBy('urutan_keseluruhan');
+
+        if ($request->filled('dimension_id')) {
+            $query->where('dimension_id', $request->dimension_id);
+        }
+        if ($request->filled('search_id')) {
+            $query->where('id', $request->search_id);
+        }
+
         $dimensions = Dimension::orderBy('urutan')->get();
-        $indicators = Indicator::with('dimension')->orderBy('urutan_keseluruhan')->paginate(20);
+        $indicators = $query->paginate(20)->withQueryString();
         
-        return view('indicators.index', compact('indicators', 'dimensions'));
+        $allData = Indicator::orderBy('urutan_keseluruhan')->get(['id', 'nama', 'urutan_keseluruhan']);
+        
+        return view('indicators.index', compact('indicators', 'dimensions', 'allData'));
     }
 
     public function create()

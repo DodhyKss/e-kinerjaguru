@@ -10,6 +10,40 @@
         </a>
     </div>
     
+    <div class="p-6 border-b border-slate-100 bg-slate-50/50">
+        <form method="GET" action="{{ route('evaluation-periods.index') }}" class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end" id="searchForm">
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Filter Sekolah</label>
+                <select name="school_id" class="select2-filter block w-full rounded-xl border-slate-300 shadow-sm sm:text-sm" onchange="document.getElementById('searchForm').submit()">
+                    <option value="">-- Semua Sekolah --</option>
+                    @foreach($schools as $school)
+                        <option value="{{ $school->id }}" {{ request('school_id') == $school->id ? 'selected' : '' }}>
+                            {{ $school->nama }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Cari Periode</label>
+                <div class="flex gap-2">
+                    <select name="search_id" class="select2-filter block w-full rounded-xl border-slate-300 shadow-sm sm:text-sm" onchange="document.getElementById('searchForm').submit()">
+                        <option value="">-- Semua Periode --</option>
+                        @foreach($allData as $period)
+                            <option value="{{ $period->id }}" {{ request('search_id') == $period->id ? 'selected' : '' }}>
+                                {{ $period->nama }} ({{ $period->tahun_ajaran }})
+                            </option>
+                        @endforeach
+                    </select>
+                    @if(request()->hasAny(['search_id', 'school_id']) && (request('search_id') || request('school_id')))
+                    <a href="{{ route('evaluation-periods.index') }}" class="bg-slate-200 text-slate-700 px-4 py-2 rounded-xl text-sm font-medium hover:bg-slate-300 transition-colors flex items-center justify-center shrink-0" title="Reset">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                    </a>
+                    @endif
+                </div>
+            </div>
+        </form>
+    </div>
+
     <div class="p-6">
         <div class="overflow-x-auto">
             <table class="w-full text-sm text-left text-slate-700 whitespace-nowrap">
@@ -76,4 +110,15 @@
         @endif
     </div>
 </div>
+
+@push('scripts')
+<script>
+    $(document).ready(function() {
+        $('.select2-filter').select2({
+            allowClear: true,
+            width: '100%'
+        });
+    });
+</script>
+@endpush
 @endsection
