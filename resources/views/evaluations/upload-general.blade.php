@@ -52,7 +52,7 @@
         <div class="mb-8 p-5 bg-indigo-50/50 rounded-xl border border-indigo-100">
             <label class="block text-sm font-bold text-slate-900 mb-2">Pilih Jenis Dokumen (Opsional)</label>
             <p class="text-xs text-slate-500 mb-4">Memilih jenis dokumen akan otomatis mencentang aspek penilaian yang sesuai di bawah ini.</p>
-            <select id="jenis_dokumen_select" class="w-full text-sm border-slate-300 rounded-xl shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 bg-white">
+            <select id="jenis_dokumen_select" class="select2-jenis-dokumen w-full text-sm border-slate-300 rounded-xl shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3 bg-white">
                 <option value="">-- Pilih Jenis Dokumen --</option>
                 @foreach($jenisDokumens as $jd)
                     <option value="{{ $jd->id }}" data-aspects="{{ json_encode($jd->assessmentAspects->pluck('id')) }}">
@@ -101,7 +101,16 @@
     </form>
 </div>
 
+@push('scripts')
 <script>
+    $(document).ready(function() {
+        $('.select2-jenis-dokumen').select2({
+            placeholder: "-- Pilih Jenis Dokumen --",
+            allowClear: true,
+            width: '100%'
+        });
+    });
+
     // Script untuk menampilkan nama file yang dipilih
     document.getElementById('dokumen').addEventListener('change', function(e) {
         const display = document.getElementById('file-name-display');
@@ -114,14 +123,16 @@
     });
 
     // Script untuk auto-check aspek berdasarkan jenis dokumen
-    document.getElementById('jenis_dokumen_select').addEventListener('change', function(e) {
+    // Gunakan event select2:select agar Select2 memicu listener dengan benar
+    $('#jenis_dokumen_select').on('select2:select change', function(e) {
         // Hilangkan semua centang terlebih dahulu
         const checkboxes = document.querySelectorAll('.aspect-checkbox');
         checkboxes.forEach(cb => cb.checked = false);
 
         // Jika ada yang dipilih, ambil data aspects dari atribut data
+        // Untuk select2, pastikan kita mengambil data dari option yang terpilih
         const selectedOption = this.options[this.selectedIndex];
-        if (selectedOption.value) {
+        if (selectedOption && selectedOption.value) {
             const aspects = JSON.parse(selectedOption.getAttribute('data-aspects') || '[]');
             
             // Centang aspek yang sesuai
@@ -134,4 +145,5 @@
         }
     });
 </script>
+@endpush
 @endsection
