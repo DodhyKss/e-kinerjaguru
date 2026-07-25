@@ -13,7 +13,20 @@
     </div>
 
     <div class="p-6 border-b border-slate-100 bg-slate-50/50">
-        <form method="GET" action="{{ route('evaluations.index') }}" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end" id="searchForm">
+        <form method="GET" action="{{ route('evaluations.index') }}" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 items-end" id="searchForm">
+            @if(auth()->user()->isAdmin())
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Filter Sekolah</label>
+                <select name="school_id" class="select2-filter block w-full rounded-xl border-slate-300 shadow-sm sm:text-sm" onchange="document.getElementById('searchForm').submit()">
+                    <option value="">-- Semua Sekolah --</option>
+                    @foreach($schools as $school)
+                        <option value="{{ $school->id }}" {{ request('school_id') == $school->id ? 'selected' : '' }}>
+                            {{ $school->nama }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            @endif
             <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Filter Periode</label>
                 <select name="period_id" class="select2-filter block w-full rounded-xl border-slate-300 shadow-sm sm:text-sm" onchange="document.getElementById('searchForm').submit()">
@@ -37,9 +50,30 @@
                     @endforeach
                 </select>
             </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Filter Asesor</label>
+                <select name="penilai_id" class="select2-filter block w-full rounded-xl border-slate-300 shadow-sm sm:text-sm" onchange="document.getElementById('searchForm').submit()">
+                    <option value="">-- Semua Asesor --</option>
+                    @foreach($penilais as $penilai)
+                        <option value="{{ $penilai->id }}" {{ request('penilai_id') == $penilai->id ? 'selected' : '' }}>
+                            {{ $penilai->nama }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
             @endif
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Filter Status</label>
+                <select name="status" class="select2-filter block w-full rounded-xl border-slate-300 shadow-sm sm:text-sm" onchange="document.getElementById('searchForm').submit()">
+                    <option value="">-- Semua Status --</option>
+                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Belum Dimulai</option>
+                    <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>Proses Penilaian</option>
+                    <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Menunggu Review</option>
+                    <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Disetujui</option>
+                </select>
+            </div>
             <div class="flex items-center gap-2">
-                @if(request()->hasAny(['period_id', 'guru_id']) && (request('period_id') || request('guru_id')))
+                @if(request()->hasAny(['period_id', 'guru_id', 'penilai_id', 'status', 'school_id']) && (request('period_id') || request('guru_id') || request('penilai_id') || request('status') || request('school_id')))
                 <a href="{{ route('evaluations.index') }}" class="bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-slate-300 transition-colors flex items-center justify-center shrink-0" title="Reset">
                     <i data-lucide="rotate-ccw" class="w-4 h-4 mr-2"></i> Reset Filter
                 </a>

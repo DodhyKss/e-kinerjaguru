@@ -50,6 +50,17 @@ class EvaluationController extends Controller
         if ($request->filled('guru_id')) {
             $query->where('guru_id', $request->guru_id);
         }
+        if ($request->filled('penilai_id')) {
+            $query->where('penilai_id', $request->penilai_id);
+        }
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        if ($request->filled('school_id')) {
+            $query->whereHas('guru', function($q) use ($request) {
+                $q->where('school_id', $request->school_id);
+            });
+        }
 
         $evaluations = $query->paginate(15)->withQueryString();
 
@@ -66,7 +77,23 @@ class EvaluationController extends Controller
             $gurus = collect([]); // Guru doesn't need to filter by Guru
         }
 
-        return view('evaluations.index', compact('evaluations', 'periods', 'gurus'));
+        // Fetch relevant penilais
+        if ($user->isAdmin() || $user->isKepalaSekolah()) {
+            $penilais = \App\Models\Penilai::when($user->isKepalaSekolah(), function($q) use ($user) {
+                $q->where('school_id', $user->school_id);
+            })->orderBy('nama')->get();
+        } else {
+            $penilais = collect([]);
+        }
+
+        // Fetch schools (Only Admin can filter by school)
+        if ($user->isAdmin()) {
+            $schools = \App\Models\School::orderBy('nama')->get();
+        } else {
+            $schools = collect([]);
+        }
+
+        return view('evaluations.index', compact('evaluations', 'periods', 'gurus', 'penilais', 'schools'));
     }
 
     public function create()

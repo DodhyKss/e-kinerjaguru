@@ -9,6 +9,66 @@
     </div>
 </div>
 
+<div class="mb-6 p-5 bg-white rounded-2xl shadow-sm border border-slate-200">
+    <form method="GET" action="{{ route('evaluations.rekomendasis.index') }}" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 items-end" id="searchForm">
+        @if(auth()->user()->isAdmin())
+        <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Filter Sekolah</label>
+            <select name="school_id" class="select2-filter block w-full rounded-xl border-slate-300 shadow-sm sm:text-sm" onchange="document.getElementById('searchForm').submit()">
+                <option value="">-- Semua Sekolah --</option>
+                @foreach($schools as $school)
+                    <option value="{{ $school->id }}" {{ request('school_id') == $school->id ? 'selected' : '' }}>
+                        {{ $school->nama }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        @endif
+        <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Filter Periode</label>
+            <select name="period_id" class="select2-filter block w-full rounded-xl border-slate-300 shadow-sm sm:text-sm" onchange="document.getElementById('searchForm').submit()">
+                <option value="">-- Semua Periode --</option>
+                @foreach($periods as $period)
+                    <option value="{{ $period->id }}" {{ request('period_id') == $period->id ? 'selected' : '' }}>
+                        {{ $period->nama }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        @if(!auth()->user()->isGuru())
+        <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Filter Guru</label>
+            <select name="guru_id" class="select2-filter block w-full rounded-xl border-slate-300 shadow-sm sm:text-sm" onchange="document.getElementById('searchForm').submit()">
+                <option value="">-- Semua Guru --</option>
+                @foreach($gurus as $guru)
+                    <option value="{{ $guru->id }}" {{ request('guru_id') == $guru->id ? 'selected' : '' }}>
+                        {{ $guru->nama }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Filter Asesor</label>
+            <select name="penilai_id" class="select2-filter block w-full rounded-xl border-slate-300 shadow-sm sm:text-sm" onchange="document.getElementById('searchForm').submit()">
+                <option value="">-- Semua Asesor --</option>
+                @foreach($penilais as $penilai)
+                    <option value="{{ $penilai->id }}" {{ request('penilai_id') == $penilai->id ? 'selected' : '' }}>
+                        {{ $penilai->nama }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        @endif
+        <div class="flex items-center gap-2">
+            @if(request()->hasAny(['period_id', 'guru_id', 'penilai_id', 'school_id']) && (request('period_id') || request('guru_id') || request('penilai_id') || request('school_id')))
+            <a href="{{ route('evaluations.rekomendasis.index') }}" class="bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-slate-300 transition-colors flex items-center justify-center shrink-0" title="Reset">
+                <i data-lucide="rotate-ccw" class="w-4 h-4 mr-2"></i> Reset Filter
+            </a>
+            @endif
+        </div>
+    </form>
+</div>
+
 <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
     <div class="overflow-x-auto">
         <table class="w-full text-sm text-left text-slate-700 whitespace-nowrap">
@@ -78,4 +138,15 @@
     </div>
     @endif
 </div>
+
+@push('scripts')
+<script>
+    $(document).ready(function() {
+        $('.select2-filter').select2({
+            allowClear: true,
+            width: '100%'
+        });
+    });
+</script>
+@endpush
 @endsection

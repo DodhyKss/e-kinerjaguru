@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 
 class RekomendasiController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
         
@@ -22,8 +22,50 @@ class RekomendasiController extends Controller
             $query->whereHas('guru', fn($q) => $q->where('school_id', $user->school_id));
         }
 
-        $evaluations = $query->latest()->paginate(10);
-        return view('rekomendasis.index', compact('evaluations'));
+        if ($request->filled('period_id')) {
+            $query->where('evaluation_period_id', $request->period_id);
+        }
+        if ($request->filled('guru_id')) {
+            $query->where('guru_id', $request->guru_id);
+        }
+        if ($request->filled('penilai_id')) {
+            $query->where('penilai_id', $request->penilai_id);
+        }
+        if ($request->filled('school_id')) {
+            $query->whereHas('guru', function($q) use ($request) {
+                $q->where('school_id', $request->school_id);
+            });
+        }
+
+        $evaluations = $query->latest()->paginate(10)->withQueryString();
+
+        $periods = \App\Models\EvaluationPeriod::orderBy('nama', 'desc')->get();
+        
+        if ($user->isAdmin() || $user->isKepalaSekolah()) {
+            $gurus = \App\Models\Guru::when($user->isKepalaSekolah(), function($q) use ($user) {
+                $q->where('school_id', $user->school_id);
+            })->orderBy('nama')->get();
+        } else if ($user->isPenilai()) {
+            $gurus = $user->penilai->gurus()->orderBy('nama')->get();
+        } else {
+            $gurus = collect([]);
+        }
+
+        if ($user->isAdmin() || $user->isKepalaSekolah()) {
+            $penilais = \App\Models\Penilai::when($user->isKepalaSekolah(), function($q) use ($user) {
+                $q->where('school_id', $user->school_id);
+            })->orderBy('nama')->get();
+        } else {
+            $penilais = collect([]);
+        }
+
+        if ($user->isAdmin()) {
+            $schools = \App\Models\School::orderBy('nama')->get();
+        } else {
+            $schools = collect([]);
+        }
+
+        return view('rekomendasis.index', compact('evaluations', 'periods', 'gurus', 'penilais', 'schools'));
     }
 
     public function create(Evaluation $evaluation)
