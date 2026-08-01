@@ -1,4 +1,0 @@
-1. Tambahkan Edit dan Hapus di menu data evaluasi admin agar dapat membatalkan dan mengedit data penugasan/evaluasi
-2. Saat Membuat Penugasan buat agar semua select nya pakai select2
-3. Saat memilih Asesor atau evaluator 
-4. perbaiki double nama muncul penilai ketika kepala sekolah ditambahkan otomatis masuk ke penilai jadi pada saat memilih namanya double ada dua

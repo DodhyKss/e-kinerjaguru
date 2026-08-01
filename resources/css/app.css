@@ -13,6 +13,18 @@ table th {
     vertical-align: middle !important;
 }
 
+@layer base {
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]), 
+    textarea, 
+    select {
+        @apply border border-slate-300 rounded-lg px-3 py-2 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm transition-colors;
+    }
+    
+    input[type="checkbox"], input[type="radio"] {
+        @apply border-slate-300 text-indigo-600 focus:ring-indigo-500;
+    }
+}
+
 /* Custom Select2 Styles for Modern Look */
 .select2-container--default .select2-selection--single {
     @apply !border-slate-300 !rounded-xl !shadow-sm !flex !items-center !bg-white !transition-all !duration-200;

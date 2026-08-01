@@ -10,6 +10,19 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <style>
+        /* Base form styles untuk inputan, dropdown, dan text area */
+        :where(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="file"]), textarea, select) {
+            border-width: 1px;
+            border-style: solid;
+            border-color: #cbd5e1; /* slate-300 */
+        }
+        :where(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="file"]):focus, textarea:focus, select:focus) {
+            outline: none;
+            border-color: #6366f1; /* indigo-500 */
+            box-shadow: 0 0 0 2px rgba(99,102,241,0.2);
+        }
+    </style>
 </head>
 
 <body class="h-full font-sans antialiased text-slate-900">
