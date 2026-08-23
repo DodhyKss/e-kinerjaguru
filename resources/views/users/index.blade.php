@@ -44,6 +44,7 @@
                     <th class="px-6 py-4 font-semibold">Nama & Email</th>
                     <th class="px-6 py-4 font-semibold">Profil Ganda / Jabatan</th>
                     <th class="px-6 py-4 font-semibold">Unit Sekolah</th>
+                    <th class="px-6 py-4 font-semibold">Status Akun</th>
                     <th class="px-6 py-4 font-semibold">Aksi Password</th>
                 </tr>
             </thead>
@@ -94,6 +95,40 @@
                             <span class="text-slate-400 italic">-</span>
                         @endif
                     </td>
+                    <td class="px-6 py-4">
+                        <div class="flex flex-col items-start gap-2">
+                            @if($user->is_active)
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                    <i data-lucide="check-circle-2" class="w-3 h-3 mr-1"></i> Aktif
+                                </span>
+                            @else
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-800 border border-red-200">
+                                    <i data-lucide="x-circle" class="w-3 h-3 mr-1"></i> Nonaktif
+                                </span>
+                            @endif
+                            @if(auth()->user()->id !== $user->id)
+                                @if($user->is_active)
+                                <form action="{{ route('users.toggle-active', $user) }}" method="POST" onsubmit="return confirm('Nonaktifkan akun {{ $user->name }}? Pengguna tidak akan bisa login sampai akunnya diaktifkan kembali.');">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" class="inline-flex items-center text-xs font-bold text-red-700 bg-red-50 border border-red-200 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors shadow-sm">
+                                        <i data-lucide="user-x" class="w-3 h-3 mr-1.5"></i> Nonaktifkan
+                                    </button>
+                                </form>
+                                @else
+                                <form action="{{ route('users.toggle-active', $user) }}" method="POST" onsubmit="return confirm('Aktifkan kembali akun {{ $user->name }}?');">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" class="inline-flex items-center text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition-colors shadow-sm">
+                                        <i data-lucide="user-check" class="w-3 h-3 mr-1.5"></i> Aktifkan
+                                    </button>
+                                </form>
+                                @endif
+                            @else
+                                <span class="text-[10px] text-slate-400 italic">Akun Anda sendiri</span>
+                            @endif
+                        </div>
+                    </td>
                     <td class="px-6 py-4 text-right">
                         @if($user->role != 'admin' || auth()->user()->id == $user->id)
                         <form action="{{ route('users.reset-password', $user) }}" method="POST" class="inline-block" onsubmit="return confirm('Anda yakin ingin mereset password akun {{ $user->name }} menjadi 12345678 ?');">
@@ -107,7 +142,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="4" class="px-6 py-4 text-center">
+                    <td colspan="5" class="px-6 py-4 text-center">
                         <div class="flex flex-col items-center justify-center">
                             <i data-lucide="users" class="h-10 w-10 text-slate-300 mb-3"></i>
                             <p>Belum ada data pengguna.</p>

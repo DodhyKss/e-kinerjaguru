@@ -41,4 +41,24 @@ class UserController extends Controller
 
         return back()->with('success', "Password untuk pengguna {$user->name} ({$user->email}) berhasil direset menjadi: 12345678");
     }
+
+    public function toggleActive(User $user)
+    {
+        if ($user->id === auth()->id()) {
+            return back()->with('error', 'Anda tidak dapat menonaktifkan akun Anda sendiri.');
+        }
+
+        $user->update([
+            'is_active' => !$user->is_active
+        ]);
+
+        // Sinkronkan status penilai (termasuk profil ganda Kepala Sekolah)
+        if ($user->penilai) {
+            $user->penilai->update(['status' => $user->is_active ? 'aktif' : 'nonaktif']);
+        }
+
+        $status = $user->is_active ? 'diaktifkan' : 'dinonaktifkan';
+
+        return back()->with('success', "Akun pengguna {$user->name} ({$user->email}) berhasil {$status}. " . ($user->is_active ? '' : 'Pengguna tersebut tidak dapat login sampai akunnya diaktifkan kembali.'));
+    }
 }

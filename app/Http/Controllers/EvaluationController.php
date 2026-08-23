@@ -172,6 +172,67 @@ class EvaluationController extends Controller
             );
         }
 
+        // Mode ALL: tugaskan sekaligus ke semua guru yang ditugaskan pada asesor terpilih
+        if ($request->boolean('assign_all')) {
+            $validated = $request->validate([
+                'evaluation_period_id' => 'required|exists:evaluation_periods,id',
+                'penilai_id' => 'required|exists:penilais,id',
+            ]);
+
+            $periodId = $validated['evaluation_period_id'];
+            $penilai = \App\Models\Penilai::findOrFail($validated['penilai_id']);
+
+            // Jika Kepala Sekolah yang membuat, pastikan asesor berasal dari sekolahnya
+            if ($user->isKepalaSekolah() && $penilai->school_id !== $user->school_id) {
+                abort(403, 'Anda hanya dapat menugaskan evaluasi untuk sekolah Anda sendiri.');
+            }
+
+            // Guru milik asesor ini (jika Kepala Sekolah: seluruh guru di sekolahnya)
+            if ($penilai->jabatan === 'Kepala Sekolah') {
+                $gurus = Guru::where('school_id', $penilai->school_id)->orderBy('nama')->get();
+            } else {
+                $gurus = $penilai->gurus()->orderBy('nama')->get();
+            }
+
+            $existingGuruIds = Evaluation::where('evaluation_period_id', $periodId)->pluck('guru_id');
+
+            $created = 0;
+            $skipped = 0;
+            foreach ($gurus as $guru) {
+                // Lewati guru yang sudah memiliki penugasan evaluasi pada periode ini
+                if ($existingGuruIds->contains($guru->id)) {
+                    $skipped++;
+                    continue;
+                }
+
+                // Lewati agar asesor tidak menilai dirinya sendiri
+                if ($penilai->user_id && $guru->user_id && $penilai->user_id === $guru->user_id) {
+                    $skipped++;
+                    continue;
+                }
+
+                Evaluation::create([
+                    'evaluation_period_id' => $periodId,
+                    'guru_id' => $guru->id,
+                    'penilai_id' => $penilai->id,
+                    'status' => 'draft',
+                ]);
+                $created++;
+            }
+
+            if ($created === 0) {
+                return redirect()->route('evaluations.index')
+                    ->with('error', "Tidak ada penugasan baru yang dibuat. {$skipped} guru sudah memiliki penugasan evaluasi pada periode ini.");
+            }
+
+            $message = "{$created} penugasan evaluasi berhasil dibuat sekaligus untuk Asesor {$penilai->nama}.";
+            if ($skipped > 0) {
+                $message .= " {$skipped} guru dilewati karena sudah memiliki penugasan pada periode ini.";
+            }
+
+            return redirect()->route('evaluations.index')->with('success', $message);
+        }
+
         $validated = $request->validate([
             'evaluation_period_id' => 'required|exists:evaluation_periods,id',
             'guru_id' => 'required|exists:gurus,id',
@@ -420,12 +481,6 @@ class EvaluationController extends Controller
             'level_capaian' => 'required|integer|min:1|max:4',
             'kesimpulan' => 'required|string',
         ]);
-
-        // Simple word count check for kesimpulan (> 50 words)
-        $wordCount = str_word_count(strip_tags($request->kesimpulan));
-        if ($wordCount < 50) {
-            return back()->withErrors(['kesimpulan' => "Kesimpulan minimal 50 kata. Saat ini hanya $wordCount kata."])->withInput();
-        }
 
         DB::transaction(function () use ($request, $evaluation, $indicator) {
             $result = EvaluationResult::firstOrCreate([

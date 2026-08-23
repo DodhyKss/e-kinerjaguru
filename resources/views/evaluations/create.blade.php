@@ -43,7 +43,7 @@
                     @if($penilais->where('jabatan', 'Kepala Sekolah')->isNotEmpty())
                         <optgroup label="Kepala Sekolah (Evaluator)">
                             @foreach($penilais->where('jabatan', 'Kepala Sekolah') as $penilai)
-                                <option value="{{ $penilai->id }}" data-is-kepsek="true" {{ old('penilai_id') == $penilai->id ? 'selected' : '' }}>
+                                <option value="{{ $penilai->id }}" data-is-kepsek="true" data-school-id="{{ $penilai->school_id }}" {{ old('penilai_id') == $penilai->id ? 'selected' : '' }}>
                                     [Kepala Sekolah] {{ $penilai->nama }} @if(auth()->user()->isAdmin() && $penilai->school) ({{ $penilai->school->nama }}) @endif
                                 </option>
                             @endforeach
@@ -52,7 +52,7 @@
                     @if($penilais->where('jabatan', '!=', 'Kepala Sekolah')->isNotEmpty())
                         <optgroup label="Asesor / Penilai Guru">
                             @foreach($penilais->where('jabatan', '!=', 'Kepala Sekolah') as $penilai)
-                                <option value="{{ $penilai->id }}" data-is-kepsek="false" {{ old('penilai_id') == $penilai->id ? 'selected' : '' }}>
+                                <option value="{{ $penilai->id }}" data-is-kepsek="false" data-school-id="{{ $penilai->school_id }}" {{ old('penilai_id') == $penilai->id ? 'selected' : '' }}>
                                     {{ $penilai->nama }} - {{ $penilai->jabatan }} @if(auth()->user()->isAdmin() && $penilai->school) ({{ $penilai->school->nama }}) @endif
                                 </option>
                             @endforeach
@@ -60,10 +60,21 @@
                     @endif
                 </select>
                 @error('penilai_id') <p class="mt-1 text-sm text-rose-500">{{ $message }}</p> @enderror
-                <p class="text-xs text-slate-500 mt-2"><i data-lucide="info" class="w-3 h-3 inline"></i> Evaluator yang dipilih (Kepala Sekolah / Asesor) akan menentukan daftar guru yang muncul di bawah.</p>
+                <p id="penilai-helper-text" class="text-xs text-slate-500 mt-2"><i data-lucide="info" class="w-3 h-3 inline"></i> Evaluator dari sekolah lain otomatis disembunyikan setelah Periode Evaluasi dipilih.</p>
+
+                <!-- Fitur ALL: Tugaskan sekaligus ke semua guru milik asesor -->
+                <div id="assign-all-wrapper" class="hidden mt-3 bg-indigo-50 border border-indigo-100 rounded-xl p-4">
+                    <label class="flex items-start cursor-pointer" for="assign_all">
+                        <input type="checkbox" name="assign_all" id="assign_all" value="1" class="mt-0.5 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                        <span class="ml-3 select-none">
+                            <span class="block text-sm font-bold text-slate-900">Tugaskan Langsung ke SEMUA Guru (ALL)</span>
+                            <span id="assign-all-info" class="block text-xs text-slate-600 mt-0.5">Buatkan penugasan evaluasi sekaligus untuk semua guru yang ditugaskan pada asesor ini.</span>
+                        </span>
+                    </label>
+                </div>
             </div>
 
-            <div>
+            <div id="guru-field-wrapper">
                 <label for="guru_id" class="block text-sm font-bold text-slate-700 mb-1">Guru Yang Akan Dinilai <span class="text-rose-500">*</span></label>
                 <select name="guru_id" id="guru_id" required class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-3 border @error('guru_id') border-rose-300 ring-rose-500 @enderror">
                     <option value="">-- Pilih Guru --</option>
@@ -103,11 +114,30 @@ $(document).ready(function() {
     $('#penilai_id').select2({ width: '100%' });
     $('#guru_id').select2({ width: '100%' });
 
+    const periodSelect = $('#evaluation_period_id');
     const penilaiSelect = $('#penilai_id');
     const guruSelect = $('#guru_id');
     const helperText = $('#guru-helper-text');
+    const assignAllWrapper = $('#assign-all-wrapper');
+    const assignAllCheckbox = $('#assign_all');
+    const assignAllInfo = $('#assign-all-info');
+    const guruFieldWrapper = $('#guru-field-wrapper');
     
     const penilaiGurusMap = @json($penilaiGurusMap);
+    // Peta: id periode evaluasi -> school_id (untuk memfilter evaluator dari sekolah lain)
+    const periodSchoolMap = @json($periods->pluck('school_id', 'id'));
+    
+    // Simpan semua options evaluator beserta grupnya
+    const penilaiPlaceholderText = penilaiSelect.find('option:first').text();
+    const allPenilaiOptions = [];
+    penilaiSelect.find('optgroup').each(function() {
+        const groupLabel = $(this).attr('label');
+        $(this).find('option').each(function() {
+            if ($(this).val() !== "") {
+                allPenilaiOptions.push({ group: groupLabel, option: $(this).clone() });
+            }
+        });
+    });
     
     // Simpan semua options guru ke array
     const allGuruOptions = [];
@@ -118,6 +148,75 @@ $(document).ready(function() {
     });
     
     const oldGuruId = "{{ old('guru_id') }}";
+
+    // Filter opsi Evaluator: hanya tampilkan evaluator dari sekolah pada Periode Evaluasi yang dipilih.
+    // Opsi yang tidak sesuai dihapus dari DOM (bukan sekadar disabled) agar benar-benar tidak muncul.
+    function filterPenilaiOptions() {
+        const selectedPeriodId = periodSelect.val();
+        const periodSchoolId = selectedPeriodId ? String(periodSchoolMap[selectedPeriodId] ?? '') : '';
+        const currentVal = String(penilaiSelect.val() ?? '');
+
+        penilaiSelect.empty().append(`<option value="">${penilaiPlaceholderText}</option>`);
+
+        let currentGroupEl = null;
+        let restored = false;
+        let shown = 0;
+
+        allPenilaiOptions.forEach(item => {
+            const optionSchoolId = String(item.option.attr('data-school-id') ?? '');
+
+            // Sembunyikan evaluator dari sekolah lain ketika periode sudah dipilih
+            if (periodSchoolId !== '' && optionSchoolId !== '' && optionSchoolId !== periodSchoolId) {
+                return;
+            }
+
+            if (!currentGroupEl || currentGroupEl.attr('label') !== item.group) {
+                currentGroupEl = $('<optgroup>').attr('label', item.group);
+                penilaiSelect.append(currentGroupEl);
+            }
+
+            const clone = item.option.clone();
+            if (clone.val() === currentVal) {
+                clone.prop('selected', true);
+                restored = true;
+            }
+            currentGroupEl.append(clone);
+            shown++;
+        });
+
+        let selectionCleared = false;
+        if (!restored) {
+            selectionCleared = currentVal !== '';
+            penilaiSelect.val('');
+        }
+
+        penilaiSelect.trigger('change.select2');
+        return selectionCleared;
+    }
+
+    function updateAssignAllVisibility() {
+        const selectedPenilaiId = penilaiSelect.val();
+        const allowedGuruIds = (selectedPenilaiId && penilaiGurusMap[selectedPenilaiId]) || [];
+        
+        if (selectedPenilaiId && allowedGuruIds.length > 0) {
+            assignAllWrapper.removeClass('hidden');
+            assignAllInfo.text(`Buatkan ${allowedGuruIds.length} penugasan evaluasi sekaligus untuk semua guru yang ditugaskan pada asesor ini.`);
+        } else {
+            assignAllWrapper.addClass('hidden');
+            assignAllCheckbox.prop('checked', false).trigger('change');
+        }
+    }
+
+    function toggleGuruField() {
+        if (assignAllCheckbox.is(':checked')) {
+            guruFieldWrapper.addClass('hidden opacity-50 pointer-events-none');
+            guruSelect.prop('disabled', true).val('').trigger('change.select2');
+        } else {
+            guruFieldWrapper.removeClass('hidden opacity-50 pointer-events-none');
+            guruSelect.prop('disabled', false);
+            filterGurus();
+        }
+    }
 
     function filterGurus() {
         const selectedPenilaiId = penilaiSelect.val();
@@ -172,8 +271,23 @@ $(document).ready(function() {
         guruSelect.trigger('change.select2');
     }
 
-    penilaiSelect.on('change', filterGurus);
+    periodSelect.on('change', function() {
+        const wasCleared = filterPenilaiOptions();
+        if (wasCleared) {
+            filterGurus();
+        }
+        updateAssignAllVisibility();
+    });
+    penilaiSelect.on('change', function() {
+        filterGurus();
+        updateAssignAllVisibility();
+    });
+    assignAllCheckbox.on('change', toggleGuruField);
+
+    filterPenilaiOptions();
     filterGurus();
+    updateAssignAllVisibility();
+    toggleGuruField();
 });
 </script>
 @endsection

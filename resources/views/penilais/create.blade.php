@@ -29,7 +29,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div class="md:col-span-2">
                 <label for="school_id" class="block text-sm font-bold text-slate-700 mb-1">Penugasan ke Sekolah <span class="text-rose-500">*</span></label>
-                <select name="school_id" id="school_id" required class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border @error('school_id') border-rose-300 ring-rose-500 @enderror">
+                <select name="school_id" id="school_id" required class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border select2 @error('school_id') border-rose-300 ring-rose-500 @enderror">
                     <option value="">-- Pilih Sekolah Tujuan Penilaian --</option>
                     @foreach($schools as $school)
                         <option value="{{ $school->id }}" {{ old('school_id', isset($guru) ? $guru->school_id : '') == $school->id ? 'selected' : '' }}>{{ $school->npsn }} - {{ $school->nama }}</option>
@@ -66,7 +66,7 @@
 
             <div>
                 <label for="pangkat_golongan_id" class="block text-sm font-bold text-slate-700 mb-1">Pangkat/Golongan (Opsional)</label>
-                <select name="pangkat_golongan_id" id="pangkat_golongan_id" class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border @error('pangkat_golongan_id') border-rose-300 ring-rose-500 @enderror">
+                <select name="pangkat_golongan_id" id="pangkat_golongan_id" class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border select2 @error('pangkat_golongan_id') border-rose-300 ring-rose-500 @enderror">
                     <option value="">-- Pilih Pangkat/Golongan --</option>
                     @foreach($pangkatGolongans as $pg)
                         <option value="{{ $pg->id }}" {{ old('pangkat_golongan_id', isset($guru) ? $guru->pangkat_golongan_id : '') == $pg->id ? 'selected' : '' }}>{{ $pg->nama }} ({{ $pg->golongan }})</option>
@@ -154,6 +154,10 @@
 <script>
 $(document).ready(function() {
     $('.select2').select2({
+        width: '100%'
+    });
+
+    $('#guru_search_select').select2({
         width: '100%',
         placeholder: '-- Cari Nama atau NIP Guru --'
     });

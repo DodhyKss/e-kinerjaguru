@@ -79,6 +79,7 @@ Route::middleware('auth')->group(function () {
         
         Route::get('users', [\App\Http\Controllers\UserController::class, 'index'])->name('users.index');
         Route::post('users/{user}/reset-password', [\App\Http\Controllers\UserController::class, 'resetPassword'])->name('users.reset-password');
+        Route::patch('users/{user}/toggle-active', [\App\Http\Controllers\UserController::class, 'toggleActive'])->name('users.toggle-active');
     });
 
     // Evaluations

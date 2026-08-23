@@ -227,7 +227,7 @@
             <div>
                 <div class="flex justify-between items-end mb-2">
                     <label for="kesimpulan" class="block text-sm font-bold text-slate-900">Uraian Kesimpulan Penilaian <span class="text-red-500">*</span></label>
-                    <span id="word-counter" class="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded">0 / 50 Minimal Kata</span>
+                    <span id="word-counter" class="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded">0 kata</span>
                 </div>
                 <p class="text-xs text-slate-500 mb-3">Tuliskan kesimpulan menyeluruh berdasarkan bukti faktual dari tabel kerja. Pemilihan level harus sejalan dengan uraian di bawah ini.</p>
                 <textarea id="kesimpulan" name="kesimpulan" rows="6" {{ isset($isReadOnly) && $isReadOnly ? 'readonly disabled' : 'required' }}
@@ -271,20 +271,21 @@
         });
     });
 
-    // Word counter for kesimpulan
+    // Word counter for kesimpulan (peringatan saja, tidak memblokir simpan)
     const textarea = document.getElementById('kesimpulan');
     const counter = document.getElementById('word-counter');
     
     function updateCounter() {
+        if (!textarea || !counter) return;
         const text = textarea.value.trim();
         const words = text ? text.split(/\s+/).length : 0;
-        counter.textContent = `${words} / 50 Minimal Kata`;
+        
         if (words >= 50) {
-            counter.classList.replace('text-slate-500', 'text-emerald-600');
-            counter.classList.replace('bg-slate-100', 'bg-emerald-50');
+            counter.textContent = `${words} kata`;
+            counter.className = 'text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-1 rounded';
         } else {
-            counter.classList.replace('text-emerald-600', 'text-slate-500');
-            counter.classList.replace('bg-emerald-50', 'bg-slate-100');
+            counter.textContent = `⚠️ ${words} kata — Disarankan minimal 50 kata agar kesimpulan lebih mendalam`;
+            counter.className = 'text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 px-2 py-1 rounded';
         }
     }
     

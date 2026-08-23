@@ -44,7 +44,7 @@
                     @if($penilais->where('jabatan', 'Kepala Sekolah')->isNotEmpty())
                         <optgroup label="Kepala Sekolah (Evaluator)">
                             @foreach($penilais->where('jabatan', 'Kepala Sekolah') as $penilai)
-                                <option value="{{ $penilai->id }}" data-is-kepsek="true" {{ old('penilai_id', $evaluation->penilai_id) == $penilai->id ? 'selected' : '' }}>
+                                <option value="{{ $penilai->id }}" data-is-kepsek="true" data-school-id="{{ $penilai->school_id }}" {{ old('penilai_id', $evaluation->penilai_id) == $penilai->id ? 'selected' : '' }}>
                                     [Kepala Sekolah] {{ $penilai->nama }} @if(auth()->user()->isAdmin() && $penilai->school) ({{ $penilai->school->nama }}) @endif
                                 </option>
                             @endforeach
@@ -53,7 +53,7 @@
                     @if($penilais->where('jabatan', '!=', 'Kepala Sekolah')->isNotEmpty())
                         <optgroup label="Asesor / Penilai Guru">
                             @foreach($penilais->where('jabatan', '!=', 'Kepala Sekolah') as $penilai)
-                                <option value="{{ $penilai->id }}" data-is-kepsek="false" {{ old('penilai_id', $evaluation->penilai_id) == $penilai->id ? 'selected' : '' }}>
+                                <option value="{{ $penilai->id }}" data-is-kepsek="false" data-school-id="{{ $penilai->school_id }}" {{ old('penilai_id', $evaluation->penilai_id) == $penilai->id ? 'selected' : '' }}>
                                     {{ $penilai->nama }} - {{ $penilai->jabatan }} @if(auth()->user()->isAdmin() && $penilai->school) ({{ $penilai->school->nama }}) @endif
                                 </option>
                             @endforeach
@@ -104,11 +104,14 @@ $(document).ready(function() {
     $('#penilai_id').select2({ width: '100%' });
     $('#guru_id').select2({ width: '100%' });
 
+    const periodSelect = $('#evaluation_period_id');
     const penilaiSelect = $('#penilai_id');
     const guruSelect = $('#guru_id');
     const helperText = $('#guru-helper-text');
     
     const penilaiGurusMap = @json($penilaiGurusMap);
+    // Peta: id periode evaluasi -> school_id (untuk memfilter Kepala Sekolah dari sekolah lain)
+    const periodSchoolMap = @json($periods->pluck('school_id', 'id'));
     
     // Simpan semua options guru ke array
     const allGuruOptions = [];
@@ -119,6 +122,36 @@ $(document).ready(function() {
     });
     
     const oldGuruId = "{{ old('guru_id', $evaluation->guru_id) }}";
+
+    // Filter opsi Kepala Sekolah: hanya tampilkan kepsek dari sekolah pada Periode Evaluasi yang dipilih
+    function filterKepsekOptions() {
+        const selectedPeriodId = periodSelect.val();
+        const periodSchoolId = selectedPeriodId ? String(periodSchoolMap[selectedPeriodId] ?? '') : '';
+        let currentVal = penilaiSelect.val();
+        let selectionInvalid = false;
+
+        if (periodSchoolId !== '') {
+            penilaiSelect.find('option[data-is-kepsek="true"]').each(function() {
+                const optionSchoolId = String($(this).attr('data-school-id') ?? '');
+                const blocked = optionSchoolId !== '' && optionSchoolId !== periodSchoolId;
+                $(this).prop('disabled', blocked);
+                if (blocked && String(currentVal) === String($(this).val())) {
+                    selectionInvalid = true;
+                }
+            });
+        } else {
+            penilaiSelect.find('option[data-is-kepsek="true"]').each(function() {
+                $(this).prop('disabled', false);
+            });
+        }
+
+        if (selectionInvalid) {
+            currentVal = null;
+            penilaiSelect.val('').trigger('change.select2');
+        }
+
+        penilaiSelect.trigger('change.select2');
+    }
 
     function filterGurus() {
         const selectedPenilaiId = penilaiSelect.val();
@@ -173,7 +206,9 @@ $(document).ready(function() {
         guruSelect.trigger('change.select2');
     }
 
+    periodSelect.on('change', filterKepsekOptions);
     penilaiSelect.on('change', filterGurus);
+    filterKepsekOptions();
     filterGurus();
 });
 </script>
