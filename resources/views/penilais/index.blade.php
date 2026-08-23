@@ -154,7 +154,7 @@
                                 <p class="text-sm text-slate-500 mb-4">
                                     Pilih Guru yang ingin ditugaskan sebagai Asesor. Form pembuatan Asesor akan terbuka otomatis terisi dengan data mereka.
                                 </p>
-                                <select name="guru_id" class="block w-full rounded-xl border-slate-300 shadow-sm sm:text-sm p-2.5 border" required>
+                                <select name="guru_id" class="block w-full rounded-xl border-slate-300 shadow-sm sm:text-sm p-2.5 border select2" required>
                                     <option value="">-- Pilih Guru --</option>
                                     @forelse($gurusBelumPenilai as $g)
                                         <option value="{{ $g->id }}">{{ $g->nama }} ({{ $g->nip ?? '-' }})</option>
