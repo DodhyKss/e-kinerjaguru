@@ -32,14 +32,25 @@ class UserController extends Controller
         return view('users.index', compact('users', 'allUsers', 'schools'));
     }
 
-    public function resetPassword(User $user)
+    public function resetPassword(Request $request, User $user)
     {
-        // Reset password ke default: 12345678
-        $user->update([
-            'password' => Hash::make('12345678')
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ], [
+            'password.required' => 'Password baru wajib diisi.',
+            'password.min' => 'Password minimal harus 8 karakter.',
+            'password.confirmed' => 'Konfirmasi password tidak cocok dengan password baru.',
         ]);
 
-        return back()->with('success', "Password untuk pengguna {$user->name} ({$user->email}) berhasil direset menjadi: 12345678");
+        if ($validator->fails()) {
+            return back()->with('error', $validator->errors()->first());
+        }
+
+        $user->update([
+            'password' => Hash::make($request->password)
+        ]);
+
+        return back()->with('success', "Password untuk pengguna {$user->name} ({$user->email}) berhasil direset sesuai password baru yang Anda tentukan.");
     }
 
     public function toggleActive(User $user)

@@ -131,12 +131,9 @@
                     </td>
                     <td class="px-6 py-4 text-right">
                         @if($user->role != 'admin' || auth()->user()->id == $user->id)
-                        <form action="{{ route('users.reset-password', $user) }}" method="POST" class="inline-block" onsubmit="return confirm('Anda yakin ingin mereset password akun {{ $user->name }} menjadi 12345678 ?');">
-                            @csrf
-                            <button type="submit" class="inline-flex items-center text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 px-3 py-1.5 rounded-lg transition-colors shadow-sm">
-                                <i data-lucide="key-round" class="w-3 h-3 mr-1.5"></i> Reset Password
-                            </button>
-                        </form>
+                        <button type="button" onclick="openResetPasswordModal('{{ route('users.reset-password', $user) }}', '{{ addslashes($user->name) }}')" class="inline-flex items-center text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 px-3 py-1.5 rounded-lg transition-colors shadow-sm">
+                            <i data-lucide="key-round" class="w-3 h-3 mr-1.5"></i> Reset Password
+                        </button>
                         @endif
                     </td>
                 </tr>
@@ -169,7 +166,56 @@
     <div>
         <h4 class="text-sm font-bold text-blue-900">Catatan Keamanan (Enkripsi Password)</h4>
         <p class="text-sm text-blue-800 mt-1">Sesuai dengan standar keamanan sistem modern, semua password pengguna dienkripsi dengan algoritma <i>Bcrypt/Argon2</i> sebelum disimpan ke dalam database. Oleh karena itu, <strong>Admin maupun sistem tidak dapat melihat password asli (teks biasa) milik pengguna.</strong></p>
-        <p class="text-sm text-blue-800 mt-2">Jika ada guru yang lupa password, solusi terbaik adalah menekan tombol <strong>"Reset Password"</strong> di atas. Password mereka akan dikembalikan ke <i>default</i> yaitu <code>12345678</code>, kemudian guru tersebut bisa login kembali dengan password tersebut.</p>
+        <p class="text-sm text-blue-800 mt-2">Jika ada guru yang lupa password, Admin dapat menekan tombol <strong>"Reset Password"</strong> di atas lalu <strong>menginput password baru yang diinginkan</strong> (minimal 8 karakter). Setelah itu, guru tersebut bisa login kembali menggunakan password baru tersebut.</p>
+    </div>
+</div>
+
+<!-- Modal Reset Password -->
+<div id="resetPasswordModal" class="fixed inset-0 z-[60] hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeResetPasswordModal()"></div>
+    <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-md border border-slate-100">
+        <form id="resetPasswordForm" method="POST" action="" onsubmit="return validateResetPasswordForm();">
+            @csrf
+            <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50 rounded-t-2xl">
+                <div class="flex items-center gap-3">
+                    <div class="bg-amber-100 text-amber-700 p-2 rounded-lg">
+                        <i data-lucide="key-round" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900">Reset Password</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Akun: <span id="resetPasswordUserName" class="font-semibold text-slate-700"></span></p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeResetPasswordModal()" class="text-slate-400 hover:text-slate-600 transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="px-6 py-5 space-y-4">
+                <div>
+                    <label for="new_password" class="block text-sm font-medium text-slate-700 mb-1.5">Password Baru <span class="text-red-500">*</span></label>
+                    <input type="password" name="password" id="new_password" required minlength="8" autocomplete="new-password"
+                        placeholder="Masukkan password baru (min. 8 karakter)"
+                        class="w-full rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-200 transition-shadow">
+                </div>
+                <div>
+                    <label for="new_password_confirmation" class="block text-sm font-medium text-slate-700 mb-1.5">Konfirmasi Password Baru <span class="text-red-500">*</span></label>
+                    <input type="password" name="password_confirmation" id="new_password_confirmation" required minlength="8" autocomplete="new-password"
+                        placeholder="Ulangi password baru"
+                        class="w-full rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-200 transition-shadow">
+                </div>
+                <p id="resetPasswordError" class="hidden text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2"></p>
+                <div class="bg-blue-50 border border-blue-100 rounded-lg px-3 py-2.5 text-xs text-blue-800 flex gap-2">
+                    <i data-lucide="info" class="w-4 h-4 flex-shrink-0 mt-0.5"></i>
+                    <span>Password minimal 8 karakter. Disarankan kombinasi huruf besar, huruf kecil, angka, dan simbol. Berikan password ini kepada pengguna terkait.</span>
+                </div>
+            </div>
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 rounded-b-2xl flex justify-end gap-3">
+                <button type="button" onclick="closeResetPasswordModal()" class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-100 transition-colors">Batal</button>
+                <button type="submit" class="inline-flex items-center px-4 py-2 text-sm font-bold text-white bg-amber-600 hover:bg-amber-700 rounded-lg transition-colors shadow-sm">
+                    <i data-lucide="check" class="w-4 h-4 mr-1.5"></i> Simpan Password
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -186,6 +232,48 @@
             allowClear: true,
             width: '100%'
         });
+    });
+
+    function openResetPasswordModal(actionUrl, userName) {
+        const form = document.getElementById('resetPasswordForm');
+        form.action = actionUrl;
+        document.getElementById('resetPasswordUserName').textContent = userName;
+        document.getElementById('new_password').value = '';
+        document.getElementById('new_password_confirmation').value = '';
+        document.getElementById('resetPasswordError').classList.add('hidden');
+
+        const modal = document.getElementById('resetPasswordModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        setTimeout(() => document.getElementById('new_password').focus(), 100);
+    }
+
+    function closeResetPasswordModal() {
+        const modal = document.getElementById('resetPasswordModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    function validateResetPasswordForm() {
+        const password = document.getElementById('new_password').value;
+        const confirmation = document.getElementById('new_password_confirmation').value;
+        const errorBox = document.getElementById('resetPasswordError');
+
+        if (password.length < 8) {
+            errorBox.textContent = 'Password minimal harus 8 karakter.';
+            errorBox.classList.remove('hidden');
+            return false;
+        }
+        if (password !== confirmation) {
+            errorBox.textContent = 'Konfirmasi password tidak cocok dengan password baru.';
+            errorBox.classList.remove('hidden');
+            return false;
+        }
+        return confirm('Anda yakin ingin mereset password akun ini dengan password baru yang telah diinput?');
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeResetPasswordModal();
     });
 </script>
 @endpush
