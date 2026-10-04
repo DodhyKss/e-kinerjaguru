@@ -4,7 +4,9 @@ namespace Database\Seeders;
 
 use App\Models\EvaluationPeriod;
 use App\Models\Guru;
+use App\Models\Kabupaten;
 use App\Models\Penilai;
+use App\Models\Provinsi;
 use App\Models\School;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -15,8 +17,8 @@ class DemoSeeder extends Seeder
     public function run(): void
     {
         // 0. Create Provinsi & Kabupaten
-        $provinsi = \App\Models\Provinsi::firstOrCreate(['nama' => 'Jawa Barat']);
-        $kabupaten = \App\Models\Kabupaten::firstOrCreate([
+        $provinsi = Provinsi::firstOrCreate(['nama' => 'Jawa Barat']);
+        $kabupaten = Kabupaten::firstOrCreate([
             'provinsi_id' => $provinsi->id,
             'nama' => 'Kota Vokasi',
         ]);
@@ -41,7 +43,16 @@ class DemoSeeder extends Seeder
             'role' => 'admin',
         ]);
 
-        // 3. Create Kepala Sekolah User
+        // 3. Create Admin Internal Sekolah User
+        User::create([
+            'name' => 'Siti Aminah (Admin Internal)',
+            'email' => 'admininternal@ekg.local',
+            'password' => Hash::make('password'),
+            'role' => 'admin_internal',
+            'school_id' => $school->id,
+        ]);
+
+        // 4. Create Kepala Sekolah User
         $kepsekUser = User::create([
             'name' => 'Dr. Budi Santoso, M.Pd.',
             'email' => 'kepsek@ekg.local',
@@ -61,7 +72,7 @@ class DemoSeeder extends Seeder
             'status' => 'aktif',
         ]);
 
-        // 4. Create Penilai (Asesor)
+        // 5. Create Penilai (Asesor)
         $penilaiUser = User::create([
             'name' => 'Ahmad Hidayat, S.Pd., M.T.',
             'email' => 'penilai@ekg.local',
@@ -80,7 +91,7 @@ class DemoSeeder extends Seeder
             'no_telepon' => '081234567890',
         ]);
 
-        // 5. Create Guru
+        // 6. Create Guru
         $guruUser = User::create([
             'name' => 'Siti Aminah, S.Kom.',
             'email' => 'guru@ekg.local',
@@ -103,7 +114,7 @@ class DemoSeeder extends Seeder
             'no_telepon' => '089876543210',
         ]);
 
-        // 6. Create Evaluation Period
+        // 7. Create Evaluation Period
         EvaluationPeriod::create([
             'school_id' => $school->id,
             'nama' => 'Evaluasi Kinerja Guru Semester Ganjil 2025/2026',

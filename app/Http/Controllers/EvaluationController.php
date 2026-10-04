@@ -2,12 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AssessmentAspect;
 use App\Models\Dimension;
+use App\Models\DocumentReviewData;
+use App\Models\DocumentReviewNote;
 use App\Models\Evaluation;
 use App\Models\EvaluationPeriod;
 use App\Models\EvaluationResult;
 use App\Models\Guru;
 use App\Models\Indicator;
+use App\Models\InterviewData;
+use App\Models\InterviewNote;
+use App\Models\JenisDokumen;
+use App\Models\ObservationData;
+use App\Models\ObservationNote;
+use App\Models\Penilai;
+use App\Models\School;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -17,28 +28,31 @@ class EvaluationController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        
+
         $query = Evaluation::with(['guru', 'penilai', 'evaluationPeriod'])->latest();
 
-        if ($user->isAdmin() || $user->isKepalaSekolah()) {
-            $query->when($user->isKepalaSekolah(), function($q) use ($user) {
-                $q->whereHas('guru', fn($g) => $g->where('school_id', $user->school_id));
+        if ($user->isAdmin() || $user->isKepalaSekolah() || $user->isAdminInternal()) {
+            // Admin internal sekolah: read-only, hanya evaluasi gurunya sendiri.
+            $lockedSchoolId = $user->isAdmin() ? null : $user->school_id;
+
+            $query->when($lockedSchoolId !== null, function ($q) use ($lockedSchoolId) {
+                $q->whereHas('guru', fn ($g) => $g->where('school_id', $lockedSchoolId));
             });
-        } else if ($user->isPenilai()) {
+        } elseif ($user->isPenilai()) {
             $assignedGuruIds = $user->penilai->gurus()->pluck('gurus.id');
-            
+
             if ($user->guru) {
-                $query->where(function($q) use ($user, $assignedGuruIds) {
-                    $q->where(function($q2) use ($user, $assignedGuruIds) {
+                $query->where(function ($q) use ($user, $assignedGuruIds) {
+                    $q->where(function ($q2) use ($user, $assignedGuruIds) {
                         $q2->where('penilai_id', $user->penilai->id)
-                           ->whereIn('guru_id', $assignedGuruIds);
+                            ->whereIn('guru_id', $assignedGuruIds);
                     })->orWhere('guru_id', $user->guru->id);
                 });
             } else {
                 $query->where('penilai_id', $user->penilai->id)
-                      ->whereIn('guru_id', $assignedGuruIds);
+                    ->whereIn('guru_id', $assignedGuruIds);
             }
-        } else if ($user->isGuru()) {
+        } elseif ($user->isGuru()) {
             $query->where('guru_id', $user->guru->id);
         } else {
             abort(403);
@@ -56,8 +70,20 @@ class EvaluationController extends Controller
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
-        if ($request->filled('school_id')) {
-            $query->whereHas('guru', function($q) use ($request) {
+        // Filter pembuktian kosong: Banyak indikator yang belum diisi sama sekali
+        // oleh asesor sehingga perlu diperbaiki Admin Pusat.
+        if ($request->boolean('pembuktian_kosong')) {
+            $query->whereHas('results', function ($q) {
+                $q->where(function ($q) {
+                    $q->where('status', 'belum')
+                        ->orWhereNull('level_capaian')
+                        ->orWhereNull('kesimpulan');
+                });
+            });
+        }
+
+        if ($request->filled('school_id') && ! $user->isAdminInternal()) {
+            $query->whereHas('guru', function ($q) use ($request) {
                 $q->where('school_id', $request->school_id);
             });
         }
@@ -65,13 +91,13 @@ class EvaluationController extends Controller
         $evaluations = $query->paginate(15)->withQueryString();
 
         $periods = EvaluationPeriod::orderBy('nama', 'desc')->get();
-        
+
         // Fetch relevant gurus for the dropdown
         if ($user->isAdmin() || $user->isKepalaSekolah()) {
-            $gurus = Guru::when($user->isKepalaSekolah(), function($q) use ($user) {
+            $gurus = Guru::when($user->isKepalaSekolah(), function ($q) use ($user) {
                 $q->where('school_id', $user->school_id);
             })->orderBy('nama')->get();
-        } else if ($user->isPenilai()) {
+        } elseif ($user->isPenilai()) {
             $gurus = $user->penilai->gurus()->orderBy('nama')->get();
         } else {
             $gurus = collect([]); // Guru doesn't need to filter by Guru
@@ -79,7 +105,7 @@ class EvaluationController extends Controller
 
         // Fetch relevant penilais
         if ($user->isAdmin() || $user->isKepalaSekolah()) {
-            $penilais = \App\Models\Penilai::when($user->isKepalaSekolah(), function($q) use ($user) {
+            $penilais = Penilai::when($user->isKepalaSekolah(), function ($q) use ($user) {
                 $q->where('school_id', $user->school_id);
             })->orderBy('nama')->get();
         } else {
@@ -88,7 +114,7 @@ class EvaluationController extends Controller
 
         // Fetch schools (Only Admin can filter by school)
         if ($user->isAdmin()) {
-            $schools = \App\Models\School::orderBy('nama')->get();
+            $schools = School::orderBy('nama')->get();
         } else {
             $schools = collect([]);
         }
@@ -99,14 +125,14 @@ class EvaluationController extends Controller
     public function create()
     {
         $user = Auth::user();
-        if (!$user->isAdmin() && !$user->isKepalaSekolah()) {
+        if (! $user->isAdmin() && ! $user->isKepalaSekolah()) {
             abort(403);
         }
 
         // Pastikan setiap User dengan role kepala_sekolah memiliki record di tabel penilais
-        $kepalaSekolahUsers = \App\Models\User::with('kepalaSekolah')->where('role', 'kepala_sekolah')->get();
+        $kepalaSekolahUsers = User::with('kepalaSekolah')->where('role', 'kepala_sekolah')->get();
         foreach ($kepalaSekolahUsers as $kepsekUser) {
-            \App\Models\Penilai::updateOrCreate(
+            Penilai::updateOrCreate(
                 ['user_id' => $kepsekUser->id],
                 [
                     'school_id' => $kepsekUser->school_id,
@@ -123,11 +149,11 @@ class EvaluationController extends Controller
 
         // Ambil periode aktif
         $periods = EvaluationPeriod::where('status', 'aktif')->get();
-        
+
         // Ambil guru dan penilai (termasuk Kepala Sekolah yang disinkronisasi) sesuai scope
         if ($user->isKepalaSekolah()) {
             $gurus = Guru::where('school_id', $user->school_id)->orderBy('nama')->get();
-            $penilais = \App\Models\Penilai::with(['user', 'gurus', 'school'])
+            $penilais = Penilai::with(['user', 'gurus', 'school'])
                 ->where('school_id', $user->school_id)
                 ->where('status', 'aktif')
                 ->orderBy('user_id', 'desc')
@@ -136,7 +162,7 @@ class EvaluationController extends Controller
                 ->unique('nama');
         } else {
             $gurus = Guru::with('school')->orderBy('nama')->get();
-            $penilais = \App\Models\Penilai::with(['user', 'gurus', 'school'])
+            $penilais = Penilai::with(['user', 'gurus', 'school'])
                 ->where('status', 'aktif')
                 ->orderBy('user_id', 'desc')
                 ->orderBy('nama')
@@ -150,14 +176,14 @@ class EvaluationController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
-        if (!$user->isAdmin() && !$user->isKepalaSekolah()) {
+        if (! $user->isAdmin() && ! $user->isKepalaSekolah()) {
             abort(403);
         }
 
         // Pastikan sinkronisasi terbaru sebelum validasi store
-        $kepalaSekolahUsers = \App\Models\User::with('kepalaSekolah')->where('role', 'kepala_sekolah')->get();
+        $kepalaSekolahUsers = User::with('kepalaSekolah')->where('role', 'kepala_sekolah')->get();
         foreach ($kepalaSekolahUsers as $kepsekUser) {
-            \App\Models\Penilai::updateOrCreate(
+            Penilai::updateOrCreate(
                 ['user_id' => $kepsekUser->id],
                 [
                     'school_id' => $kepsekUser->school_id,
@@ -180,7 +206,7 @@ class EvaluationController extends Controller
             ]);
 
             $periodId = $validated['evaluation_period_id'];
-            $penilai = \App\Models\Penilai::findOrFail($validated['penilai_id']);
+            $penilai = Penilai::findOrFail($validated['penilai_id']);
 
             // Jika Kepala Sekolah yang membuat, pastikan asesor berasal dari sekolahnya
             if ($user->isKepalaSekolah() && $penilai->school_id !== $user->school_id) {
@@ -202,12 +228,14 @@ class EvaluationController extends Controller
                 // Lewati guru yang sudah memiliki penugasan evaluasi pada periode ini
                 if ($existingGuruIds->contains($guru->id)) {
                     $skipped++;
+
                     continue;
                 }
 
                 // Lewati agar asesor tidak menilai dirinya sendiri
                 if ($penilai->user_id && $guru->user_id && $penilai->user_id === $guru->user_id) {
                     $skipped++;
+
                     continue;
                 }
 
@@ -240,7 +268,7 @@ class EvaluationController extends Controller
         ]);
 
         $guru = Guru::findOrFail($validated['guru_id']);
-        $penilai = \App\Models\Penilai::findOrFail($validated['penilai_id']);
+        $penilai = Penilai::findOrFail($validated['penilai_id']);
 
         if ($penilai->user_id && $guru->user_id && $penilai->user_id === $guru->user_id) {
             return back()->with('error', 'Seorang Asesor tidak dapat menilai dirinya sendiri.')->withInput();
@@ -255,8 +283,8 @@ class EvaluationController extends Controller
 
         // Cek apakah sudah ada evaluasi untuk guru ini di periode ini
         $exists = Evaluation::where('evaluation_period_id', $validated['evaluation_period_id'])
-                            ->where('guru_id', $validated['guru_id'])
-                            ->exists();
+            ->where('guru_id', $validated['guru_id'])
+            ->exists();
 
         if ($exists) {
             return back()->with('error', 'Guru tersebut sudah memiliki penugasan evaluasi pada periode ini.')->withInput();
@@ -275,7 +303,7 @@ class EvaluationController extends Controller
     public function edit(Evaluation $evaluation)
     {
         $user = Auth::user();
-        if (!$user->isAdmin() && !$user->isKepalaSekolah()) {
+        if (! $user->isAdmin() && ! $user->isKepalaSekolah()) {
             abort(403);
         }
 
@@ -285,10 +313,10 @@ class EvaluationController extends Controller
 
         // Ambil periode aktif
         $periods = EvaluationPeriod::where('status', 'aktif')->get();
-        
+
         if ($user->isKepalaSekolah()) {
             $gurus = Guru::where('school_id', $user->school_id)->orderBy('nama')->get();
-            $penilais = \App\Models\Penilai::with(['user', 'gurus', 'school'])
+            $penilais = Penilai::with(['user', 'gurus', 'school'])
                 ->where('school_id', $user->school_id)
                 ->where('status', 'aktif')
                 ->orderBy('user_id', 'desc')
@@ -297,7 +325,7 @@ class EvaluationController extends Controller
                 ->unique('nama');
         } else {
             $gurus = Guru::with('school')->orderBy('nama')->get();
-            $penilais = \App\Models\Penilai::with(['user', 'gurus', 'school'])
+            $penilais = Penilai::with(['user', 'gurus', 'school'])
                 ->where('status', 'aktif')
                 ->orderBy('user_id', 'desc')
                 ->orderBy('nama')
@@ -311,7 +339,7 @@ class EvaluationController extends Controller
     public function update(Request $request, Evaluation $evaluation)
     {
         $user = Auth::user();
-        if (!$user->isAdmin() && !$user->isKepalaSekolah()) {
+        if (! $user->isAdmin() && ! $user->isKepalaSekolah()) {
             abort(403);
         }
 
@@ -322,7 +350,7 @@ class EvaluationController extends Controller
         ]);
 
         $guru = Guru::findOrFail($validated['guru_id']);
-        $penilai = \App\Models\Penilai::findOrFail($validated['penilai_id']);
+        $penilai = Penilai::findOrFail($validated['penilai_id']);
 
         if ($penilai->user_id && $guru->user_id && $penilai->user_id === $guru->user_id) {
             return back()->with('error', 'Seorang Asesor tidak dapat menilai dirinya sendiri.')->withInput();
@@ -335,9 +363,9 @@ class EvaluationController extends Controller
         }
 
         $exists = Evaluation::where('evaluation_period_id', $validated['evaluation_period_id'])
-                            ->where('guru_id', $validated['guru_id'])
-                            ->where('id', '!=', $evaluation->id)
-                            ->exists();
+            ->where('guru_id', $validated['guru_id'])
+            ->where('id', '!=', $evaluation->id)
+            ->exists();
 
         if ($exists) {
             return back()->with('error', 'Guru tersebut sudah memiliki penugasan evaluasi pada periode ini.')->withInput();
@@ -355,7 +383,7 @@ class EvaluationController extends Controller
     public function destroy(Evaluation $evaluation)
     {
         $user = Auth::user();
-        if (!$user->isAdmin() && !$user->isKepalaSekolah()) {
+        if (! $user->isAdmin() && ! $user->isKepalaSekolah()) {
             abort(403);
         }
 
@@ -371,26 +399,26 @@ class EvaluationController extends Controller
     public function show(Evaluation $evaluation)
     {
         $user = Auth::user();
-        
+
         // Authorization check
         $isAssignedPenilai = $user->penilai && $evaluation->penilai_id === $user->penilai->id;
         $isEvaluatedGuru = $user->guru && $evaluation->guru_id === $user->guru->id;
         $isKepsekOfSchool = $user->isKepalaSekolah() && $evaluation->guru->school_id === $user->school_id;
         $isAdmin = $user->isAdmin();
 
-        if (!$isAssignedPenilai && !$isEvaluatedGuru && !$isKepsekOfSchool && !$isAdmin) {
+        if (! $isAssignedPenilai && ! $isEvaluatedGuru && ! $isKepsekOfSchool && ! $isAdmin) {
             abort(403);
         }
 
         $evaluation->load(['guru', 'penilai', 'evaluationPeriod', 'results.indicator.dimension']);
-        
+
         // Initialize results if empty
         if ($evaluation->results->isEmpty() && $user->isPenilai() && in_array($evaluation->status, ['draft', 'in_progress'])) {
             $this->initializeResults($evaluation);
             $evaluation->load('results.indicator.dimension');
         }
 
-        $dimensions = Dimension::with(['indicators' => function($q) use ($evaluation) {
+        $dimensions = Dimension::with(['indicators' => function ($q) {
             $q->with(['achievementLevels', 'assessmentAspects']);
         }])->orderBy('urutan')->get();
 
@@ -403,20 +431,20 @@ class EvaluationController extends Controller
     public function report(Evaluation $evaluation)
     {
         $user = Auth::user();
-        
+
         // Authorization check
         $isAssignedPenilai = $user->penilai && $evaluation->penilai_id === $user->penilai->id;
         $isEvaluatedGuru = $user->guru && $evaluation->guru_id === $user->guru->id;
         $isKepsekOfSchool = $user->isKepalaSekolah() && $evaluation->guru->school_id === $user->school_id;
         $isAdmin = $user->isAdmin();
 
-        if (!$isAssignedPenilai && !$isEvaluatedGuru && !$isKepsekOfSchool && !$isAdmin) {
+        if (! $isAssignedPenilai && ! $isEvaluatedGuru && ! $isKepsekOfSchool && ! $isAdmin) {
             abort(403);
         }
 
         $evaluation->load(['guru', 'penilai', 'evaluationPeriod', 'rekomendasi', 'results.indicator.dimension']);
-        
-        $dimensions = Dimension::with(['indicators' => function($q) use ($evaluation) {
+
+        $dimensions = Dimension::with(['indicators' => function ($q) {
             $q->with(['achievementLevels', 'assessmentAspects']);
         }])->orderBy('urutan')->get();
 
@@ -440,7 +468,7 @@ class EvaluationController extends Controller
             ];
         }
         EvaluationResult::insert($results);
-        
+
         if ($evaluation->status === 'draft') {
             $evaluation->update(['status' => 'in_progress']);
         }
@@ -452,7 +480,8 @@ class EvaluationController extends Controller
         $isAssignedPenilai = $user->penilai && $evaluation->penilai_id === $user->penilai->id;
         $isKepsekOfSchool = $user->isKepalaSekolah() && $evaluation->guru->school_id === $user->school_id;
 
-        if (!$isAssignedPenilai && !$isKepsekOfSchool) {
+        // Admin Pusat boleh menyunting pembuktian kapan saja, termasuk yang sudah selesai.
+        if (! $isAssignedPenilai && ! $isKepsekOfSchool && ! $user->isAdmin()) {
             abort(403);
         }
 
@@ -464,7 +493,9 @@ class EvaluationController extends Controller
         $indicator->load(['achievementLevels', 'observationAspects', 'documentReviewAspects', 'interviewAspects']);
         $result->load(['observationData', 'observationNote', 'documentReviewData', 'documentReviewNote', 'interviewData', 'interviewNote']);
 
-        return view('evaluations.indicator-form', compact('evaluation', 'indicator', 'result'));
+        $isAdminEdit = $user->isAdmin();
+
+        return view('evaluations.indicator-form', compact('evaluation', 'indicator', 'result', 'isAdminEdit'));
     }
 
     public function saveIndicatorForm(Request $request, Evaluation $evaluation, Indicator $indicator)
@@ -473,7 +504,7 @@ class EvaluationController extends Controller
         $isAssignedPenilai = $user->penilai && $evaluation->penilai_id === $user->penilai->id;
         $isKepsekOfSchool = $user->isKepalaSekolah() && $evaluation->guru->school_id === $user->school_id;
 
-        if (!$isAssignedPenilai && !$isKepsekOfSchool) {
+        if (! $isAssignedPenilai && ! $isKepsekOfSchool && ! $user->isAdmin()) {
             abort(403);
         }
 
@@ -482,7 +513,9 @@ class EvaluationController extends Controller
             'kesimpulan' => 'required|string',
         ]);
 
-        DB::transaction(function () use ($request, $evaluation, $indicator) {
+        $isAdminEdit = $user->isAdmin();
+
+        DB::transaction(function () use ($request, $evaluation, $indicator, $user, $isAdminEdit) {
             $result = EvaluationResult::firstOrCreate([
                 'evaluation_id' => $evaluation->id,
                 'indicator_id' => $indicator->id,
@@ -494,17 +527,27 @@ class EvaluationController extends Controller
                 'status' => 'selesai',
             ]);
 
+            // Jejak audit hanya diisi bila penyunting adalah Admin Pusat, sehingga
+            // "diisi oleh admin" tetap terbedakan dari "diisi oleh penilai".
+            if ($isAdminEdit) {
+                $result->update([
+                    'updated_by_user_id' => $user->id,
+                    'updated_by_name' => $user->name,
+                    'edited_at' => now(),
+                ]);
+            }
+
             // Save Observation Data
             if ($request->has('observation')) {
                 foreach ($request->observation as $aspectId => $hasil) {
-                    \App\Models\ObservationData::updateOrCreate(
+                    ObservationData::updateOrCreate(
                         ['evaluation_result_id' => $result->id, 'assessment_aspect_id' => $aspectId],
                         ['hasil' => $hasil]
                     );
                 }
             }
             if ($request->has('observation_note')) {
-                \App\Models\ObservationNote::updateOrCreate(
+                ObservationNote::updateOrCreate(
                     ['evaluation_result_id' => $result->id],
                     ['catatan' => $request->observation_note]
                 );
@@ -513,14 +556,14 @@ class EvaluationController extends Controller
             // Save Document Review Data
             if ($request->has('document_review')) {
                 foreach ($request->document_review as $aspectId => $hasil) {
-                    \App\Models\DocumentReviewData::updateOrCreate(
+                    DocumentReviewData::updateOrCreate(
                         ['evaluation_result_id' => $result->id, 'assessment_aspect_id' => $aspectId],
                         ['hasil' => $hasil]
                     );
                 }
             }
             if ($request->has('document_review_note')) {
-                \App\Models\DocumentReviewNote::updateOrCreate(
+                DocumentReviewNote::updateOrCreate(
                     ['evaluation_result_id' => $result->id],
                     ['catatan' => $request->document_review_note]
                 );
@@ -530,11 +573,11 @@ class EvaluationController extends Controller
             if ($request->has('interview')) {
                 foreach ($request->interview as $aspectId => $respondenData) {
                     foreach ($respondenData as $responden => $hasil) {
-                        \App\Models\InterviewData::updateOrCreate(
+                        InterviewData::updateOrCreate(
                             [
-                                'evaluation_result_id' => $result->id, 
+                                'evaluation_result_id' => $result->id,
                                 'assessment_aspect_id' => $aspectId,
-                                'responden' => $responden
+                                'responden' => $responden,
                             ],
                             ['hasil' => $hasil ?? '']
                         );
@@ -542,7 +585,7 @@ class EvaluationController extends Controller
                 }
             }
             if ($request->has('interview_note')) {
-                \App\Models\InterviewNote::updateOrCreate(
+                InterviewNote::updateOrCreate(
                     ['evaluation_result_id' => $result->id],
                     ['catatan' => $request->interview_note]
                 );
@@ -559,7 +602,7 @@ class EvaluationController extends Controller
     {
         $user = Auth::user();
         // Hanya Guru yang dinilai yang boleh akses
-        if (!$user->guru || $evaluation->guru_id !== $user->guru->id) {
+        if (! $user->guru || $evaluation->guru_id !== $user->guru->id) {
             abort(403);
         }
 
@@ -581,7 +624,7 @@ class EvaluationController extends Controller
     public function storeDokumen(Request $request, Evaluation $evaluation, Indicator $indicator)
     {
         $user = Auth::user();
-        if (!$user->guru || $evaluation->guru_id !== $user->guru->id) {
+        if (! $user->guru || $evaluation->guru_id !== $user->guru->id) {
             abort(403);
         }
 
@@ -598,7 +641,7 @@ class EvaluationController extends Controller
             foreach ($request->file('dokumen') as $aspectId => $file) {
                 if ($file->isValid()) {
                     // Cek data lama
-                    $existingData = \App\Models\DocumentReviewData::where('evaluation_result_id', $result->id)
+                    $existingData = DocumentReviewData::where('evaluation_result_id', $result->id)
                         ->where('assessment_aspect_id', $aspectId)
                         ->first();
 
@@ -611,12 +654,12 @@ class EvaluationController extends Controller
                     }
 
                     // Simpan file baru langsung ke folder public/dokumen_guru
-                    $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                    $filename = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
                     $file->move(public_path('dokumen_guru'), $filename);
-                    $path = 'dokumen_guru/' . $filename;
+                    $path = 'dokumen_guru/'.$filename;
                     $originalName = $file->getClientOriginalName();
 
-                    \App\Models\DocumentReviewData::updateOrCreate(
+                    DocumentReviewData::updateOrCreate(
                         ['evaluation_result_id' => $result->id, 'assessment_aspect_id' => $aspectId],
                         ['file_path' => $path, 'original_filename' => $originalName]
                     );
@@ -630,7 +673,7 @@ class EvaluationController extends Controller
     public function generalUploadForm(Evaluation $evaluation)
     {
         $user = Auth::user();
-        if (!$user->guru || $evaluation->guru_id !== $user->guru->id) {
+        if (! $user->guru || $evaluation->guru_id !== $user->guru->id) {
             abort(403);
         }
 
@@ -648,7 +691,7 @@ class EvaluationController extends Controller
             ->select('indicators.*')
             ->get();
 
-        $jenisDokumens = \App\Models\JenisDokumen::with(['assessmentAspects' => function($q) {
+        $jenisDokumens = JenisDokumen::with(['assessmentAspects' => function ($q) {
             $q->select('id', 'jenis_dokumen_id');
         }])->get();
 
@@ -658,7 +701,7 @@ class EvaluationController extends Controller
     public function storeGeneralUpload(Request $request, Evaluation $evaluation)
     {
         $user = Auth::user();
-        if (!$user->guru || $evaluation->guru_id !== $user->guru->id) {
+        if (! $user->guru || $evaluation->guru_id !== $user->guru->id) {
             abort(403);
         }
 
@@ -675,13 +718,13 @@ class EvaluationController extends Controller
         if ($request->hasFile('dokumen')) {
             $file = $request->file('dokumen');
             if ($file->isValid()) {
-                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $filename = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
                 $file->move(public_path('dokumen_guru'), $filename);
-                $path = 'dokumen_guru/' . $filename;
+                $path = 'dokumen_guru/'.$filename;
                 $originalName = $file->getClientOriginalName();
 
                 // Dapatkan indicator_id dari masing-masing aspect_id
-                $aspects = \App\Models\AssessmentAspect::whereIn('id', $request->aspect_ids)->get();
+                $aspects = AssessmentAspect::whereIn('id', $request->aspect_ids)->get();
 
                 foreach ($aspects as $aspect) {
                     $result = EvaluationResult::firstOrCreate([
@@ -690,7 +733,7 @@ class EvaluationController extends Controller
                     ]);
 
                     // Cek data lama untuk ditimpa file barunya
-                    $existingData = \App\Models\DocumentReviewData::where('evaluation_result_id', $result->id)
+                    $existingData = DocumentReviewData::where('evaluation_result_id', $result->id)
                         ->where('assessment_aspect_id', $aspect->id)
                         ->first();
 
@@ -701,7 +744,7 @@ class EvaluationController extends Controller
                         // Namun lebih amannya, biarkan file lamanya tetap ada di storage, hanya update recordnya saja.
                     }
 
-                    \App\Models\DocumentReviewData::updateOrCreate(
+                    DocumentReviewData::updateOrCreate(
                         ['evaluation_result_id' => $result->id, 'assessment_aspect_id' => $aspect->id],
                         ['file_path' => $path, 'original_filename' => $originalName]
                     );
@@ -718,7 +761,7 @@ class EvaluationController extends Controller
         $isAssignedPenilai = $user->penilai && $evaluation->penilai_id === $user->penilai->id;
         $isKepsekOfSchool = $user->isKepalaSekolah() && $evaluation->guru->school_id === $user->school_id;
 
-        if (!$isAssignedPenilai && !$isKepsekOfSchool) {
+        if (! $isAssignedPenilai && ! $isKepsekOfSchool) {
             abort(403);
         }
 
@@ -740,17 +783,17 @@ class EvaluationController extends Controller
 
     public function approve(Request $request, Evaluation $evaluation)
     {
-        if (!Auth::user()->isKepalaSekolah() || $evaluation->guru->school_id !== Auth::user()->school_id) {
+        if (! Auth::user()->isKepalaSekolah() || $evaluation->guru->school_id !== Auth::user()->school_id) {
             abort(403);
         }
 
         $request->validate([
-            'catatan_kepala_sekolah' => 'nullable|string'
+            'catatan_kepala_sekolah' => 'nullable|string',
         ]);
 
         $evaluation->update([
             'status' => 'approved',
-            'catatan_kepala_sekolah' => $request->catatan_kepala_sekolah
+            'catatan_kepala_sekolah' => $request->catatan_kepala_sekolah,
         ]);
 
         return back()->with('success', 'Hasil evaluasi berhasil disetujui.');
@@ -759,14 +802,14 @@ class EvaluationController extends Controller
     public function showIndicator(Evaluation $evaluation, Indicator $indicator)
     {
         $user = Auth::user();
-        
+
         // Authorization check
         $isAssignedPenilai = $user->penilai && $evaluation->penilai_id === $user->penilai->id;
         $isEvaluatedGuru = $user->guru && $evaluation->guru_id === $user->guru->id;
         $isKepsekOfSchool = $user->isKepalaSekolah() && $evaluation->guru->school_id === $user->school_id;
         $isAdmin = $user->isAdmin();
 
-        if (!$isAssignedPenilai && !$isEvaluatedGuru && !$isKepsekOfSchool && !$isAdmin) {
+        if (! $isAssignedPenilai && ! $isEvaluatedGuru && ! $isKepsekOfSchool && ! $isAdmin) {
             abort(403);
         }
 
@@ -779,6 +822,7 @@ class EvaluationController extends Controller
         $result->load(['observationData', 'observationNote', 'documentReviewData', 'documentReviewNote', 'interviewData', 'interviewNote']);
 
         $isReadOnly = true;
+
         return view('evaluations.indicator-form', compact('evaluation', 'indicator', 'result', 'isReadOnly'));
     }
 }

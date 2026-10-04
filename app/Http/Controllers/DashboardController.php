@@ -5,8 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Evaluation;
 use App\Models\EvaluationPeriod;
 use App\Models\Guru;
+use App\Models\Penilai;
 use App\Models\School;
-use Illuminate\Http\Request;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -18,7 +19,11 @@ class DashboardController extends Controller
         if ($user->isAdmin()) {
             return $this->adminDashboard();
         }
-        
+
+        if ($user->isAdminInternal()) {
+            return $this->adminSekolahDashboard($user);
+        }
+
         if ($user->isKepalaSekolah()) {
             return $this->kepsekDashboard($user);
         }
@@ -38,9 +43,9 @@ class DashboardController extends Controller
             'active_periods' => EvaluationPeriod::where('status', 'aktif')->count(),
             'total_evaluations' => Evaluation::count(),
         ];
-        
+
         $recentSchools = School::latest()->take(5)->get();
-        
+
         return view('dashboard.admin', compact('stats', 'recentSchools'));
     }
 
@@ -49,16 +54,16 @@ class DashboardController extends Controller
         $schoolId = $user->school_id;
         $stats = [
             'total_gurus' => Guru::where('school_id', $schoolId)->count(),
-            'evaluations_completed' => Evaluation::whereHas('guru', function($q) use ($schoolId) {
+            'evaluations_completed' => Evaluation::whereHas('guru', function ($q) use ($schoolId) {
                 $q->where('school_id', $schoolId);
             })->where('status', 'completed')->count(),
-            'evaluations_approved' => Evaluation::whereHas('guru', function($q) use ($schoolId) {
+            'evaluations_approved' => Evaluation::whereHas('guru', function ($q) use ($schoolId) {
                 $q->where('school_id', $schoolId);
             })->where('status', 'approved')->count(),
         ];
 
         $recentEvaluations = Evaluation::with(['guru', 'penilai'])
-            ->whereHas('guru', function($q) use ($schoolId) {
+            ->whereHas('guru', function ($q) use ($schoolId) {
                 $q->where('school_id', $schoolId);
             })
             ->latest('updated_at')
@@ -66,6 +71,36 @@ class DashboardController extends Controller
             ->get();
 
         return view('dashboard.kepala_sekolah', compact('stats', 'recentEvaluations'));
+    }
+
+    /**
+     * Dashboard Admin Internal Sekolah: seluruh angka dibatasi ke sekolahnya sendiri.
+     */
+    private function adminSekolahDashboard($user)
+    {
+        $schoolId = $user->school_id;
+        $school = School::find($schoolId);
+
+        $evaluasiSekolah = Evaluation::whereHas('guru', function ($q) use ($schoolId) {
+            $q->where('school_id', $schoolId);
+        });
+
+        $stats = [
+            'total_gurus' => Guru::where('school_id', $schoolId)->count(),
+            'total_penilais' => Penilai::where('school_id', $schoolId)
+                ->where('jabatan', '!=', 'Kepala Sekolah')->count(),
+            'total_users' => User::where('school_id', $schoolId)->count(),
+            'evaluations_total' => (clone $evaluasiSekolah)->count(),
+            'evaluations_completed' => (clone $evaluasiSekolah)->where('status', 'completed')->count(),
+            'evaluations_approved' => (clone $evaluasiSekolah)->where('status', 'approved')->count(),
+        ];
+
+        $recentEvaluations = (clone $evaluasiSekolah)->with(['guru', 'penilai', 'evaluationPeriod'])
+            ->latest('updated_at')
+            ->take(5)
+            ->get();
+
+        return view('dashboard.admin_sekolah', compact('stats', 'school', 'recentEvaluations'));
     }
 
     private function guruPenilaiDashboard($user)
@@ -94,10 +129,10 @@ class DashboardController extends Controller
             $guruId = $user->guru->id;
             $data['guruCurrentEvaluation'] = Evaluation::with(['evaluationPeriod', 'penilai'])
                 ->where('guru_id', $guruId)
-                ->whereHas('evaluationPeriod', function($q) {
+                ->whereHas('evaluationPeriod', function ($q) {
                     $q->where('status', 'aktif');
                 })->first();
-                
+
             $data['guruHistoryEvaluations'] = Evaluation::with(['evaluationPeriod'])
                 ->where('guru_id', $guruId)
                 ->whereIn('status', ['completed', 'approved'])

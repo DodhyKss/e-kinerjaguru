@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\FiltersWilayah;
 use App\Models\Evaluation;
 use App\Models\EvaluationPeriod;
 use App\Models\School;
@@ -10,31 +11,33 @@ use Illuminate\Support\Facades\Auth;
 
 class RankingController extends Controller
 {
+    use FiltersWilayah;
+
     public function index(Request $request)
     {
         $user = Auth::user();
-        
+
         // Only Admin and Kepala Sekolah can access ranking
-        if (!$user->isAdmin() && !$user->isKepalaSekolah()) {
+        if (! $user->isAdmin() && ! $user->isSchoolScoped()) {
             abort(403);
         }
 
         // Base Query: Only completed or approved evaluations with a score
         $query = Evaluation::with(['guru.school', 'penilai', 'evaluationPeriod'])
-                    ->whereIn('status', ['completed', 'approved'])
-                    ->whereNotNull('rata_rata');
+            ->whereIn('status', ['completed', 'approved'])
+            ->whereNotNull('rata_rata');
 
         // Apply filters
         // 1. School Filter
         $schoolId = null;
-        if ($user->isKepalaSekolah()) {
+        if ($user->isSchoolScoped()) {
             $schoolId = $user->school_id;
-            $query->whereHas('guru', function($q) use ($schoolId) {
+            $query->whereHas('guru', function ($q) use ($schoolId) {
                 $q->where('school_id', $schoolId);
             });
         } elseif ($user->isAdmin() && $request->filled('school_id')) {
             $schoolId = $request->school_id;
-            $query->whereHas('guru', function($q) use ($schoolId) {
+            $query->whereHas('guru', function ($q) use ($schoolId) {
                 $q->where('school_id', $schoolId);
             });
         }
@@ -54,21 +57,25 @@ class RankingController extends Controller
 
         // 3. Guru Name Filter
         if ($request->filled('guru_name')) {
-            $query->whereHas('guru', function($q) use ($request) {
-                $q->where('nama', 'like', '%' . $request->guru_name . '%');
+            $query->whereHas('guru', function ($q) use ($request) {
+                $q->where('nama', 'like', '%'.$request->guru_name.'%');
             });
         }
 
         // Get rankings ordered by average score descending, then total score descending
         // and if there's a tie, maybe by guru name.
         $rankings = $query->orderBy('rata_rata', 'desc')
-                          ->orderBy('total_skor', 'desc')
-                          ->paginate(15)->withQueryString();
+            ->orderBy('total_skor', 'desc')
+            ->paginate(15)->withQueryString();
 
         // Pass filters data to view
-        $periods = EvaluationPeriod::orderBy('tanggal_mulai', 'desc')->get();
+        $periods = $this->scopedPeriods();
+        $this->applyWilayahFilter($query, $request);
         $schools = $user->isAdmin() ? School::orderBy('nama')->get() : collect();
 
-        return view('reports.ranking', compact('rankings', 'periods', 'schools', 'periodId', 'schoolId'));
+        return view('reports.ranking', array_merge(
+            compact('rankings', 'periods', 'schools', 'periodId', 'schoolId'),
+            $this->wilayahFilterOptions()
+        ));
     }
 }

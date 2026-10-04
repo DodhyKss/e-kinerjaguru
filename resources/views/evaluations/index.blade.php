@@ -72,8 +72,19 @@
                     <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Disetujui</option>
                 </select>
             </div>
+            @if(auth()->user()->isAdmin())
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Pembuktian</label>
+                <label class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-300 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors w-full">
+                    <input type="checkbox" name="pembuktian_kosong" value="1" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                        {{ request('pembuktian_kosong') ? 'checked' : '' }}
+                        onchange="document.getElementById('searchForm').submit()">
+                    <span class="text-sm text-slate-700">Hanya yang pembuktiannya kosong</span>
+                </label>
+            </div>
+            @endif
             <div class="flex items-center gap-2">
-                @if(request()->hasAny(['period_id', 'guru_id', 'penilai_id', 'status', 'school_id']) && (request('period_id') || request('guru_id') || request('penilai_id') || request('status') || request('school_id')))
+                @if(request()->hasAny(['period_id', 'guru_id', 'penilai_id', 'status', 'school_id', 'pembuktian_kosong']) && (request('period_id') || request('guru_id') || request('penilai_id') || request('status') || request('school_id') || request('pembuktian_kosong')))
                 <a href="{{ route('evaluations.index') }}" class="bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-slate-300 transition-colors flex items-center justify-center shrink-0" title="Reset">
                     <i data-lucide="rotate-ccw" class="w-4 h-4 mr-2"></i> Reset Filter
                 </a>

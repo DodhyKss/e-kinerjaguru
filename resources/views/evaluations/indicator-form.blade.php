@@ -19,6 +19,25 @@
     </div>
 </div>
 
+@if(!empty($isAdminEdit))
+    <div class="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+        <i data-lucide="shield-alert" class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5"></i>
+        <div class="text-sm text-amber-900">
+            <p class="font-bold">Anda sedang menyunting pembuktian sebagai Admin Pusat</p>
+            <p class="mt-1">Penyimpanan dari sini akan menimpa isi yang diisi oleh asesor dan tercatat pada jejak audit.
+                Unggah dokumen tetap dilakukan oleh guru.</p>
+        </div>
+    </div>
+@elseif($result->wasEditedByAdmin())
+    <div class="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+        <i data-lucide="history" class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5"></i>
+        <div class="text-sm text-amber-900">
+            <p class="font-bold">Pembuktian ini pernah diperbaiki oleh Admin Pusat</p>
+            <p class="mt-1">Terakhir disunting oleh {{ $result->updated_by_name }} pada {{ $result->edited_at?->format('d F Y H:i') }}.</p>
+        </div>
+    </div>
+@endif
+
 <form action="{{ route('evaluations.indicator.save', [$evaluation, $indicator]) }}" method="POST" id="evaluation-form">
     @csrf
 

@@ -53,6 +53,12 @@
                     </a>
                 @endif
             </div>
+        @if(auth()->user()->isAdmin())
+            <div class="md:col-span-2 lg:col-span-3">
+                <p class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Filter Wilayah</p>
+                @include('reports.partials.wilayah-filter')
+            </div>
+        @endif
         </form>
     </div>
 </div>

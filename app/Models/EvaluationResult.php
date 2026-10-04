@@ -11,11 +11,29 @@ class EvaluationResult extends Model
 {
     protected $fillable = [
         'evaluation_id', 'indicator_id', 'level_capaian', 'kesimpulan', 'status',
+        'updated_by_user_id', 'updated_by_name', 'edited_at',
     ];
+
+    protected $casts = [
+        'edited_at' => 'datetime',
+    ];
+
+    /**
+     * Apakah pembuktian ini terakhir disunting oleh Admin Pusat?
+     */
+    public function wasEditedByAdmin(): bool
+    {
+        return $this->edited_at !== null;
+    }
 
     public function evaluation(): BelongsTo
     {
         return $this->belongsTo(Evaluation::class);
+    }
+
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by_user_id');
     }
 
     public function indicator(): BelongsTo

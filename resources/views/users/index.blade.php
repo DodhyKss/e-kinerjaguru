@@ -2,39 +2,58 @@
 @section('title', 'Manajemen Akun Pengguna')
 
 @section('content')
+@php
+    // Aturan siapa boleh mengelola akun ini (sinkron dengan User::isManageableBy()).
+    $viewer = auth()->user();
+    $canToggleTarget = fn ($t) => $viewer->isAdmin()
+        ? ($t->id !== $viewer->id)
+        : $t->isManageableBy($viewer);
+    $canResetTarget = fn ($t) => $viewer->isAdmin()
+        ? ($t->role !== 'admin' || $t->id === $viewer->id)
+        : $t->isManageableBy($viewer);
+@endphp
 <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
     <div class="px-6 py-5 border-b border-slate-100 flex flex-col md:flex-row justify-between items-center bg-slate-50 gap-4">
         <div>
             <h3 class="text-lg font-medium text-slate-900">Daftar Akun Pengguna</h3>
             <p class="text-xs text-slate-500 mt-1">Mengelola akses login dan mereset password pengguna.</p>
         </div>
-        <form action="{{ route('users.index') }}" method="GET" class="w-full md:w-auto flex flex-col sm:flex-row gap-3" id="searchForm">
-            <div class="relative">
-                <select name="school_id" class="select2-school w-full sm:w-64" onchange="document.getElementById('searchForm').submit()">
-                    <option value="">Semua Sekolah...</option>
-                    @foreach($schools as $school)
-                        <option value="{{ $school->id }}" {{ request('school_id') == $school->id ? 'selected' : '' }}>
-                            {{ $school->nama }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="relative">
-                <select name="search" class="select2-search w-full sm:w-64" onchange="document.getElementById('searchForm').submit()">
-                    <option value="">Semua Akun Pengguna...</option>
-                    @foreach($allUsers as $u)
-                        <option value="{{ $u->name }}" {{ request('search') == $u->name ? 'selected' : '' }}>
-                            {{ $u->name }} ({{ $u->email }})
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-            @if(request('search') || request('school_id'))
-                <div class="flex items-center">
-                    <a href="{{ route('users.index') }}" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">Reset Filter</a>
-                </div>
+        <div class="w-full md:w-auto flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+            @if(auth()->user()->isAdmin())
+                <button type="button" onclick="openCreateAdminInternalModal()" class="inline-flex items-center justify-center px-4 py-2.5 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-sm transition-colors">
+                    <i data-lucide="user-plus" class="w-4 h-4 mr-1.5"></i> Tambah Admin Internal Sekolah
+                </button>
             @endif
-        </form>
+            <form action="{{ route('users.index') }}" method="GET" class="w-full md:w-auto flex flex-col sm:flex-row gap-3" id="searchForm">
+                @if(auth()->user()->isAdmin())
+                <div class="relative">
+                    <select name="school_id" class="select2-school w-full sm:w-64" onchange="document.getElementById('searchForm').submit()">
+                        <option value="">Semua Sekolah...</option>
+                        @foreach($schools as $school)
+                            <option value="{{ $school->id }}" {{ request('school_id') == $school->id ? 'selected' : '' }}>
+                                {{ $school->nama }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                @endif
+                <div class="relative">
+                    <select name="search" class="select2-search w-full sm:w-64" onchange="document.getElementById('searchForm').submit()">
+                        <option value="">Semua Akun Pengguna...</option>
+                        @foreach($allUsers as $u)
+                            <option value="{{ $u->name }}" {{ request('search') == $u->name ? 'selected' : '' }}>
+                                {{ $u->name }} ({{ $u->email }})
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                @if(request('search') || request('school_id'))
+                    <div class="flex items-center">
+                        <a href="{{ route('users.index') }}" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">Reset Filter</a>
+                    </div>
+                @endif
+            </form>
+        </div>
     </div>
     
     <div class="overflow-x-auto">
@@ -56,7 +75,9 @@
                         <div class="text-xs text-slate-500">{{ $user->email }}</div>
                         <div class="mt-1">
                             @if($user->role == 'admin')
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800">Admin Utama</span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800">Admin Pusat</span>
+                            @elseif($user->role == 'admin_internal')
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-teal-100 text-teal-800">Admin Internal Sekolah</span>
                             @else
                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-800">Role Dasar: {{ ucfirst(str_replace('_', ' ', $user->role)) }}</span>
                             @endif
@@ -106,7 +127,7 @@
                                     <i data-lucide="x-circle" class="w-3 h-3 mr-1"></i> Nonaktif
                                 </span>
                             @endif
-                            @if(auth()->user()->id !== $user->id)
+                            @if($canToggleTarget($user))
                                 @if($user->is_active)
                                 <form action="{{ route('users.toggle-active', $user) }}" method="POST" onsubmit="return confirm('Nonaktifkan akun {{ $user->name }}? Pengguna tidak akan bisa login sampai akunnya diaktifkan kembali.');">
                                     @csrf
@@ -130,7 +151,7 @@
                         </div>
                     </td>
                     <td class="px-6 py-4 text-right">
-                        @if($user->role != 'admin' || auth()->user()->id == $user->id)
+                        @if($canResetTarget($user))
                         <button type="button" onclick="openResetPasswordModal('{{ route('users.reset-password', $user) }}', '{{ addslashes($user->name) }}')" class="inline-flex items-center text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 px-3 py-1.5 rounded-lg transition-colors shadow-sm">
                             <i data-lucide="key-round" class="w-3 h-3 mr-1.5"></i> Reset Password
                         </button>
@@ -167,6 +188,67 @@
         <h4 class="text-sm font-bold text-blue-900">Catatan Keamanan (Enkripsi Password)</h4>
         <p class="text-sm text-blue-800 mt-1">Sesuai dengan standar keamanan sistem modern, semua password pengguna dienkripsi dengan algoritma <i>Bcrypt/Argon2</i> sebelum disimpan ke dalam database. Oleh karena itu, <strong>Admin maupun sistem tidak dapat melihat password asli (teks biasa) milik pengguna.</strong></p>
         <p class="text-sm text-blue-800 mt-2">Jika ada guru yang lupa password, Admin dapat menekan tombol <strong>"Reset Password"</strong> di atas lalu <strong>menginput password baru yang diinginkan</strong> (minimal 8 karakter). Setelah itu, guru tersebut bisa login kembali menggunakan password baru tersebut.</p>
+    </div>
+</div>
+
+<!-- Modal Tambah Admin Internal Sekolah (khusus Admin Pusat) -->
+<div id="createAdminInternalModal" class="fixed inset-0 z-[60] hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeCreateAdminInternalModal()"></div>
+    <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-md border border-slate-100">
+        <form method="POST" action="{{ route('users.store') }}" onsubmit="return validateCreateAdminInternalForm();">
+            @csrf
+            <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50 rounded-t-2xl">
+                <div class="flex items-center gap-3">
+                    <div class="bg-teal-100 text-teal-700 p-2 rounded-lg">
+                        <i data-lucide="user-plus" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900">Tambah Admin Internal Sekolah</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Akun hanya dapat mengelola data guru &amp; asesor sekolahnya sendiri.</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeCreateAdminInternalModal()" class="text-slate-400 hover:text-slate-600 transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="px-6 py-5 space-y-4">
+                <div>
+                    <label for="cai_name" class="block text-sm font-medium text-slate-700 mb-1.5">Nama Lengkap <span class="text-red-500">*</span></label>
+                    <input type="text" name="name" id="cai_name" value="{{ old('name') }}" required maxlength="255" class="w-full rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-200 transition-shadow">
+                    @error('name') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label for="cai_email" class="block text-sm font-medium text-slate-700 mb-1.5">Email (untuk login) <span class="text-red-500">*</span></label>
+                    <input type="email" name="email" id="cai_email" value="{{ old('email') }}" required class="w-full rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-200 transition-shadow">
+                    @error('email') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label for="cai_school_id" class="block text-sm font-medium text-slate-700 mb-1.5">Sekolah <span class="text-red-500">*</span></label>
+                    <select name="school_id" id="cai_school_id" required class="select2-school-id w-full">
+                        <option value="">-- Pilih Sekolah --</option>
+                        @foreach($schools as $school)
+                            <option value="{{ $school->id }}" {{ old('school_id') == $school->id ? 'selected' : '' }}>{{ $school->nama }}</option>
+                        @endforeach
+                    </select>
+                    @error('school_id') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label for="cai_password" class="block text-sm font-medium text-slate-700 mb-1.5">Password <span class="text-red-500">*</span></label>
+                    <input type="password" name="password" id="cai_password" required minlength="8" autocomplete="new-password" class="w-full rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-200 transition-shadow">
+                    @error('password') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label for="cai_password_confirmation" class="block text-sm font-medium text-slate-700 mb-1.5">Konfirmasi Password <span class="text-red-500">*</span></label>
+                    <input type="password" name="password_confirmation" id="cai_password_confirmation" required minlength="8" autocomplete="new-password" class="w-full rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-200 transition-shadow">
+                </div>
+            </div>
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 rounded-b-2xl flex justify-end gap-3">
+                <button type="button" onclick="closeCreateAdminInternalModal()" class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-100 transition-colors">Batal</button>
+                <button type="submit" class="inline-flex items-center px-4 py-2 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors shadow-sm">
+                    <i data-lucide="check" class="w-4 h-4 mr-1.5"></i> Buat Akun
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -232,7 +314,39 @@
             allowClear: true,
             width: '100%'
         });
+        $('.select2-school-id').select2({
+            placeholder: "Pilih Sekolah...",
+            width: '100%'
+        });
     });
+
+    function openCreateAdminInternalModal() {
+        const modal = document.getElementById('createAdminInternalModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        setTimeout(() => document.getElementById('cai_name').focus(), 100);
+    }
+
+    function closeCreateAdminInternalModal() {
+        const modal = document.getElementById('createAdminInternalModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    function validateCreateAdminInternalForm() {
+        const password = document.getElementById('cai_password').value;
+        const confirmation = document.getElementById('cai_password_confirmation').value;
+
+        if (password.length < 8) {
+            alert('Password minimal harus 8 karakter.');
+            return false;
+        }
+        if (password !== confirmation) {
+            alert('Konfirmasi password tidak cocok dengan password baru.');
+            return false;
+        }
+        return true;
+    }
 
     function openResetPasswordModal(actionUrl, userName) {
         const form = document.getElementById('resetPasswordForm');
@@ -273,7 +387,10 @@
     }
 
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') closeResetPasswordModal();
+        if (e.key === 'Escape') {
+            closeResetPasswordModal();
+            closeCreateAdminInternalModal();
+        }
     });
 </script>
 @endpush

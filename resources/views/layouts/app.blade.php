@@ -199,6 +199,32 @@
                     </a>
                 @endif
 
+                @if(auth()->user()->isAdminInternal())
+                    <div class="pt-4 pb-2">
+                        <p class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Administrasi Sekolah</p>
+                    </div>
+                    <a href="{{ route('users.index') }}"
+                        class="{{ request()->routeIs('users.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }} group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200">
+                        <i data-lucide="users"
+                            class="mr-3 h-5 w-5 {{ request()->routeIs('users.*') ? 'text-indigo-400' : 'text-slate-400 group-hover:text-indigo-400' }}"></i>
+                        Manajemen Akun
+                    </a>
+
+                    <a href="{{ route('gurus.index') }}"
+                        class="{{ request()->routeIs('gurus.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }} group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200">
+                        <i data-lucide="users"
+                            class="mr-3 h-5 w-5 {{ request()->routeIs('gurus.*') ? 'text-indigo-400' : 'text-slate-400 group-hover:text-indigo-400' }}"></i>
+                        Data Guru
+                    </a>
+
+                    <a href="{{ route('penilais.index') }}"
+                        class="{{ request()->routeIs('penilais.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }} group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200">
+                        <i data-lucide="user-check"
+                            class="mr-3 h-5 w-5 {{ request()->routeIs('penilais.*') ? 'text-indigo-400' : 'text-slate-400 group-hover:text-indigo-400' }}"></i>
+                        Data Asesor / Evaluator
+                    </a>
+                @endif
+
                 <!-- Evaluasi Kinerja (All Roles) -->
                 <div class="pt-4 pb-2">
                     <p class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Evaluasi</p>
@@ -226,7 +252,16 @@
                     Laporan
                 </a>
 
-                @if(auth()->user()->isAdmin() || auth()->user()->isKepalaSekolah())
+                @if(auth()->user()->isAdmin())
+                <a href="{{ route('monitoring.index') }}"
+                    class="{{ request()->routeIs('monitoring.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }} group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 mb-1">
+                    <i data-lucide="map"
+                        class="mr-3 h-5 w-5 {{ request()->routeIs('monitoring.*') ? 'text-indigo-400' : 'text-slate-400 group-hover:text-indigo-400' }}"></i>
+                    Monitoring Kinerja
+                </a>
+                @endif
+
+                @if(auth()->user()->isAdmin() || auth()->user()->isSchoolScoped())
                 <a href="{{ route('reports.grafik') }}"
                     class="{{ request()->routeIs('reports.grafik') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }} group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 mb-1">
                     <i data-lucide="bar-chart-3"
@@ -271,8 +306,18 @@
                         </div>
                         <div class="text-sm hidden sm:block">
                             <p class="font-medium text-slate-700 leading-none">{{ auth()->user()->name }}</p>
-                            <p class="text-slate-500 text-xs mt-1 capitalize">
-                                {{ str_replace('_', ' ', auth()->user()->role) }}</p>
+                            @php
+                                $roleLabels = [
+                                    'admin' => 'Admin Pusat',
+                                    'admin_internal' => 'Admin Internal Sekolah',
+                                    'kepala_sekolah' => 'Kepala Sekolah',
+                                    'penilai' => 'Asesor',
+                                    'guru' => 'Guru',
+                                ];
+                                $currentRole = $roleLabels[auth()->user()->role] ?? ucfirst(str_replace('_', ' ', auth()->user()->role));
+                            @endphp
+                            <p class="text-slate-500 text-xs mt-1">
+                                {{ $currentRole }}</p>
                         </div>
                     </div>
                     <div class="h-6 w-px bg-slate-200 mx-2"></div>

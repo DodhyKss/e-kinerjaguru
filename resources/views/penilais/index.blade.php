@@ -5,7 +5,7 @@
 <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
     <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
         <h3 class="text-lg font-medium text-slate-900">Daftar Asesor Kinerja</h3>
-        @if(auth()->user()->isAdmin())
+        @if(auth()->user()->canManageSchoolData())
         <div class="flex gap-2">
             <button type="button" onclick="document.getElementById('modalTambahDariGuru').classList.remove('hidden')" class="bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors inline-flex items-center">
                 <i data-lucide="user-plus" class="w-4 h-4 mr-1"></i> Tambah dari Guru
@@ -62,7 +62,7 @@
                         <th class="px-6 py-4 font-semibold">Jabatan & Instansi</th>
                         <th class="px-6 py-4 font-semibold">Penugasan Sekolah</th>
                         <th class="px-6 py-4 font-semibold">Guru Yang Dinilai</th>
-                        @if(auth()->user()->isAdmin())
+                        @if(auth()->user()->canManageSchoolData())
                         <th class="px-6 py-4 font-semibold">Aksi</th>
                         @endif
                     </tr>
@@ -94,7 +94,7 @@
                             @endif
                         </td>
                         
-                        @if(auth()->user()->isAdmin())
+                        @if(auth()->user()->canManageSchoolData())
                         <td class="px-6 py-4 text-right">
                             <div class="flex items-center justify-end gap-2">
                                 <a href="{{ route('penilais.edit', $penilai) }}" class="text-indigo-600 hover:bg-indigo-50 p-1.5 rounded-lg transition-colors">
@@ -113,7 +113,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="{{ auth()->user()->isAdmin() ? 6 : 5 }}" class="px-6 py-8 text-center text-slate-500">
+                        <td colspan="{{ auth()->user()->canManageSchoolData() ? 6 : 5 }}" class="px-6 py-8 text-center text-slate-500">
                             Belum ada data asesor/penilai.
                         </td>
                     </tr>

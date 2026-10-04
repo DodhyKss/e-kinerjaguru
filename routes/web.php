@@ -65,8 +65,8 @@ Route::middleware('auth')->group(function () {
     // API Routes for Dropdown
     Route::get('/api/kabupatens/{provinsi_id}', [\App\Http\Controllers\KabupatenController::class, 'getByProvinsi'])->name('api.kabupatens.by-provinsi');
 
-    // Master Data Guru & Penilai & Kepsek (Admin & Kepsek)
-    Route::middleware('role:admin,kepala_sekolah')->group(function () {
+    // Master Data Guru & Penilai & Kepsek (Admin Pusat, Admin Internal Sekolah & Kepsek)
+    Route::middleware('role:admin,admin_internal,kepala_sekolah')->group(function () {
         Route::get('gurus/create-from-penilai', [GuruController::class, 'createFromPenilai'])->name('gurus.createFromPenilai');
         Route::resource('gurus', GuruController::class)->except(['show']);
         Route::get('penilais/create-from-guru', [PenilaiController::class, 'createFromGuru'])->name('penilais.createFromGuru');
@@ -77,6 +77,13 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:admin')->group(function () {
         Route::resource('kepala-sekolahs', \App\Http\Controllers\KepalaSekolahController::class)->except(['show']);
         
+        // Hanya Admin Pusat yang boleh membuat akun admin internal sekolah baru.
+        Route::post('users', [\App\Http\Controllers\UserController::class, 'store'])->name('users.store');
+    });
+
+    // Manajemen Akun (Admin Pusat & Admin Internal Sekolah).
+    // Admin internal dibatasi ke akun sekolahnya sendiri oleh UserController.
+    Route::middleware('role:admin,admin_internal')->group(function () {
         Route::get('users', [\App\Http\Controllers\UserController::class, 'index'])->name('users.index');
         Route::post('users/{user}/reset-password', [\App\Http\Controllers\UserController::class, 'resetPassword'])->name('users.reset-password');
         Route::patch('users/{user}/toggle-active', [\App\Http\Controllers\UserController::class, 'toggleActive'])->name('users.toggle-active');
@@ -106,10 +113,16 @@ Route::middleware('auth')->group(function () {
         Route::get('/{evaluation}', [EvaluationController::class, 'show'])->name('show');
         Route::get('/{evaluation}/report', [EvaluationController::class, 'report'])->name('report');
         
-        // Penilai & Kepala Sekolah routes
-        Route::middleware('role:penilai,kepala_sekolah')->group(function () {
+        // Penilai & Kepala Sekolah & Admin Pusat routes
+        // Admin Pusat ikut serta agar dapat memperbaiki pembuktian yang kosong,
+        // termasuk pada evaluasi yang sudah selesai.
+        Route::middleware('role:admin,penilai,kepala_sekolah')->group(function () {
             Route::get('/{evaluation}/indicator/{indicator}', [EvaluationController::class, 'indicatorForm'])->name('indicator');
             Route::post('/{evaluation}/indicator/{indicator}', [EvaluationController::class, 'saveIndicatorForm'])->name('indicator.save');
+        });
+
+        // Submit tetap milik penilai/kepsek; admin pusat tidak menutup penilaian.
+        Route::middleware('role:penilai,kepala_sekolah')->group(function () {
             Route::post('/{evaluation}/submit', [EvaluationController::class, 'submit'])->name('submit');
         });
 
@@ -124,6 +137,15 @@ Route::middleware('auth')->group(function () {
         
         // Show indicator details
         Route::get('/{evaluation}/indicator/{indicator}/show', [EvaluationController::class, 'showIndicator'])->name('indicator.show');
+    });
+
+    // Monitoring Kinerja Guru per Wilayah (khusus Admin Pusat)
+    Route::middleware('role:admin')->prefix('monitoring')->name('monitoring.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\MonitoringController::class, 'index'])->name('index');
+        Route::get('/provinsi/{provinsi}', [\App\Http\Controllers\MonitoringController::class, 'kabupaten'])->name('kabupaten');
+        Route::get('/kabupaten/{kabupaten}', [\App\Http\Controllers\MonitoringController::class, 'sekolah'])->name('sekolah');
+        Route::get('/export', [\App\Http\Controllers\MonitoringController::class, 'export'])->name('export');
+        Route::get('/print', [\App\Http\Controllers\MonitoringController::class, 'print'])->name('print');
     });
 
     // Reports Menu

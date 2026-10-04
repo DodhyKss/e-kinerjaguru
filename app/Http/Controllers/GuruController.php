@@ -2,27 +2,34 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\ScopesSchoolData;
 use App\Models\Guru;
+use App\Models\JabatanFungsional;
+use App\Models\KompetensiKeahlian;
+use App\Models\MataPelajaran;
+use App\Models\PangkatGolongan;
+use App\Models\Penilai;
 use App\Models\School;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use App\Models\MataPelajaran;
-use App\Models\KompetensiKeahlian;
-use App\Models\PangkatGolongan;
-use App\Models\JabatanFungsional;
 use Illuminate\Support\Facades\Hash;
 
 class GuruController extends Controller
 {
+    use ScopesSchoolData;
+
     public function index(Request $request)
     {
         $user = Auth::user();
         $query = Guru::with(['school', 'mataPelajaran'])->latest();
 
-        if ($user->isKepalaSekolah()) {
-            $query->where('school_id', $user->school_id);
+        // Kepala sekolah & admin internal sekolah terkunci ke sekolahnya sendiri.
+        $lockedSchoolId = $user->isKepalaSekolah() ? $user->school_id : $this->managedSchoolId();
+
+        if ($lockedSchoolId !== null) {
+            $query->where('school_id', $lockedSchoolId);
         } elseif ($request->filled('school_id')) {
             $query->where('school_id', $request->school_id);
         }
@@ -36,18 +43,18 @@ class GuruController extends Controller
         }
 
         $gurus = $query->paginate(10)->withQueryString();
-        
+
         $schools = $user->isAdmin() ? School::where('status', 'aktif')->orderBy('nama')->get() : collect();
         $mataPelajarans = MataPelajaran::orderBy('nama')->get();
-        $allGurus = ($user->isKepalaSekolah() ? Guru::where('school_id', $user->school_id) : Guru::query())->orderBy('nama')->get();
+        $allGurus = ($lockedSchoolId !== null ? Guru::where('school_id', $lockedSchoolId) : Guru::query())->orderBy('nama')->get();
 
-        $penilaisBelumGuru = \App\Models\Penilai::whereDoesntHave('user.guru')
+        $penilaisBelumGuru = Penilai::whereDoesntHave('user.guru')
             ->whereNotNull('user_id')
-            ->whereHas('user', function($q) {
+            ->whereHas('user', function ($q) {
                 $q->where('role', '!=', 'kepala_sekolah');
             })
-            ->when($user->isKepalaSekolah(), function($q) use ($user) {
-                $q->where('school_id', $user->school_id);
+            ->when($lockedSchoolId !== null, function ($q) use ($lockedSchoolId) {
+                $q->where('school_id', $lockedSchoolId);
             })
             ->orderBy('nama')
             ->get();
@@ -57,42 +64,40 @@ class GuruController extends Controller
 
     public function create()
     {
-        // Hanya Admin yang bisa menambah guru lintas sekolah
-        if (!Auth::user()->isAdmin()) {
-            abort(403);
-        }
-        
-        $schools = School::where('status', 'aktif')->get();
+        $this->authorizeSchoolManagement();
+
+        $schools = $this->managedSchoolId() !== null
+            ? School::where('status', 'aktif')->where('id', $this->managedSchoolId())->get()
+            : School::where('status', 'aktif')->get();
         $mataPelajarans = MataPelajaran::with('kelompokMapel')->orderBy('nama')->get();
         $kompetensiKeahlians = KompetensiKeahlian::orderBy('nama')->get();
         $pangkatGolongans = PangkatGolongan::orderBy('nama')->get();
         $jabatanFungsionals = JabatanFungsional::orderBy('nama')->get();
-        
+
         return view('gurus.create', compact('schools', 'mataPelajarans', 'kompetensiKeahlians', 'pangkatGolongans', 'jabatanFungsionals'));
     }
 
     public function createFromPenilai(Request $request)
     {
-        if (!Auth::user()->isAdmin()) {
-            abort(403);
-        }
+        $this->authorizeSchoolManagement();
 
-        $penilai = \App\Models\Penilai::findOrFail($request->penilai_id);
+        $penilai = Penilai::findOrFail($request->penilai_id);
+        $this->authorizeRecordSchool($penilai->school_id);
 
-        $schools = School::where('status', 'aktif')->get();
+        $schools = $this->managedSchoolId() !== null
+            ? School::where('status', 'aktif')->where('id', $this->managedSchoolId())->get()
+            : School::where('status', 'aktif')->get();
         $mataPelajarans = MataPelajaran::with('kelompokMapel')->orderBy('nama')->get();
         $kompetensiKeahlians = KompetensiKeahlian::orderBy('nama')->get();
         $pangkatGolongans = PangkatGolongan::orderBy('nama')->get();
         $jabatanFungsionals = JabatanFungsional::orderBy('nama')->get();
-        
+
         return view('gurus.create', compact('schools', 'mataPelajarans', 'kompetensiKeahlians', 'pangkatGolongans', 'jabatanFungsionals', 'penilai'));
     }
 
     public function store(Request $request)
     {
-        if (!Auth::user()->isAdmin()) {
-            abort(403);
-        }
+        $this->authorizeSchoolManagement();
 
         $validated = $request->validate([
             'school_id' => 'required|exists:schools,id',
@@ -107,6 +112,9 @@ class GuruController extends Controller
             'no_telepon' => 'nullable|string|max:20',
             'email' => 'required|email|max:255',
         ]);
+
+        // Admin internal sekolah tidak boleh menentukan sekolahnya sendiri.
+        $validated['school_id'] = $this->resolveSchoolId($validated);
 
         $existingUser = User::where('email', $validated['email'])->first();
         if ($existingUser && $existingUser->guru) {
@@ -149,11 +157,12 @@ class GuruController extends Controller
 
     public function edit(Guru $guru)
     {
-        if (!Auth::user()->isAdmin()) {
-            abort(403);
-        }
+        $this->authorizeSchoolManagement();
+        $this->authorizeRecordSchool($guru->school_id);
 
-        $schools = School::where('status', 'aktif')->get();
+        $schools = $this->managedSchoolId() !== null
+            ? School::where('status', 'aktif')->where('id', $this->managedSchoolId())->get()
+            : School::where('status', 'aktif')->get();
         $mataPelajarans = MataPelajaran::with('kelompokMapel')->orderBy('nama')->get();
         $kompetensiKeahlians = KompetensiKeahlian::orderBy('nama')->get();
         $pangkatGolongans = PangkatGolongan::orderBy('nama')->get();
@@ -164,14 +173,13 @@ class GuruController extends Controller
 
     public function update(Request $request, Guru $guru)
     {
-        if (!Auth::user()->isAdmin()) {
-            abort(403);
-        }
+        $this->authorizeSchoolManagement();
+        $this->authorizeRecordSchool($guru->school_id);
 
         $validated = $request->validate([
             'school_id' => 'required|exists:schools,id',
             'nama' => 'required|string|max:255',
-            'nip' => 'required|string|max:50|unique:gurus,nip,' . $guru->id,
+            'nip' => 'required|string|max:50|unique:gurus,nip,'.$guru->id,
             'nuptk' => 'nullable|string|max:50',
             'mata_pelajaran_id' => 'required|exists:mata_pelajarans,id',
             'kompetensi_keahlian_id' => 'nullable|exists:kompetensi_keahlians,id',
@@ -179,8 +187,11 @@ class GuruController extends Controller
             'jabatan_fungsional_id' => 'nullable|exists:jabatan_fungsionals,id',
             'jenis_kelamin' => 'required|in:L,P',
             'no_telepon' => 'nullable|string|max:20',
-            'email' => 'required|email|max:255|unique:users,email,' . $guru->user_id,
+            'email' => 'required|email|max:255|unique:users,email,'.$guru->user_id,
         ]);
+
+        // Admin internal sekolah tidak boleh memindahkan guru antar sekolah.
+        $validated['school_id'] = $this->resolveSchoolId($validated);
 
         DB::transaction(function () use ($validated, $guru) {
             // Update User
@@ -210,9 +221,8 @@ class GuruController extends Controller
 
     public function destroy(Guru $guru)
     {
-        if (!Auth::user()->isAdmin()) {
-            abort(403);
-        }
+        $this->authorizeSchoolManagement();
+        $this->authorizeRecordSchool($guru->school_id);
 
         try {
             DB::transaction(function () use ($guru) {
@@ -222,6 +232,7 @@ class GuruController extends Controller
                     $user->delete();
                 }
             });
+
             return redirect()->route('gurus.index')->with('success', 'Data Guru dan Akunnya berhasil dihapus.');
         } catch (\Exception $e) {
             return redirect()->route('gurus.index')->with('error', 'Gagal menghapus Guru karena memiliki data evaluasi yang terikat.');

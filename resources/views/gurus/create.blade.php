@@ -30,7 +30,10 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div class="md:col-span-2">
                 <label for="school_id" class="block text-sm font-bold text-slate-700 mb-1">Asal Sekolah <span class="text-rose-500">*</span></label>
-                <select name="school_id" id="school_id" required class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border select2 @error('school_id') border-rose-300 ring-rose-500 @enderror">
+                @if(auth()->user()->isAdminInternal())
+                    <input type="hidden" name="school_id" value="{{ auth()->user()->school_id }}">
+                @endif
+                <select name="school_id" id="school_id" required @disabled(auth()->user()->isAdminInternal()) class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border select2 @error('school_id') border-rose-300 ring-rose-500 @enderror">
                     <option value="">-- Pilih Sekolah --</option>
                     @foreach($schools as $school)
                         <option value="{{ $school->id }}" {{ old('school_id', isset($penilai) ? $penilai->school_id : '') == $school->id ? 'selected' : '' }}>{{ $school->npsn }} - {{ $school->nama }}</option>

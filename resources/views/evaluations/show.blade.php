@@ -132,9 +132,27 @@
     @php
         $canEvaluate = (auth()->user()->isPenilai() && $evaluation->penilai_id === auth()->user()->penilai->id) ||
             (auth()->user()->isKepalaSekolah() && $evaluation->guru->school_id === auth()->user()->school_id);
-            
+
         $isEvaluatedGuru = auth()->user()->guru && $evaluation->guru_id === auth()->user()->guru->id;
+
+        // Admin Pusat boleh menyunting pembuktian pada tahap berapa pun, termasuk
+        // evaluasi yang sudah selesai, karena banyak pembuktian kosong dari penilai.
+        $isAdminEdit = auth()->user()->isAdmin();
+
+        // Syarat status hanya berlaku untuk penilai/kepsek; admin pusat bebas.
+        $canEditIndicator = $isAdminEdit || ($canEvaluate && in_array($evaluation->status, ['draft', 'in_progress']));
     @endphp
+
+    @if($isAdminEdit)
+        <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5 mb-8 flex items-start gap-3">
+            <i data-lucide="shield-alert" class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5"></i>
+            <div class="text-sm text-amber-900">
+                <p class="font-bold">Mode penyuntingan Admin Pusat</p>
+                <p class="mt-1">Anda dapat memperbaiki atau menulis ulang pembuktian kinerja pada indikator mana pun,
+                    termasuk yang sudah selesai dinilai. Setiap perubahan akan tercatat pada jejak audit.</p>
+            </div>
+        </div>
+    @endif
 
     @if($canEvaluate && in_array($evaluation->status, ['in_progress', 'draft']))
         @if($evaluation->progress == 100)
@@ -226,7 +244,17 @@
                                                 Level {{ $result->level_capaian }}
                                             </div>
                                         </div>
-                                        @if($canEvaluate && in_array($evaluation->status, ['draft', 'in_progress']))
+                                        @if($isAdminEdit)
+                                            <a href="{{ route('evaluations.indicator', [$evaluation, $ind]) }}"
+                                                class="inline-flex items-center text-xs font-bold text-amber-700 hover:text-amber-900">
+                                                <i data-lucide="edit" class="w-3 h-3 mr-1"></i> Edit Pembuktian (Admin Pusat)
+                                            </a>
+                                            @if($result->wasEditedByAdmin())
+                                                <span class="inline-flex items-center text-[10px] font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded px-1.5 py-0.5 mt-1">
+                                                    Disunting {{ $result->updated_by_name }}
+                                                </span>
+                                            @endif
+                                        @elseif($canEvaluate && in_array($evaluation->status, ['draft', 'in_progress']))
                                             <a href="{{ route('evaluations.indicator', [$evaluation, $ind]) }}"
                                                 class="inline-flex items-center text-xs font-medium text-indigo-600 hover:text-indigo-800">
                                                 <i data-lucide="edit" class="w-3 h-3 mr-1"></i> Edit Penilaian
@@ -243,10 +271,10 @@
                                                 class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-500">Belum
                                                 Dinilai</span>
                                         </div>
-                                        @if($canEvaluate && in_array($evaluation->status, ['draft', 'in_progress']))
+                                        @if($canEditIndicator)
                                             <a href="{{ route('evaluations.indicator', [$evaluation, $ind]) }}"
-                                                class="inline-flex items-center justify-center w-full px-4 py-2 bg-slate-900 text-white text-sm font-medium rounded-xl hover:bg-slate-800 transition-colors shadow-sm mb-2">
-                                                Mulai Penilaian
+                                                class="inline-flex items-center justify-center w-full px-4 py-2 {{ $isAdminEdit ? 'bg-amber-600 hover:bg-amber-700' : 'bg-slate-900 hover:bg-slate-800' }} text-white text-sm font-medium rounded-xl transition-colors shadow-sm mb-2">
+                                                {{ $isAdminEdit ? 'Isi Pembuktian (Admin Pusat)' : 'Mulai Penilaian' }}
                                             </a>
                                         @endif
 

@@ -1,0 +1,119 @@
+@extends('layouts.app')
+@section('title', 'Monitoring - Kabupaten ' . $provinsi->nama)
+
+@section('content')
+<nav class="flex items-center text-sm text-slate-500 mb-4">
+    <a href="{{ route('monitoring.index', request()->only(['period_id','status'])) }}" class="hover:text-indigo-600 font-medium">Kementerian</a>
+    <i data-lucide="chevron-right" class="w-4 h-4 mx-2 text-slate-300"></i>
+    <span class="font-semibold text-slate-700">{{ $provinsi->nama }}</span>
+</nav>
+
+<div class="mb-6 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+    <div>
+        <h3 class="text-xl font-bold text-slate-900">Rincian Kabupaten</h3>
+        <p class="text-sm text-slate-500 mt-1">Provinsi {{ $provinsi->nama }} &mdash; klik nama kabupaten untuk melihat rincian per sekolah.</p>
+    </div>
+    <div class="flex flex-wrap items-center gap-2">
+        <a href="{{ route('monitoring.export', array_merge(request()->query(), ['level' => 'kabupaten', 'provinsi' => $provinsi->id])) }}"
+            class="inline-flex items-center px-4 py-2.5 text-sm font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 rounded-xl transition-colors">
+            <i data-lucide="download" class="w-4 h-4 mr-1.5"></i> Unduh CSV
+        </a>
+        <a href="{{ route('monitoring.print', array_merge(request()->query(), ['level' => 'kabupaten', 'provinsi' => $provinsi->id])) }}" target="_blank"
+            class="inline-flex items-center px-4 py-2.5 text-sm font-bold text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-xl transition-colors">
+            <i data-lucide="printer" class="w-4 h-4 mr-1.5"></i> Cetak
+        </a>
+    </div>
+</div>
+
+<form method="GET" class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+        <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Periode Evaluasi</label>
+            <select name="period_id" class="select2 w-full">
+                <option value="">Semua Periode</option>
+                @foreach($periods as $period)
+                    <option value="{{ $period->id }}" {{ (int) request('period_id') === $period->id ? 'selected' : '' }}>
+                        {{ $period->nama }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Status Evaluasi</label>
+            <select name="status" class="select2 w-full">
+                <option value="">Semua Status</option>
+                <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>Draft / Belum Dimulai</option>
+                <option value="in_progress" {{ request('status') === 'in_progress' ? 'selected' : '' }}>Proses Penilaian</option>
+                <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>Menunggu Review Kepala Sekolah</option>
+                <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>Disetujui Kepala Sekolah</option>
+            </select>
+        </div>
+        <div class="flex gap-3">
+            <button type="submit" class="inline-flex items-center justify-center px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition-colors shadow-sm">
+                <i data-lucide="filter" class="w-4 h-4 mr-1.5"></i> Terapkan
+            </button>
+            <a href="{{ route('monitoring.kabupaten', $provinsi) }}" class="px-5 py-2.5 text-sm font-medium text-slate-600 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition-colors">Reset</a>
+        </div>
+    </div>
+</form>
+
+@include('monitoring.partials.summary')
+
+<div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+    <div class="px-6 py-5 border-b border-slate-100">
+        <h4 class="text-base font-bold text-slate-900">Kabupaten di {{ $provinsi->nama }}</h4>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full min-w-[900px] text-sm text-left text-slate-700 whitespace-nowrap">
+            <thead class="text-xs text-slate-600 uppercase bg-slate-100 border-b border-slate-200 tracking-wider">
+                <tr>
+                    <th class="px-6 py-4 font-semibold">Kabupaten</th>
+                    <th class="px-6 py-4 font-semibold">Sekolah</th>
+                    <th class="px-6 py-4 font-semibold">Guru</th>
+                    <th class="px-6 py-4 font-semibold">Asesor</th>
+                    <th class="px-6 py-4 font-semibold">Evaluasi</th>
+                    <th class="px-6 py-4 font-semibold">Selesai</th>
+                    <th class="px-6 py-4 font-semibold">Rata-rata</th>
+                    <th class="px-6 py-4 font-semibold">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($rows as $row)
+                <tr class="bg-white border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                    <td class="px-6 py-4 font-semibold text-slate-900">{{ $row['nama'] }}</td>
+                    <td class="px-6 py-4">{{ number_format($row['sekolah'], 0, ',', '.') }}</td>
+                    <td class="px-6 py-4">{{ number_format($row['guru'], 0, ',', '.') }}</td>
+                    <td class="px-6 py-4">{{ number_format($row['asesor'], 0, ',', '.') }}</td>
+                    <td class="px-6 py-4">{{ number_format($row['evaluasi'], 0, ',', '.') }}</td>
+                    <td class="px-6 py-4">
+                        <span class="font-semibold text-emerald-600">{{ number_format($row['selesai'], 0, ',', '.') }}</span>
+                        @if($row['evaluasi'] > 0)
+                            <span class="text-xs text-slate-400 ml-1">({{ round($row['selesai'] / $row['evaluasi'] * 100, 1) }}%)</span>
+                        @endif
+                    </td>
+                    <td class="px-6 py-4 font-semibold text-indigo-600">{{ $row['rata_rata'] ?? '-' }}</td>
+                    <td class="px-6 py-4">
+                        <a href="{{ route('monitoring.sekolah', array_merge(['kabupaten' => $row['id']], request()->only(['period_id','status']))) }}"
+                            class="inline-flex items-center text-xs font-bold text-indigo-600 hover:text-indigo-900">
+                            <i data-lucide="chevron-right" class="w-3.5 h-3.5 mr-1"></i> Rincian
+                        </a>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="8" class="px-6 py-8 text-center text-slate-500">Belum ada data kabupaten.</td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
+@endsection
+
+@push('scripts')
+<script>
+    $(document).ready(function() {
+        $('.select2').select2({ width: '100%' });
+    });
+</script>
+@endpush
