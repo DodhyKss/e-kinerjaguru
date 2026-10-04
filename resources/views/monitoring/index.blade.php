@@ -22,8 +22,8 @@
 <form method="GET" action="{{ route('monitoring.index') }}" class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 mb-6">
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
         <div>
-            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Periode Evaluasi</label>
-            <select name="period_id" class="select2 w-full">
+            <label class="block text-xs font-medium text-slate-500 mb-1">Periode Evaluasi</label>
+            <select name="period_id" id="monitoring-periode" class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border">
                 <option value="">Semua Periode</option>
                 @foreach($periods as $period)
                     <option value="{{ $period->id }}" {{ (int) request('period_id') === $period->id ? 'selected' : '' }}>
@@ -33,8 +33,8 @@
             </select>
         </div>
         <div>
-            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Status Evaluasi</label>
-            <select name="status" class="select2 w-full">
+            <label class="block text-xs font-medium text-slate-500 mb-1">Status Evaluasi</label>
+            <select name="status" id="monitoring-status" class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border">
                 <option value="">Semua Status</option>
                 <option value="draft" {{ request('status') === 'draft' ? 'selected' : '' }}>Draft / Belum Dimulai</option>
                 <option value="in_progress" {{ request('status') === 'in_progress' ? 'selected' : '' }}>Proses Penilaian</option>
@@ -125,7 +125,7 @@
 @push('scripts')
 <script>
     $(document).ready(function() {
-        $('.select2').select2({ width: '100%' });
+        $('#monitoring-periode, #monitoring-status').select2({ width: '100%' });
     });
 </script>
 @endpush

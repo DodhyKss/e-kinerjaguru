@@ -24,7 +24,7 @@
             <h3 class="text-base font-bold text-slate-900">Filter Rekapitulasi</h3>
         </div>
         
-        <form action="{{ route('reports.recap') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <form action="{{ route('reports.recap') }}" method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
                 <label for="period_id" class="block text-xs font-medium text-slate-500 mb-1">Periode Evaluasi <span class="text-red-500">*</span></label>
                 <select name="period_id" id="period_id" required class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border">
@@ -51,25 +51,23 @@
             </div>
             @endif
 
-            <div class="{{ auth()->user()->isAdmin() ? '' : 'md:col-span-2' }}">
+            <div class="{{ auth()->user()->isAdmin() ? '' : 'sm:col-span-2' }}">
                 <label for="guru_name" class="block text-xs font-medium text-slate-500 mb-1">Nama Guru</label>
                 <input type="text" name="guru_name" id="guru_name" value="{{ request('guru_name') }}" placeholder="Opsional..." class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border">
             </div>
 
-            <div class="md:col-span-4 flex justify-end gap-2 mt-2">
-                <a href="{{ route('reports.recap') }}" class="px-4 py-2.5 bg-slate-100 text-slate-600 text-sm font-medium rounded-lg hover:bg-slate-200 transition-colors">
-                    Reset
+            @if(auth()->user()->isAdmin())
+                @include('reports.partials.wilayah-filter')
+            @endif
+
+            <div class="sm:col-span-2 lg:col-span-4 flex justify-end gap-2">
+                <a href="{{ route('reports.recap') }}" class="px-4 py-2.5 bg-slate-100 text-slate-600 text-sm font-medium rounded-lg hover:bg-slate-200 transition-colors inline-flex items-center">
+                    <i data-lucide="rotate-ccw" class="w-4 h-4 mr-1.5"></i> Reset
                 </a>
                 <button type="submit" class="px-4 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors inline-flex items-center shadow-sm">
-                    <i data-lucide="search" class="w-4 h-4 mr-2"></i> Tampilkan Rekapitulasi
+                    <i data-lucide="search" class="w-4 h-4 mr-1.5"></i> Tampilkan Rekapitulasi
                 </button>
             </div>
-        @if(auth()->user()->isAdmin())
-            <div class="md:col-span-2 lg:col-span-3">
-                <p class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Filter Wilayah</p>
-                @include('reports.partials.wilayah-filter')
-            </div>
-        @endif
         </form>
     </div>
 </div>

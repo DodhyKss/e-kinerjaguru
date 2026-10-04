@@ -1,39 +1,39 @@
 {{--
-    Filter wilayah (Provinsi > Kabupaten) untuk halaman laporan.
+    Dua field filter wilayah (Provinsi > Kabupaten), langsung selaras dengan
+    field filter lain di dalam grid. Hanya dirender untuk Admin Pusat.
     Memerlukan $provinsis & $kabupatens dari trait FiltersWilayah.
 --}}
 @php
     $allKabupatenOptions = $kabupatens->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama])->values();
 @endphp
 
-<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-    <div>
-        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Provinsi</label>
-        <select name="provinsi_id" id="filter-provinsi" class="select2-provinsi w-full">
-            <option value="">Semua Provinsi</option>
-            @foreach($provinsis as $provinsi)
-                <option value="{{ $provinsi->id }}" {{ (int) request('provinsi_id') === $provinsi->id ? 'selected' : '' }}>
-                    {{ $provinsi->nama }}
-                </option>
-            @endforeach
-        </select>
-    </div>
-    <div>
-        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Kabupaten</label>
-        <select name="kabupaten_id" id="filter-kabupaten" class="select2-kabupaten w-full">
-            <option value="">Semua Kabupaten</option>
-            @foreach($kabupatens as $kabupaten)
-                <option value="{{ $kabupaten->id }}" {{ (int) request('kabupaten_id') === $kabupaten->id ? 'selected' : '' }}>
-                    {{ $kabupaten->nama }}
-                </option>
-            @endforeach
-        </select>
-    </div>
+<div>
+    <label for="filter-provinsi" class="block text-xs font-medium text-slate-500 mb-1">Provinsi</label>
+    <select name="provinsi_id" id="filter-provinsi" class="select2-provinsi block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border">
+        <option value="">Semua Provinsi</option>
+        @foreach($provinsis as $provinsi)
+            <option value="{{ $provinsi->id }}" {{ (int) request('provinsi_id') === $provinsi->id ? 'selected' : '' }}>
+                {{ $provinsi->nama }}
+            </option>
+        @endforeach
+    </select>
+</div>
+
+<div>
+    <label for="filter-kabupaten" class="block text-xs font-medium text-slate-500 mb-1">Kabupaten</label>
+    <select name="kabupaten_id" id="filter-kabupaten" class="select2-kabupaten block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border">
+        <option value="">Semua Kabupaten</option>
+        @foreach($kabupatens as $kab)
+            <option value="{{ $kab->id }}" {{ (int) request('kabupaten_id') === $kab->id ? 'selected' : '' }}>
+                {{ $kab->nama }}
+            </option>
+        @endforeach
+    </select>
 </div>
 
 @push('scripts')
 <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
         var $provinsi = $('#filter-provinsi');
         var $kabupaten = $('#filter-kabupaten');
         var allKabupaten = @json($allKabupatenOptions);

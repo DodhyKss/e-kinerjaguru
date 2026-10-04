@@ -16,10 +16,10 @@
             <h3 class="text-base font-bold text-slate-900">Filter Grafik Kinerja</h3>
         </div>
         
-        <form action="{{ route('reports.grafik') }}" method="GET" class="flex flex-col sm:flex-row items-end gap-4">
+        <form action="{{ route('reports.grafik') }}" method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             @if(auth()->user()->isAdmin())
-            <div class="flex-1 w-full max-w-sm">
-                <label for="school_id" class="block text-xs font-medium text-slate-500 mb-1">Pilih Sekolah (Unit Kerja)</label>
+            <div>
+                <label for="school_id" class="block text-xs font-medium text-slate-500 mb-1">Sekolah (Unit Kerja)</label>
                 <select name="school_id" id="school_id" class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border bg-white">
                     <option value="">-- Menampilkan Semua Sekolah --</option>
                     @foreach($schools as $school)
@@ -31,8 +31,8 @@
             </div>
             @endif
 
-            <div class="flex-1 w-full max-w-sm">
-                <label for="evaluation_period_id" class="block text-xs font-medium text-slate-500 mb-1">Pilih Periode Evaluasi</label>
+            <div>
+                <label for="evaluation_period_id" class="block text-xs font-medium text-slate-500 mb-1">Periode Evaluasi</label>
                 <select name="evaluation_period_id" id="evaluation_period_id" class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border bg-white">
                     <option value="">-- Periode Aktif --</option>
                     @foreach($periods as $period)
@@ -43,22 +43,20 @@
                 </select>
             </div>
 
-            <div class="flex items-center gap-2">
-                <button type="submit" class="px-4 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors shadow-sm inline-flex items-center">
-                    <i data-lucide="search" class="w-4 h-4 mr-2"></i> Terapkan
-                </button>
-                @if($schoolId || request()->filled('evaluation_period_id'))
-                    <a href="{{ route('reports.grafik') }}" class="px-4 py-2.5 bg-slate-100 text-slate-600 text-sm font-medium rounded-lg hover:bg-slate-200 transition-colors shadow-sm inline-flex items-center">
-                        <i data-lucide="x" class="w-4 h-4 mr-2"></i> Reset
+            @if(auth()->user()->isAdmin())
+                @include('reports.partials.wilayah-filter')
+            @endif
+
+            <div class="sm:col-span-2 lg:col-span-4 flex justify-end gap-2">
+                @if($schoolId || request()->filled('evaluation_period_id') || request()->filled('provinsi_id') || request()->filled('kabupaten_id'))
+                    <a href="{{ route('reports.grafik') }}" class="px-4 py-2.5 bg-slate-100 text-slate-600 text-sm font-medium rounded-lg hover:bg-slate-200 transition-colors inline-flex items-center">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4 mr-1.5"></i> Reset
                     </a>
                 @endif
+                <button type="submit" class="px-4 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors shadow-sm inline-flex items-center">
+                    <i data-lucide="search" class="w-4 h-4 mr-1.5"></i> Terapkan
+                </button>
             </div>
-        @if(auth()->user()->isAdmin())
-            <div class="md:col-span-2 lg:col-span-3">
-                <p class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Filter Wilayah</p>
-                @include('reports.partials.wilayah-filter')
-            </div>
-        @endif
         </form>
     </div>
 </div>
