@@ -314,21 +314,34 @@
             allowClear: true,
             width: '100%'
         });
-        $('.select2-school-id').select2({
-            placeholder: "Pilih Sekolah...",
-            width: '100%'
-        });
     });
+
+    // Select2 di dalam modal baru di-init saat modal dibuka, karena dropdown-nya
+    // di-append ke body (bukan ikut modal) sehingga z-index-nya selalu di atas
+    // layer modal dan lebarnya tidak terukur saat elemen masih display:none.
+    function initCreateAdminInternalSelect2() {
+        const $school = $('#cai_school_id');
+        if ($school.data('select2')) {
+            return;
+        }
+        $school.select2({
+            placeholder: "Pilih Sekolah...",
+            width: '100%',
+            dropdownParent: $('#createAdminInternalModal')
+        });
+    }
 
     function openCreateAdminInternalModal() {
         const modal = document.getElementById('createAdminInternalModal');
         modal.classList.remove('hidden');
         modal.classList.add('flex');
+        initCreateAdminInternalSelect2();
         setTimeout(() => document.getElementById('cai_name').focus(), 100);
     }
 
     function closeCreateAdminInternalModal() {
         const modal = document.getElementById('createAdminInternalModal');
+        $('#cai_school_id').select2('close');
         modal.classList.add('hidden');
         modal.classList.remove('flex');
     }
@@ -347,6 +360,14 @@
         }
         return true;
     }
+
+    // Setelah validasi gagal, halaman di-reload dengan old() + errors, jadi modal
+    // perlu dibuka otomatis agar pesan errornya terlihat.
+    @if ($errors->hasAny(['name', 'email', 'school_id', 'password']))
+        $(document).ready(function() {
+            openCreateAdminInternalModal();
+        });
+    @endif
 
     function openResetPasswordModal(actionUrl, userName) {
         const form = document.getElementById('resetPasswordForm');
