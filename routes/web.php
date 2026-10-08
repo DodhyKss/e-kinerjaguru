@@ -33,7 +33,6 @@ Route::middleware('auth')->group(function () {
     // Master Data Routes (Admin Only)
     Route::middleware('role:admin')->group(function () {
         Route::resource('schools', SchoolController::class)->except(['show']);
-        Route::resource('evaluation-periods', EvaluationPeriodController::class)->except(['show']);
         
         // Master Instrumen
         Route::resource('indicators', IndicatorController::class);
@@ -71,6 +70,11 @@ Route::middleware('auth')->group(function () {
         Route::resource('gurus', GuruController::class)->except(['show']);
         Route::get('penilais/create-from-guru', [PenilaiController::class, 'createFromGuru'])->name('penilais.createFromGuru');
         Route::resource('penilais', PenilaiController::class)->except(['show']);
+    });
+
+    // Periode Evaluasi (Admin Pusat & Admin Internal Sekolah)
+    Route::middleware('role:admin,admin_internal')->group(function () {
+        Route::resource('evaluation-periods', EvaluationPeriodController::class)->except(['show']);
     });
     
     // Master Kepala Sekolah & Users (Admin only)

@@ -223,6 +223,13 @@
                             class="mr-3 h-5 w-5 {{ request()->routeIs('penilais.*') ? 'text-indigo-400' : 'text-slate-400 group-hover:text-indigo-400' }}"></i>
                         Data Asesor / Evaluator
                     </a>
+
+                    <a href="{{ route('evaluation-periods.index') }}"
+                        class="{{ request()->routeIs('evaluation-periods.*') ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }} group flex items-center px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200">
+                        <i data-lucide="calendar-clock"
+                            class="mr-3 h-5 w-5 {{ request()->routeIs('evaluation-periods.*') ? 'text-indigo-400' : 'text-slate-400 group-hover:text-indigo-400' }}"></i>
+                        Periode Evaluasi
+                    </a>
                 @endif
 
                 <!-- Evaluasi Kinerja (All Roles) -->

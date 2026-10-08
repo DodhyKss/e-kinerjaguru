@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\EvaluationPeriod;
 use App\Models\Guru;
 use App\Models\MataPelajaran;
 use App\Models\Penilai;
@@ -293,6 +294,118 @@ class AdminInternalScopeTest extends TestCase
     }
 
     /**
+     * Admin internal boleh membuat periode evaluasi, otomatis untuk sekolahnya.
+     */
+    public function test_admin_internal_bisa_membuat_periode_untuk_sekolahnya(): void
+    {
+        $this->seedData();
+
+        $this->actingAs($this->adminInternal)
+            ->post(route('evaluation-periods.store'), [
+                'nama' => 'Evaluasi Semester Ganjil',
+                'tahun_ajaran' => '2025/2026',
+                'semester' => 'ganjil',
+                'tanggal_mulai' => '2026-07-01',
+                'tanggal_selesai' => '2026-12-31',
+                'status' => 'aktif',
+            ])
+            ->assertRedirect(route('evaluation-periods.index'));
+
+        $this->assertDatabaseHas('evaluation_periods', [
+            'nama' => 'Evaluasi Semester Ganjil',
+            'school_id' => $this->sekolahA->id,
+        ]);
+    }
+
+    /**
+     * school_id di request tetap tidak dipercaya admin internal.
+     */
+    public function test_admin_internal_tidak_bisa_membuat_periode_untuk_sekolah_lain(): void
+    {
+        $this->seedData();
+
+        $this->actingAs($this->adminInternal)
+            ->post(route('evaluation-periods.store'), [
+                'school_id' => $this->sekolahB->id,
+                'nama' => 'Periode Ngawur',
+                'tahun_ajaran' => '2025/2026',
+                'semester' => 'ganjil',
+                'tanggal_mulai' => '2026-07-01',
+                'tanggal_selesai' => '2026-12-31',
+                'status' => 'aktif',
+            ])
+            ->assertRedirect(route('evaluation-periods.index'));
+
+        $this->assertDatabaseHas('evaluation_periods', [
+            'nama' => 'Periode Ngawur',
+            'school_id' => $this->sekolahA->id,
+        ]);
+        $this->assertDatabaseMissing('evaluation_periods', [
+            'nama' => 'Periode Ngawur',
+            'school_id' => $this->sekolahB->id,
+        ]);
+    }
+
+    public function test_admin_internal_tidak_bisa_mengelola_periode_sekolah_lain(): void
+    {
+        $this->seedData();
+        $periodeB = $this->periode($this->sekolahB, 'Periode Sekolah B');
+
+        $this->actingAs($this->adminInternal)
+            ->get(route('evaluation-periods.edit', $periodeB))
+            ->assertForbidden();
+
+        $this->actingAs($this->adminInternal)
+            ->delete(route('evaluation-periods.destroy', $periodeB))
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('evaluation_periods', ['id' => $periodeB->id]);
+    }
+
+    public function test_admin_internal_hanya_melihat_periode_sekolahnya(): void
+    {
+        $this->seedData();
+        $this->periode($this->sekolahA, 'Periode Sekolah A');
+        $this->periode($this->sekolahB, 'Periode Sekolah B');
+
+        $response = $this->actingAs($this->adminInternal)->get(route('evaluation-periods.index'));
+
+        $response->assertOk();
+        $response->assertSee('Periode Sekolah A');
+        $response->assertDontSee('Periode Sekolah B');
+    }
+
+    /**
+     * Filter periode, guru, dan asesor pada Data Evaluasi harus hanya
+     * menawarkan data sekolah sendiri.
+     */
+    public function test_filter_data_evaluasi_hanya_menampilkan_data_sekolahnya(): void
+    {
+        $this->seedData();
+        $guruA = $this->guru($this->sekolahA, 'Zeta Ananda');
+        $guruB = $this->guru($this->sekolahB, 'Yuni Brahmana');
+        $this->penilai($this->sekolahA, 'Asesor Internal A');
+        $this->penilai($this->sekolahB, 'Asesor Internal B');
+        $periodeA = $this->periode($this->sekolahA, 'Periode Sekolah A');
+        $periodeB = $this->periode($this->sekolahB, 'Periode Sekolah B');
+
+        $response = $this->actingAs($this->adminInternal)->get(route('evaluations.index'));
+
+        $response->assertOk();
+        $response->assertSee($periodeA->nama);
+        $response->assertDontSee($periodeB->nama);
+        $response->assertSee($guruA->nama);
+        $response->assertDontSee($guruB->nama);
+        $response->assertSee('Asesor Internal A');
+        $response->assertDontSee('Asesor Internal B');
+
+        // Filter lewat query string tidak bisa menembus batas sekolah.
+        $responseLain = $this->actingAs($this->adminInternal)
+            ->get(route('evaluations.index', ['guru_id' => $guruB->id]));
+        $responseLain->assertOk();
+    }
+
+    /**
      * Regresi: seluruh halaman form yang memakai query sekolah harus bisa
      * dibuka oleh admin internal tanpa SQL error.
      */
@@ -313,6 +426,8 @@ class AdminInternalScopeTest extends TestCase
             route('gurus.index'),
             route('penilais.index'),
             route('evaluations.index'),
+            route('evaluation-periods.index'),
+            route('evaluation-periods.create'),
         ];
 
         foreach ($urls as $url) {
@@ -356,6 +471,19 @@ class AdminInternalScopeTest extends TestCase
             'nama' => $nama,
             'jabatan' => 'Asesor Kompetensi',
             'instansi' => $school->nama,
+        ]);
+    }
+
+    private function periode(School $school, string $nama): EvaluationPeriod
+    {
+        return EvaluationPeriod::create([
+            'school_id' => $school->id,
+            'nama' => $nama,
+            'tahun_ajaran' => '2025/2026',
+            'semester' => 'ganjil',
+            'tanggal_mulai' => '2026-07-01',
+            'tanggal_selesai' => '2026-12-31',
+            'status' => 'aktif',
         ]);
     }
 }

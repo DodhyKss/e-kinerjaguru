@@ -5,3 +5,4 @@
 4. [selesai] Menu Monitoring Kinerja Guru per wilayah: Provinsi > Kabupaten > Sekolah, plus ekspor CSV & cetak
 5. [selesai] Filter provinsi/kabupaten pada halaman Laporan, Grafik, Ranking, dan Rekapitulasi
 6. [selesai] Admin Pusat dapat menyunting ulang pembuktian kinerja yang kosong, termasuk pada evaluasi yang sudah selesai, dengan jejak audit
+7. [selesai] Admin Internal Sekolah dapat membuat periode evaluasi, dan filter periode/guru/asesor pada Data Evaluasi hanya menampilkan data sekolahnya

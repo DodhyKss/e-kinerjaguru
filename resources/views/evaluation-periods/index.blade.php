@@ -12,6 +12,7 @@
     
     <div class="p-6 border-b border-slate-100 bg-slate-50/50">
         <form method="GET" action="{{ route('evaluation-periods.index') }}" class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end" id="searchForm">
+            @if(auth()->user()->isAdmin())
             <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Filter Sekolah</label>
                 <select name="school_id" class="select2-filter block w-full rounded-xl border-slate-300 shadow-sm sm:text-sm" onchange="document.getElementById('searchForm').submit()">
@@ -23,6 +24,7 @@
                     @endforeach
                 </select>
             </div>
+            @endif
             <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Cari Periode</label>
                 <div class="flex gap-2">

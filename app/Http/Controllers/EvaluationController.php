@@ -90,11 +90,17 @@ class EvaluationController extends Controller
 
         $evaluations = $query->paginate(15)->withQueryString();
 
-        $periods = EvaluationPeriod::orderBy('nama', 'desc')->get();
+        // Periode, guru, dan asesor dibatasi ke sekolah sendiri bila aktor
+        // school-scoped (kepala sekolah & admin internal sekolah).
+        $lockedPeriodSchoolId = $user->isSchoolScoped() ? $user->school_id : null;
+
+        $periods = EvaluationPeriod::when($lockedPeriodSchoolId !== null, function ($q) use ($lockedPeriodSchoolId) {
+            $q->where('school_id', $lockedPeriodSchoolId);
+        })->orderBy('nama', 'desc')->get();
 
         // Fetch relevant gurus for the dropdown
-        if ($user->isAdmin() || $user->isKepalaSekolah()) {
-            $gurus = Guru::when($user->isKepalaSekolah(), function ($q) use ($user) {
+        if ($user->isAdmin() || $user->isKepalaSekolah() || $user->isAdminInternal()) {
+            $gurus = Guru::when($user->isSchoolScoped(), function ($q) use ($user) {
                 $q->where('school_id', $user->school_id);
             })->orderBy('nama')->get();
         } elseif ($user->isPenilai()) {
@@ -104,8 +110,8 @@ class EvaluationController extends Controller
         }
 
         // Fetch relevant penilais
-        if ($user->isAdmin() || $user->isKepalaSekolah()) {
-            $penilais = Penilai::when($user->isKepalaSekolah(), function ($q) use ($user) {
+        if ($user->isAdmin() || $user->isKepalaSekolah() || $user->isAdminInternal()) {
+            $penilais = Penilai::when($user->isSchoolScoped(), function ($q) use ($user) {
                 $q->where('school_id', $user->school_id);
             })->orderBy('nama')->get();
         } else {
